@@ -178,7 +178,7 @@
     <Filter Include="Source files\Control Box\Bluetooth">
       <UniqueIdentifier>{eaa1a901-2590-4e0c-b287-ec7758bf2c7c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source files\Insrtument\FluidSynth\Control Box">
+    <Filter Include="Source files\Insrtument\Control Box">
       <UniqueIdentifier>{2090f1bb-3456-475f-b6b3-79acf57a60ff}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -240,7 +240,7 @@
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingDistortion.cpp">
       <Filter>Source files\Synthesizer\AdjSynth\Settings Handlers</Filter>
     </ClCompile>
-    <ClCompile Include="AdjSynth\adjSynthEventsHandlingEquilizer.cpp">
+    <ClCompile Include="AdjSynth\adjSynthEventsHandlingEqualizer.cpp">
       <Filter>Source files\Synthesizer\AdjSynth\Settings Handlers</Filter>
     </ClCompile>
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingFilter.cpp">
@@ -544,7 +544,7 @@
       <Filter>Source files\Insrtument\Analog Synth</Filter>
     </ClCompile>
     <ClCompile Include="Instrument\instrumentControlBoxHandler.cpp">
-      <Filter>Source files\Insrtument\FluidSynth\Control Box</Filter>
+      <Filter>Source files\Insrtument\Control Box</Filter>
     </ClCompile>
     <ClCompile Include="FluidSynth\fluidSynthInterface.cpp">
       <Filter>Source files\Insrtument\FluidSynth</Filter>
@@ -630,9 +630,6 @@
     <ClCompile Include="LibAPI_getVCOsParams.cpp">
       <Filter>Source files\LibApi</Filter>
     </ClCompile>
-    <ClCompile Include="Patches\patches.cpp">
-      <Filter>Source files\LibApi</Filter>
-    </ClCompile>
     <ClCompile Include="MIDI\midiAlsaQclient.cpp">
       <Filter>Source files\Midi</Filter>
     </ClCompile>
@@ -701,6 +698,12 @@
     </ClCompile>
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingPolyphonicMixer.cpp">
       <Filter>Source files\Synthesizer\AdjSynth\Settings Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="Patches\patches.cpp">
+      <Filter>Source files\Patch</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\audioMasterLimiter.cpp">
+      <Filter>Source files\Audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1021,6 +1024,9 @@
     </ClInclude>
     <ClInclude Include="Instrument\instrumentsManager.h">
       <Filter>Header files\Instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\audioMasterLimiter.h">
+      <Filter>Header files\Audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -825,7 +825,7 @@ void* AUDMNG_update_thread(void *arg)
 			
 			utilization = (int)(float(stop_ts.tv_usec - start_ts.tv_usec) / (float)period_time_us * 100.0);
 			//callback_update_utilization_bar(utilization);
-			fprintf(stderr, "Update Cycle time= %i\n", stop_ts.tv_usec - start_ts.tv_usec);
+			//fprintf(stderr, "Update Cycle time= %i\n", stop_ts.tv_usec - start_ts.tv_usec);
 			count = 0;
 		}
 

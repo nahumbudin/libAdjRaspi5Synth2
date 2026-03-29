@@ -43,17 +43,17 @@ InstrumentFluidSynth::InstrumentFluidSynth()
 		presets[p].settings_type = "fluid-synth-preset";
 		presets[p].name = "Preset " + to_string(p + 1);
 
-		presets[p].version = active_settings_params->version;
+		presets[p].version = active_preset_settings_params->version;
 
-		presets[p].bool_parameters_map = active_settings_params->bool_parameters_map;
-		presets[p].float_parameters_map = active_settings_params->float_parameters_map;
-		presets[p].int_parameters_map = active_settings_params->int_parameters_map;
-		presets[p].string_parameters_map = active_settings_params->string_parameters_map;
+		presets[p].bool_parameters_map = active_preset_settings_params->bool_parameters_map;
+		presets[p].float_parameters_map = active_preset_settings_params->float_parameters_map;
+		presets[p].int_parameters_map = active_preset_settings_params->int_parameters_map;
+		presets[p].string_parameters_map = active_preset_settings_params->string_parameters_map;
 	}
 
 	active_preset = 0;
 
-	active_settings_params = &presets[0];
+	active_preset_settings_params = &presets[0];
 	
 	res++; // for debug 
 }
@@ -343,21 +343,21 @@ int InstrumentFluidSynth::set_fluid_synth_program_select(int chan, unsigned int 
 	std::string sfont_name;
 
 	res = instrument_settings->set_int_param_value(
-		active_settings_params,
+		active_preset_settings_params,
 		preset_prefix + "program",
 		program,
 		_SET_VALUE,
 		-1);
 
 	res |= instrument_settings->set_int_param_value(
-		active_settings_params,
+		active_preset_settings_params,
 		preset_prefix + "bank",
 		bank,
 		_SET_VALUE,
 		-1);
 
 	res |= instrument_settings->set_int_param_value(
-		active_settings_params,
+		active_preset_settings_params,
 		preset_prefix + "sound_font_id",
 		sfid,
 		_SET_VALUE,
@@ -369,14 +369,14 @@ int InstrumentFluidSynth::set_fluid_synth_program_select(int chan, unsigned int 
 	sfont_name = fluid_synth_int_instance->get_fluid_synth_channel_preset_soundfont_name(chan);
 
 	res |= instrument_settings->set_string_param_value(
-		active_settings_params,
+		active_preset_settings_params,
 		preset_prefix + "program_name",
 		preset_name,
 		_SET_VALUE,
 		-1);
 
 	res |= instrument_settings->set_string_param_value(
-		active_settings_params,
+		active_preset_settings_params,
 		preset_prefix + "sound_font",
 		sfont_name,
 		_SET_VALUE,
@@ -444,11 +444,11 @@ int InstrumentFluidSynth::save_fluid_synth_settings_file(string path)
 	return_val_if_true(instrument_settings == NULL, _SETTINGS_BAD_PARAMETERS);
 
 	res = instrument_settings->write_settings_file(
-		active_settings_params,
+		active_preset_settings_params,
 		instrument_settings->get_settings_version(),
 		"",
 		path,
-		"fluid_settings_params");
+		"active_preset_settings_params");
 	return res;
 }
 
@@ -463,7 +463,7 @@ int InstrumentFluidSynth::open_fluid_synth_settings_file(string path)
 
 	XML_files *xml_files = new XML_files();
 
-	int res = instrument_settings->read_settings_file(active_settings_params, path, "fluid_synth_settings");
+	int res = instrument_settings->read_settings_file(active_preset_settings_params, path, "fluid_synth_settings");
 	fluid_synth_int_instance->set_fluid_synth_chorus_params();
 	fluid_synth_int_instance->set_fluid_synth_reverb_params();
 	
@@ -480,12 +480,12 @@ void InstrumentFluidSynth::set_active_preset(int preset_num)
 {
 	active_preset = preset_num;
 
-	active_settings_params = &presets[active_preset];
+	active_preset_settings_params = &presets[active_preset];
 
 	collect_fluid_synth_prest_channels_data(
 		&presets[active_preset], &channels_presets[active_preset][0]);
 
-	set_fluid_synth_settings(active_settings_params, 
+	set_fluid_synth_settings(active_preset_settings_params, 
 							 &channels_presets[active_preset][0]);
 }
 

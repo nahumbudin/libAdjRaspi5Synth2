@@ -6,6 +6,7 @@
 *					1. Code refactoring and notaion.
 *					2. Add id number (for debug).
 *					3. change LEFT/RIGHT defines to _SYNTH_VOICE_OUT_1/2
+*					4. Adding audio limiter in update() to avoid clipping 
 *					
 *	@version	Ver1.2	Code refactoring and notaion.
 *				29-Jan-2021	1.1 
@@ -37,7 +38,7 @@ AudioOutputFloat::AudioOutputFloat(
 				uint8_t stage,
 	int block_size,
 	shared_memory_audio_block_float_stereo_struct_t *shared_memory,
-	AudioBlockFloat **audio_first_update_ptr, int vid)
+	AudioBlockFloat **audio_first_update_ptr, int vid, bool use_limiter)
 	: AudioBlockFloat(
 			2, // 2 audio inputs 
 			input_queue_array, // audio block input queue
@@ -47,9 +48,13 @@ AudioOutputFloat::AudioOutputFloat(
 	audio_block_stereo_float_shared_memory = shared_memory; 
 	set_audio_block_size(block_size);
 	voice_id = vid;
+	use_the_limiter = use_limiter;
 	
 	i_master_volume = 100; // Currently we do not change it
 	master_volume = 1.0;
+	
+	master_limiter_left = new MasterLimiter(5.0f, 44100.0f);
+	master_limiter_right = new MasterLimiter(5.0f, 44100.0f);	
 }
 
 /**
@@ -108,6 +113,15 @@ int AudioOutputFloat::get_master_volume()
 	return master_volume;
 }
 
+void AudioOutputFloat::set_use_limiter(bool use)
+{
+	use_the_limiter = use;
+}
+bool AudioOutputFloat::get_use_limiter()
+{
+	return use_the_limiter;
+}
+
 /**
 *   @brief  Execute an update cycle - get input samples, process and 
 *			write it into the shared memory.
@@ -127,8 +141,13 @@ void AudioOutputFloat::update(void) {
 	
 	if (in[_SYNTH_VOICE_OUT_1])
 	{
-		for (i = 0; i < audio_block_size; i++) 
+		if (use_the_limiter)
 		{
+			master_limiter_left->processBlock(in[_SYNTH_VOICE_OUT_1]->data, nullptr, audio_block_size);
+		}
+		
+		for (i = 0; i < audio_block_size; i++) 
+		{						
 			audio_block_stereo_float_shared_memory->data[_SYNTH_VOICE_OUT_1][i] = 
 				in[_SYNTH_VOICE_OUT_1]->data[i] * master_volume;
 		}
@@ -147,6 +166,11 @@ void AudioOutputFloat::update(void) {
 	
 	if (in[_SYNTH_VOICE_OUT_2])
 	{
+		if (use_the_limiter)
+		{
+			master_limiter_right->processBlock(nullptr, in[_SYNTH_VOICE_OUT_2]->data, audio_block_size);
+		}
+		
 		for (i = 0; i < audio_block_size; i++) 
 		{
 			audio_block_stereo_float_shared_memory->data[_SYNTH_VOICE_OUT_2][i] = 

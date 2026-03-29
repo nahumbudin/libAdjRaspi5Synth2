@@ -355,7 +355,8 @@ AdjSynth::AdjSynth()
 		audio_block_size,
 		audio_manager->audio_block_stereo_float_shared_memory_outputs,
 		&audio_common_first_update,
-		100); // Main output id
+		100, // Main output id
+		true); // Activate the limiter for the main output to avoid clipping.
 
 	/* An audio connections for the mixer output. */
 	connection_mixer_out_L = audio_manager->connections_manager->get_audio_connection();
@@ -375,30 +376,30 @@ AdjSynth::AdjSynth()
 	
 	
 	// Temporarlly connect poly mixer output to audio out  TODO: <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	connection_mixer_out_L->connect(audio_polyphony_mixer, _LEFT, audio_out, _LEFT);
-	connection_mixer_out_R->connect(audio_polyphony_mixer, _RIGHT, audio_out, _RIGHT);
+	//connection_mixer_out_L->connect(audio_polyphony_mixer, _LEFT, audio_out, _LEFT);
+	//connection_mixer_out_R->connect(audio_polyphony_mixer, _RIGHT, audio_out, _RIGHT);
 	
 	
 	
 	// Connect the mixer output to the equilizer input.
-	//connection_mixer_out_L->connect(audio_polyphony_mixer, _LEFT, audio_equalizer, _LEFT);
-	//connection_mixer_out_R->connect(audio_polyphony_mixer, _RIGHT, audio_equalizer, _RIGHT);
+	connection_mixer_out_L->connect(audio_polyphony_mixer, _LEFT, audio_equalizer, _LEFT);
+	connection_mixer_out_R->connect(audio_polyphony_mixer, _RIGHT, audio_equalizer, _RIGHT);
 
 	// Connect the mixer send output to the reverb input.
 	connection_mixer_send_L->connect(audio_polyphony_mixer, _SEND_LEFT, audio_reverb, _LEFT);
 	connection_mixer_send_R->connect(audio_polyphony_mixer, _SEND_RIGHT, audio_reverb, _RIGHT);	
 	
 	// Temporarally Connect reverb output to audio out input. TODO: <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	connection_reverb_out_L->connect(audio_reverb, _LEFT, audio_out, _LEFT);
-	connection_reverb_out_R->connect(audio_reverb, _RIGHT, audio_out, _RIGHT);
+	//connection_reverb_out_L->connect(audio_reverb, _LEFT, audio_out, _LEFT);
+	//connection_reverb_out_R->connect(audio_reverb, _RIGHT, audio_out, _RIGHT);
 
 	// Connect the reverb output to the equilizer input.
-	//connection_reverb_out_L->connect(audio_reverb, _LEFT, audio_equalizer, _SEND_LEFT);
-	//connection_reverb_out_R->connect(audio_reverb, _RIGHT, audio_equalizer, _SEND_RIGHT);
+	connection_reverb_out_L->connect(audio_reverb, _LEFT, audio_equalizer, _SEND_LEFT);
+	connection_reverb_out_R->connect(audio_reverb, _RIGHT, audio_equalizer, _SEND_RIGHT);
 
 	// Connect the equilizer output to the audio output input.
-	//connection_equilizer_out_L->connect(audio_equalizer, _LEFT, audio_out, _LEFT);
-	//connection_equilizer_out_R->connect(audio_equalizer, _RIGHT, audio_out, _RIGHT);
+	connection_equilizer_out_L->connect(audio_equalizer, _LEFT, audio_out, _LEFT);
+	connection_equilizer_out_R->connect(audio_equalizer, _RIGHT, audio_out, _RIGHT);
 	
 	
 	
@@ -636,7 +637,8 @@ void AdjSynth::init_synth_voices()
 			active_sketch,
 			sample_rate,
 			audio_block_size,
-			&active_adj_synth_preset_params,
+			&active_adj_synth_preset_params,	// This should be holding the default preset parameters, 
+												// and will be updated by the program when a program is set to the voice.
 			mso_wtab,
 			program_wavetable,
 			audio_manager);
@@ -655,7 +657,9 @@ void AdjSynth::init_synth_voices()
 }
 
 /**
-*   @brief  Create and initialize the synth programs instances
+*   @brief  Create and initialize the synth programs instances; 
+*			set the program preset parameters to default values; 
+*			set the program wavetables to default values; 
 *   @param  none
 *   @return void
 */
@@ -667,6 +671,7 @@ void AdjSynth::init_synth_programs()
 #ifdef _USE_NEW_MIDI_PROGRAM
 	for (int program = 0; program < num_of_programs; program++)
 	{
+		// Create new instances of the programs with default parameters.
 		_settings_params_t *default_params = new _settings_params_t;
 		set_default_preset_parameters(default_params, 0);
 		synth_program[program] = new AdjSynthPrograms(program, _PAD_DEFAULT_WAVETABLE_SIZE,
@@ -1135,7 +1140,7 @@ void AdjSynth::init_jack()
  *   @param	none
  *   @return void
  */
-void AdjSynth::synth_panic_ection()
+void AdjSynth::synth_panic_action()
 {
 	InstrumentMidiPlayer::get_instrument_midi_player_instance()->send_all_notes_off_command();
 	InstrumentMidiPlayer::get_instrument_midi_player_instance()->send_all_sounds_off_command();
@@ -1273,6 +1278,16 @@ _settings_params_t *AdjSynth::get_active_preset_params()
 }
 
 /**
+*   @brief  retruns a pointer to the active common params struct
+*   @param  none
+*   @return a pointer to the active preset params struct
+*/
+_settings_params_t *AdjSynth::get_active_common_params()
+{
+	return &active_adj_synth_common_preset_params;
+}
+
+/**
 *   @brief  retruns a pointer to the active settings params struct
 *   @param  none
 *   @return a pointer to the active settings params struct
@@ -1322,11 +1337,12 @@ int AdjSynth::set_default_preset_parameters(_settings_params_t *params, int prog
 }
 
 /**
-*   @brief  Set the settings parameters to their default values
+*   @brief  Set the settings globalparameters to their default values
 *   @param	params	a _setting_params_t parameters struct
 *   @return 0 if done
 */
-int AdjSynth::set_default_settings_parameters(_settings_params_t *params)
+//int AdjSynth::set_default_settings_parameters(_settings_params_t *params)
+int AdjSynth::set_default_global_parameters(_settings_params_t *params)
 {	
 	int res = 0;
 	
@@ -1718,6 +1734,7 @@ void  AdjSynth::midi_play_note_off(uint8_t channel, uint8_t byte2, uint8_t byte3
 		synth_voice[voice]->dsp_voice->adsr_note_off(synth_voice[voice]->dsp_voice->adsr_3);
 		synth_voice[voice]->dsp_voice->adsr_note_off(synth_voice[voice]->dsp_voice->adsr_4);
 		synth_voice[voice]->dsp_voice->adsr_note_off(synth_voice[voice]->dsp_voice->adsr_5);
+		synth_voice[voice]->dsp_voice->adsr_note_off(synth_voice[voice]->dsp_voice->adsr_6);
 		synth_voice[voice]->dsp_voice->karplus_1->note_off();
 		synth_polyphony_manager->free_voice(voice, true); // go to pending untill env is zero
 		fprintf(stderr, "midi_play_note_off  %i voice: %i prog: %i\n", byte2, voice, program);

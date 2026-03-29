@@ -31,7 +31,7 @@ FluidSynthInterface *FluidSynthInterface::fluid_synth_int_instance = NULL;
 FluidSynthInterface::FluidSynthInterface(InstrumentFluidSynth *fluid_instrument)
 {
 	parent_instrument = fluid_instrument;
-	active_settings_params = &parent_instrument->active_settings_params;
+	active_settings_params = &parent_instrument->active_preset_settings_params;
 }
 
 /**

@@ -109,9 +109,10 @@ int Instrument::init()
 		alsa_midi_sequencer_events_handler->set_instrument(this);
 	}
 
-	active_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
+	active_preset_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
+	active_common_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
 
-	instrument_settings = new Settings(active_settings_params); // TODO: presets or active_settings_param?
+	instrument_settings = new Settings(active_preset_settings_params); // TODO: presets or active_settings_param?
 
 	return 0;
 }

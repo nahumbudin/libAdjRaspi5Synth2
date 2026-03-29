@@ -22,14 +22,15 @@ InstrumentAnalogSynth::InstrumentAnalogSynth(AdjSynth *adj_synth)
 	adjheart_synth = adj_synth;
 	alsa_midi_sequencer_events_handler->set_instrument(this);
 
-	active_settings_params->name = "Analog Synth Params";
-	active_settings_params->settings_type = _ADJ_SYNTH_PRESET_PARAMS;
-	active_settings_params->version = instrument_settings->get_settings_version();
+	active_preset_settings_params->name = "Analog Synth Params";
+	active_preset_settings_params->settings_type = _ADJ_SYNTH_PRESET_PARAMS;
+	active_preset_settings_params->version = instrument_settings->get_settings_version();
 
 	// Preset params are set when a voice is assigned to a program, so we don't set them here.
 	
 	// Set the settings parameters of the common resources (not program specific) to their default values.
-	set_default_settings_parameters(active_settings_params, 0);
+	set_default_settings_parameters(active_preset_settings_params, 
+									AdjSynth::get_instance()->get_active_common_params());
 }
 
 InstrumentAnalogSynth::~InstrumentAnalogSynth()

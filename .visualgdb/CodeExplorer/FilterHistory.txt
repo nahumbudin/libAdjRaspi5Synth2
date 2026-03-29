@@ -1,2 +1,7 @@
 m
 master
+register
+PATCH
+c
+panic
+instrument

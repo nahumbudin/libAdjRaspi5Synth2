@@ -1,12 +1,14 @@
 /**
 *	@file		instrumenyMidiPlayerPlaybackTread.cpp
 *	@author		Nahum Budin
-*	@date		14-Aug-2024
-*	@version	1.0
+*	@date		28-Mar-2026
+*	@version	1.1
+*			1. Added support for going forward and backward in the file.
 *
-*	@brief		MIDI files player main playback thread.
+*	@brief		MIDI files player.
 *
 *	History:\n
+*		Version 1.0 14-Aug-2024 Initial
 *
 *	Based on my Android TilTune Player Java Project 
 *
@@ -77,14 +79,14 @@ MidiPlaybackThread::MidiPlaybackThread(MidiFile *mid_file,
 {
 	midi_file = mid_file;
 	
-	clear_all_playing_notes_callback_ptr = clr_all_playing_notes_callback_ptr;
-	midi_change_program_callback_ptr = midi_change_prog_callback_ptr;
-	midi_change_channel_volume_callback_ptr = midi_change_chan_volume_callback_ptr;
-	send_midi_events_vector_callback_ptr = send_midi_events_vec_ptr;
-	midi_player_potision_update_callback_ptr = midi_player_pos_update_callback_ptr;
-	midi_player_playing_time_update_callback_ptr = midi_player_play_time_update_callback_ptr;
-	midi_player_file_remaining_time_update_callback_ptr = midi_player_file_rem_time_update_callback_ptr;
-	midi_player_file_total_time_update_callback_ptr = midi_player_tot_play_time_update_callback_ptr;
+	this->clear_all_playing_notes_callback_ptr = clr_all_playing_notes_callback_ptr;
+	this->midi_change_program_callback_ptr = midi_change_prog_callback_ptr;
+	this->midi_change_channel_volume_callback_ptr = midi_change_chan_volume_callback_ptr;
+	this->send_midi_events_vector_callback_ptr = send_midi_events_vec_ptr;
+	this->midi_player_potision_update_callback_ptr = midi_player_pos_update_callback_ptr;
+	this->midi_player_playing_time_update_callback_ptr = midi_player_play_time_update_callback_ptr;
+	this->midi_player_file_remaining_time_update_callback_ptr = midi_player_file_rem_time_update_callback_ptr;
+	this->midi_player_file_total_time_update_callback_ptr = midi_player_tot_play_time_update_callback_ptr;
 
 	midi_file_path = midi_file->get_file_path();
 
@@ -187,6 +189,119 @@ void MidiPlaybackThread::stop_playing()
 			paused = false;
 			do_stop();
 			break;
+	}
+}
+
+void MidiPlaybackThread::go_backward()
+{
+	if (midi_file == NULL)
+	{
+		return;
+	}
+
+	const double skip_duration_ms = 5000.0; // 5 seconds
+	const double skip_pulses = skip_duration_ms * pulses_per_msec;
+
+	// Calculate target pulse time
+	double target_pulse_time = current_pulse_time - skip_pulses;
+
+	// Don't go before the beginning
+	if (target_pulse_time < 0)
+	{
+		target_pulse_time = 0;
+	}
+
+	// Search for target event index
+	std::vector<MidiFileEvent> file_events = midi_file->get_combined_track();
+	int target_index = 0;
+
+	for (int i = next_played_event_index; i >= 0; i--)
+	{
+		if (file_events[i].start_time <= target_pulse_time)
+		{
+			target_index = i;
+			break;
+		}
+	}
+
+	// Remember if we were playing
+	bool was_playing = (player_state == _MIDI_PLAYER_STATE_PLAYING);
+
+	// Clear any playing notes
+	if (clear_all_playing_notes_callback_ptr != NULL)
+	{
+		clear_all_playing_notes_callback_ptr();
+	}
+
+	// Update position
+	next_played_event_index = target_index;
+	current_pulse_time = target_pulse_time;
+	prev_pulse_time = target_pulse_time;
+
+	// Recalculate timing to maintain playback continuity
+	long current_time_ms = get_current_time_ms();
+	long target_elapsed_ms = (long)(target_pulse_time / pulses_per_msec);
+
+	// Adjust start time as if we had been playing from the new position
+	start_playing_time_ms = current_time_ms - target_elapsed_ms - pause_duration_time_msec;
+
+	// If we were playing, playback will continue automatically
+	// The playback thread will pick up from the new next_played_event_index
+
+	fprintf(stderr, "Jumped backward to %.2fs (index %d)%s\n",
+			target_elapsed_ms / 1000.0, target_index,
+			was_playing ? " - continuing playback" : "");
+}
+
+void MidiPlaybackThread::go_forward()
+{
+	if (midi_file == NULL)
+	{
+		return;
+	}
+
+	const double skip_duration_ms = 5000.0; // 5 seconds
+	const double skip_pulses = skip_duration_ms * pulses_per_msec;
+
+	// Calculate target pulse time
+	double target_pulse_time = current_pulse_time + skip_pulses;
+    
+	// Don't go past the end
+	if (target_pulse_time > midi_file->get_total_pulses())
+	{
+		target_pulse_time = midi_file->get_total_pulses();
+	}
+
+	// Search FORWARD from current position (already efficient)
+	std::vector<MidiFileEvent> file_events = midi_file->get_combined_track();
+	int target_index = next_played_event_index;
+    
+	for (int i = next_played_event_index; i < file_events.size(); i++)
+	{
+		if (file_events[i].start_time <= target_pulse_time)
+		{
+			target_index = i;
+		}
+		else
+		{
+			break; // Passed the target, stop searching
+		}
+	}
+
+	// Update playback position
+	next_played_event_index = target_index;
+    
+	// Adjust timing references
+	long current_time_ms = get_current_time_ms();
+	long elapsed_time_ms = (long)(target_pulse_time / pulses_per_msec);
+	start_playing_time_ms = current_time_ms - elapsed_time_ms - pause_duration_time_msec;
+	current_pulse_time = target_pulse_time;
+	prev_pulse_time = target_pulse_time;
+
+	// Clear any playing notes
+	if (clear_all_playing_notes_callback_ptr != NULL)
+	{
+		clear_all_playing_notes_callback_ptr();
 	}
 }
 

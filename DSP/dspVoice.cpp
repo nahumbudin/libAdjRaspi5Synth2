@@ -9,6 +9,7 @@
 *					4. Refactoring lfo_delays[] -> global array in adjSynth.
 *					5. Force source outputs to zero when voice is not active.
 *					6. Adding option to use global LFOs for modulation calculations.
+*					7. Scale output gain by 0.25 to avoid clipping when all sources are at max level.
 
 *
 *	@History
@@ -1753,12 +1754,12 @@ void DSP_Voice::calc_next_oscilators_output_value()
 */
 float DSP_Voice::get_next_output_value_ch_1()
 {		
-	float sig_1 = osc_1_out * osc_1_send_filter_1_level +
+	float sig_1 = (osc_1_out * osc_1_send_filter_1_level +
 				 osc_2_out * osc_2_send_filter_1_level +
 				 noise_1_out * noise_1_send_filter_1_level +
 				 karplus_1_out * karplus_1_send_filter_1_level +
 				 mso_1_out * mso_1_send_filter_1_level +
-				 wavetable_1_out_1 * wavetable_1_send_filter_1_level;
+				 wavetable_1_out_1 * wavetable_1_send_filter_1_level) * 0.15f; // Overflow?!
 
 	if (distortion_1_active)
 	{
@@ -1777,12 +1778,12 @@ float DSP_Voice::get_next_output_value_ch_1()
 */
 float DSP_Voice::get_next_output_value_ch_2()
 {		
-	float sig_2 = osc_1_out * osc_1_send_filter_2_level +
+	float sig_2 = (osc_1_out * osc_1_send_filter_2_level +
 				 osc_2_out * osc_2_send_filter_2_level +
 				 noise_1_out * noise_1_send_filter_2_level +
 				 karplus_1_out * karplus_1_send_filter_2_level +
 				 mso_1_out * mso_1_send_filter_2_level +
-				 wavetable_1_out_2 * wavetable_1_send_filter_2_level;
+				 wavetable_1_out_2 * wavetable_1_send_filter_2_level) * 0.15f; // Overflow?!
 
 	if (distortion_2_active)
 	{

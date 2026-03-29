@@ -1,11 +1,12 @@
 /**
 *	@file		dspBandEqualizer.cpp
 *	@author		Nahum Budin
-*	@date		3-Oct-2024
+*	@date		18-Feb-2026
 *	@version	1.2 
-*					1. Code refactoring and notaion.
-*					
-*	@History	23-Jan-2021	1.1	Code refactoring and notaion.
+*					1. Set Band Level range changed from (-50 to +50) to (-20 to +20).
+*
+*	@History	3-Oct-2024	1.2	Code refactoring and notation.
+*				23-Jan-2021	1.1	Code refactoring and notaion.
 *				31-Oct-2019	1.0 revised version from old libAdjHeartRaspiFlSynthMultiCore_3_1
 *
 * https://www.nxp.com/docs/en/application-note/AN2110.pdf
@@ -83,20 +84,20 @@ DSP_BandEqualizer::DSP_BandEqualizer()
 /**
 *	@brief	Sets frequency band output level
 *	@param	band filter frequency band.
-*	@param	requency band output level (-50 to +50) (-20db to +20db)
+*	@param	requency band output level (-20 to +20) (-20db to +20db) (0.1 to 10)
 *	@return void
 */
 void DSP_BandEqualizer::set_band_level(enum iir_filter_bands band, int level)
 {
 	int i;
 
-	if (level > 50)
+	if (level > 20)
 	{
-		level = 50;
+		level = 20;
 	}
-	else if (level < -50)
+	else if (level < -20)
 	{
-		level = -50;
+		level = -20;
 	}
 	// Level is in db: 0db-> 1.0; +20db->10; -20db->0.1
 	bands_levels[band] = pow(10.0, (double)level / 20.0);

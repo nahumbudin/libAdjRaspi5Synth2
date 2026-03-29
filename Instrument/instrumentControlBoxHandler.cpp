@@ -50,43 +50,53 @@ void InstrumentControlBoxEventsHandler::sysex_handler(uint8_t *message, int len)
 		event_id = *(message + 4);
 		val = (*(message + 5) << 7) + *(message + 6);
 
-		if ((event_id >= _CONTROL_SLIDER_BLUE_BLACK) && (event_id <= _CONTROL_SLIDER_ORANGE_YELLOW))
+		if ((event_id >= _I2C_CONTROL_ENCODER_1) && (event_id <= _I2C_CONTROL_ENCODER_PUSHBUTTON_16))
 		{
-			/* Slider command */
-			slider_num = event_id - _CONTROL_SLIDER_BLUE_BLACK;
-			/* Hold each slider actual min and max values */
-			if (val > sliders_input_value_max[slider_num])
+			// An I2C Interface based control  box event
+			
+			
+			control_box_events_handler(event_id, val);
+		}		
+		else if ((event_id >= _CONTROL_PUSHBUTTON_BLUE_BLACK) && (event_id <= _CONTROL_GREEN_LED))
+		{
+			// A Serial Port based control  box event
+			if ((event_id >= _CONTROL_SLIDER_BLUE_BLACK) && (event_id <= _CONTROL_SLIDER_ORANGE_YELLOW))
 			{
-				sliders_input_value_max[slider_num] = val;
-			}
-			else if (val < sliders_input_value_min[slider_num])
-			{
-				sliders_input_value_min[slider_num] = val;
+				/* Slider command */
+				slider_num = event_id - _CONTROL_SLIDER_BLUE_BLACK;
+				/* Hold each slider actual min and max values */
+				if (val > sliders_input_value_max[slider_num])
+				{
+					sliders_input_value_max[slider_num] = val;
+				}
+				else if (val < sliders_input_value_min[slider_num])
+				{
+					sliders_input_value_min[slider_num] = val;
+				}
+
+				/* Normalize  to 0-100*/
+				val = (int)(((float)(val - sliders_input_value_min[slider_num]) /
+							 (float)(sliders_input_value_max[slider_num] - sliders_input_value_min[slider_num])) * 100.0);
+
+				if (val > 100)
+				{
+					val = 100;
+				}
+				else if (val < 0)
+				{
+					val = 0;
+				}
 			}
 
-			/* Normalize  to 0-100*/
-			val = (int)(((float)(val - sliders_input_value_min[slider_num]) /
-						 (float)(sliders_input_value_max[slider_num] - sliders_input_value_min[slider_num])) *
-						100.0);
-
-			if (val > 100)
-			{
-				val = 100;
-			}
-			else if (val < 0)
-			{
-				val = 0;
-			}
-		}
-
-		control_box_events_handler(event_id, val);
+			control_box_events_handler(event_id, val);
+		}		
 	}
 
 	else if ((*(message + 1) == _MIDI_CONTROL_BOX_SYSEX_VENDOR_ID_0) &&
 			 (*(message + 2) == _MIDI_CONTROL_BOX_SYSEX_VENDOR_ID_1) &&
 			 (*(message + 3) == _MIDI_CONTROL_BOX_SYSEX_VENDOR_ID_2CB))
 	{
-		/* A control board message */
+		/* An I2C control board message */
 		event_id = *(message + 4);
 		switch (event_id)
 		{
@@ -104,6 +114,12 @@ void InstrumentControlBoxEventsHandler::sysex_handler(uint8_t *message, int len)
 			break;
 		case _I2C_CONTROL_PUSHBUTTON_RIGHT_PRESSED:
 			event_id = _I2C_CONTROL_PUSHBUTTON_RIGHT;
+			break;
+		case _I2C_CONTROL_ENCODER_SCROLL:
+			event_id = _I2C_CONTROL_ENCODER_SCROLL;
+			break;
+		case _I2C_CONTROL_ENCODER_PUSHBUTTON_SCROLL:
+			event_id = _I2C_CONTROL_ENCODER_PUSHBUTTON_SCROLL;
 			break;
 		//default:
 			//event_id = _I2C_CONTROL_PUSHBUTTON_NONE_PRESSED;

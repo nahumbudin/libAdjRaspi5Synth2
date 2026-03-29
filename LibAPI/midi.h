@@ -6,6 +6,7 @@
  *					1. Increase the number of max midi devices and ports to 32
  *					2. Added MIDI mixer Pan modulation LFO level and selection control definitions
  *					3. Added MIDI mixer Send control definition
+ *					4. Added MIDI Player Backward and Forward control
  *
  *	@brief		Provides the MIDI related API
  *
@@ -236,6 +237,9 @@ int mod_synth_open_midi_file(std::string path);
 void mod_synth_midi_player_play();
 void mod_synth_midi_player_pause();
 void mod_synth_midi_player_stop();
+void mod_synth_midi_player_backward();
+void mod_synth_midi_player_forward();
+
 
 /**
 *	@brief	Set a MIDI mixer channel volume

@@ -73,6 +73,13 @@ class ModSynth
 public:
 	~ModSynth();
 	static ModSynth *get_instance();
+	
+	static std::string get_mod_synth_current_working_directory();
+	static std::string get_mod_synth_current_patches_directory();
+	static std::string get_mod_synth_current_settings_directory();
+	static std::string get_mod_synth_current_soundfonts_directory();
+	static std::string get_mod_synth_current_midi_files_directory();
+	static std::string get_mod_synth_general_settings_file_path();
 
 	int init();
 	
@@ -204,8 +211,18 @@ public:
 	   Channel 0 is the main edditing channel */
 	uint16_t midi_channel_synth[_SKETCH_PROGRAM_3 + 1];
 	
+	// ModSynth current working directory
+	static string mod_synth_current_working_directory;
+	// ModSynth current patches directory
+	static string mod_synth_current_patches_directory;
+	// ModSynth current settings directory
+	static string mod_synth_current_settings_directory;
+	// ModSynth current SoundFonts directory
+	static string mod_synth_current_soundfonts_directory;
+	// ModSynth currnet Midi files directory
+	static string mod_synth_current_midi_files_directory;
 	// ModSynth default settings directory
-	string mod_synth_general_settings_file_path_name;
+	static string mod_synth_general_settings_file_path;
 	
 	
 	/* Holds the general (global) settings parameters */

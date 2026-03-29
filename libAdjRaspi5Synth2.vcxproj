@@ -72,7 +72,7 @@
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingAmp.cpp" />
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingAudio.cpp" />
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingDistortion.cpp" />
-    <ClCompile Include="AdjSynth\adjSynthEventsHandlingEquilizer.cpp" />
+    <ClCompile Include="AdjSynth\adjSynthEventsHandlingEqualizer.cpp" />
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingFilter.cpp" />
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingKeyboard.cpp" />
     <ClCompile Include="AdjSynth\adjSynthEventsHandlingKPS.cpp" />
@@ -131,6 +131,7 @@
     <ClCompile Include="Audio\audioBandEqualizer.cpp" />
     <ClCompile Include="Audio\audioBlock.cpp" />
     <ClCompile Include="Audio\audioManager.cpp" />
+    <ClCompile Include="Audio\audioMasterLimiter.cpp" />
     <ClCompile Include="Audio\audioOutput.cpp" />
     <ClCompile Include="Audio\audioPolyMixer.cpp" />
     <ClCompile Include="Audio\audioReverb.cpp" />
@@ -247,6 +248,7 @@
     <ClInclude Include="Audio\audioBlock.h" />
     <ClInclude Include="Audio\audioCommons.h" />
     <ClInclude Include="Audio\audioManager.h" />
+    <ClInclude Include="Audio\audioMasterLimiter.h" />
     <ClInclude Include="Audio\audioOutput.h" />
     <ClInclude Include="Audio\audioPolyMixer.h" />
     <ClInclude Include="Audio\audioReverb.h" />

@@ -48,7 +48,7 @@ int AdjSynth::set_default_preset_parameters_polyphonic_mixer(_settings_params_t 
 	
 	res |= adj_synth_settings_manager->set_int_param(params,
 		"adjsynth.poly_mixer.pan",
-		80,
+		50,
 		100,
 		0,
 		_ADJ_SYNTH_PRESET_PARAMS,
@@ -62,8 +62,8 @@ int AdjSynth::set_default_preset_parameters_polyphonic_mixer(_settings_params_t 
 	
 	res |= adj_synth_settings_manager->set_int_param(params,
 		"adjsynth.poly_mixer.pan_lfo_num",
-		80,
-		100,
+		_LFO_NONE,
+		_NUM_OF_LFOS,
 		0,
 		_ADJ_SYNTH_PRESET_PARAMS,
 		set_program_poly_mixer_pan_lfo_num_cb,
@@ -76,7 +76,7 @@ int AdjSynth::set_default_preset_parameters_polyphonic_mixer(_settings_params_t 
 	
 	res |= adj_synth_settings_manager->set_int_param(params,
 		"adjsynth.poly_mixer.pan_lfo_level",
-		80,
+		0,
 		100,
 		0,
 		_ADJ_SYNTH_PRESET_PARAMS,

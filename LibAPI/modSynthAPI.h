@@ -288,7 +288,7 @@ int mod_synth_distortion_event_bool(int distid, int eventid, bool val);
 
 
 /**
-*   @brief  Initiates a 10 bands equilizer related event with integer value (affects all voices).
+*   @brief  Initiates a 10 bands equalizer related event with integer value (affects all voices).
 *			All available parameters values are defined in LibAPI/synthesizer.h
 *   @param  int beqid	target equilizer: _BAND_EQUALIZER_EVENT
 *	@param	int eventid	specific event code:\n
@@ -305,7 +305,7 @@ int mod_synth_distortion_event_bool(int distid, int eventid, bool val);
 *
 *   @return 0
 */
-int mod_synth_band_equilizer_event(int beqid, int eventid, int val);
+int mod_synth_band_equalizer_event(int beqid, int eventid, int val);
 
 /**
 *   @brief  Initiates a filter related event with integer value (affects all voices).

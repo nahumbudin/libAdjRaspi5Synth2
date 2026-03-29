@@ -33,7 +33,7 @@ public:
 	void pitch_bend_handler(uint8_t channel, int pitch);
 	void sysex_handler(uint8_t *message, int len);
 
-	int set_default_settings_parameters(_settings_params_t *params, int prog = -1);
+	int set_default_settings_parameters(_settings_params_t *preset_params, _settings_params_t *global_params);
 
 	/**
 *   @brief  Save the active Analog Synth settings parameters as XML file

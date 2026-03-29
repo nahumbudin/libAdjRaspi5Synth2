@@ -1,5 +1,5 @@
 /**
-*	@file		adjSynthEventsHandlingEquilizer.cpp
+*	@file		adjSynthEventsHandlingEqualizer.cpp
 *	@author		Nahum Budin
 *	@date		5-Feb-2021
 *	@version	1.2
@@ -36,7 +36,7 @@
 *
 *   @return 0
 */
-int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_params_t *params)
+int AdjSynth::band_equalizer_event(int beqid, int eventid, int val, _settings_params_t *params)
 {
 	
 	if (beqid != _BAND_EQUALIZER_EVENT)
@@ -49,7 +49,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_31_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_31_level",
+			"adjsynth.equalizer.band_31_level",
 			val,
 			_EXEC_CALLBACK,
 			-1); // -1: no program (common resource)
@@ -59,7 +59,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_62_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_62_level",
+			"adjsynth.equalizer.band_62_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -69,7 +69,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_125_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_125_level",
+			"adjsynth.equalizer.band_125_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -79,7 +79,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_250_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_250_level",
+			"adjsynth.equalizer.band_250_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -89,7 +89,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_500_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_500_level",
+			"adjsynth.equalizer.band_500_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -99,7 +99,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_1K_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_1k_level",
+			"adjsynth.equalizer.band_1k_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -109,7 +109,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_2K_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_2k_level",
+			"adjsynth.equalizer.band_2k_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -119,7 +119,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_4K_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_4k_level",
+			"adjsynth.equalizer.band_4k_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -129,7 +129,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_8K_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_8k_level",
+			"adjsynth.equalizer.band_8k_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -139,7 +139,7 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 	case _BAND_EQUALIZER_BAND_16K_LEVEL:
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_16k_level",
+			"adjsynth.equalizer.band_16k_level",
 			val,
 			_EXEC_CALLBACK,
 			-1);
@@ -155,14 +155,14 @@ int AdjSynth::band_equilizer_event(int beqid, int eventid, int val, _settings_pa
 
 		adj_synth_settings_manager->set_int_param_value
 			(params,
-			"adjsynth.equilizer.band_31_level",
+			"adjsynth.equalizer.band_31_level",
 			0,
 			_EXEC_CALLBACK,
 			-1);
 
 		adj_synth_settings_manager->set_int_param_value
 		(params,
-			"adjsynth.equilizer.band_62_level",
+			"adjsynth.equalizer.band_62_level",
 			0,
 			_EXEC_CALLBACK,
 			-1);

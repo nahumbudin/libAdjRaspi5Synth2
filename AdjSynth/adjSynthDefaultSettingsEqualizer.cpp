@@ -1,16 +1,15 @@
 /**
 *	@file		adjSynthDefaultSettingsEqualizer.cpp
 *	@author		Nahum Budin
-*	@date		4-Oct-2024
+*	@date		18-Feb-2026
 *	@version	1.2
-*					1. Code refactoring and notaion. (equi->equa)
-*	
-*	@brief		Set default settings Equilizer parameters
+*					1. Band Level range changed from (-50 to +50) to (-20 to +20).
+*
+*	@brief		Set default settings Equalizer parameters
 *
 *	History:\n
 *	
-*	version 1.1	5-Feb-2021
-*					1. Code refactoring and notaion. (equi->equa)
+*	version 1.2	4-Oct-2024	1. Code refactoring and notaion. (equi->equa)
 *			1.0	15_Nov-2019	First version
 *		
 */
@@ -32,8 +31,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_31_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_31_level_cb,
 		0,
@@ -47,8 +46,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_62_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_62_level_cb,
 		0,
@@ -62,8 +61,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_125_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_125_level_cb,
 		0,
@@ -77,8 +76,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_250_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_250_level_cb,
 		0,
@@ -92,8 +91,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_500_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_500_level_cb,
 		0,
@@ -107,8 +106,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_1k_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_1K_level_cb,
 		0,
@@ -122,8 +121,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_2k_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_2K_level_cb,
 		0,
@@ -137,8 +136,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_4k_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_4K_level_cb,
 		0,
@@ -152,8 +151,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_8k_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_8K_level_cb,
 		0,
@@ -167,8 +166,8 @@ int AdjSynth::set_default_settings_parameters_equalizer(_settings_params_t *para
 				(params,
 		"adjsynth.equalizer.band_16k_level",
 		0,
-		50,
-		-50,
+		20,
+		-20,
 		"instrument_settings_param",
 		set_band_equalizer_band_16K_level_cb,
 		0,

@@ -109,7 +109,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 			-1);
 	}
 
-	result = instrument_settings->get_float_param(active_settings_params, "fluid.synth.volume", &float_param);
+	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.volume", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -133,7 +133,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_bool_param(active_settings_params, "fluid.synth.reverb.active", &bool_param);
+	result = instrument_settings->get_bool_param(active_preset_settings_params, "fluid.synth.reverb.active", &bool_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		bool_val = bool_param.value;
@@ -155,7 +155,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_settings_params, "fluid.synth.reverb.room-size", &float_param);
+	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.reverb.room-size", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -179,7 +179,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_settings_params, "fluid.synth.reverb.damp", &float_param);
+	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.reverb.damp", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -203,7 +203,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_settings_params, "fluid.synth.reverb.width", &float_param);
+	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.reverb.width", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -227,7 +227,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_settings_params, "fluid.synth.reverb.level", &float_param);
+	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.reverb.level", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -251,7 +251,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_bool_param(active_settings_params, "fluid.synth.chorus.active", &bool_param);
+	result = instrument_settings->get_bool_param(active_preset_settings_params, "fluid.synth.chorus.active", &bool_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		bool_val = bool_param.value;
@@ -273,7 +273,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_int_param(active_settings_params, "fluid.synth.chorus.nr", &int_param);
+	result = instrument_settings->get_int_param(active_preset_settings_params, "fluid.synth.chorus.nr", &int_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		int_val = int_param.value;
@@ -297,7 +297,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_settings_params, "fluid.synth.chorus.level", &float_param);
+	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.chorus.level", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -321,7 +321,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_settings_params, "fluid.synth.chorus.speed", &float_param);
+	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.chorus.speed", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -345,7 +345,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_settings_params, "fluid.synth.chorus.depth", &float_param);
+	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.chorus.depth", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -369,7 +369,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_int_param(active_settings_params, "fluid.synth.chorus.waveform", &int_param);
+	result = instrument_settings->get_int_param(active_preset_settings_params, "fluid.synth.chorus.waveform", &int_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		int_val = int_param.value;
@@ -458,7 +458,7 @@ int InstrumentFluidSynth::open_fluid_synth_preset_file(
 		{
 			collect_fluid_synth_prest_channels_data(preset, &channels_presets[active_preset][0]);
 			load_fluid_synth_preset_soundfonts(&channels_presets[active_preset][0]);
-			set_fluid_synth_settings(active_settings_params, &channels_presets[active_preset][0]);
+			set_fluid_synth_settings(active_preset_settings_params, &channels_presets[active_preset][0]);
 			generate_fluid_synth_prest_summary(&channels_presets[active_preset][0], summary);
 			
 		}

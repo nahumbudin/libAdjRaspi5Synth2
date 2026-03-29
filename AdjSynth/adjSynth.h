@@ -97,12 +97,14 @@ public:
 	void set_master_volume(int vol);
 	int get_master_volume();
 	
-	int set_settings_params(Settings *settings,  
-		_settings_params_t *settings_params);
+	int set_preset_global_settings_params(Settings *settings, _settings_params_t *settings_params);
+	
+	int set_settings_params(Settings *settings, _settings_params_t *settings_params);
 
 	std::string get_program_preset_name(int prog);
 	
 	_settings_params_t *get_active_preset_params();
+	_settings_params_t *get_active_common_params();
 	_settings_params_t *get_active_settings_params();
 	//_setting_params_t *get_active_general_settings_params();
 	
@@ -115,7 +117,7 @@ public:
 	void init_poly();
 	void init_jack();
 
-	void synth_panic_ection();
+	void synth_panic_action();
 
 	void set_midi_mapping_mode(int mod);
 	int get_midi_mapping_mode();
@@ -133,7 +135,8 @@ public:
 	int set_default_preset_parameters_polyphonic_mixer(_settings_params_t *params, int prog);
 	int set_default_preset_parameters_output(_settings_params_t *params, int prog);
 	
-	int set_default_settings_parameters(_settings_params_t *params);
+	int set_default_global_parameters(_settings_params_t *params);
+	//int set_default_settings_parameters(_settings_params_t *params);
 	int set_default_settings_parameters_equalizer(_settings_params_t *params);
 	int set_default_settings_parameters_reverb(_settings_params_t *params);
 	int set_default_settings_parameters_mixer(_settings_params_t *params);
@@ -165,7 +168,7 @@ public:
 	
 	int reverb_event_int(int revid, int eventid, int val, _settings_params_t *params);
 	int reverb_event_bool(int revid, int eventid, bool val, _settings_params_t *params);
-	int band_equilizer_event(int beqid, int eventid, int val, _settings_params_t *params);
+	int band_equalizer_event(int beqid, int eventid, int val, _settings_params_t *params);
 	int band_equilizer_event_bool(int beqid, int eventid, bool val, _settings_params_t *params);	
 	int midi_mixer_event(int mixid, int eventid, int val, _settings_params_t *params);	
 	int kbd_event_int(int kbid, int eventid, int val, _settings_params_t *params);
@@ -275,10 +278,15 @@ public:
 	
 	static AdjSynth *adj_synth;
 
-	/* Holds the AdjSynth preset parameters */
+	/* Holds the AdjSynth preset parameters - Set per program (VCOs, PAD, MSO, KPS, Filter, Dist, PolyMixer) */
 	_settings_params_t active_adj_synth_preset_params;
-	/* Holds the AdjSynth settings parameters */
+	
+	/* Holds the AdjSettings Common Preset parameters (Reverb, Equalizer, KBD) */
+	_settings_params_t active_adj_synth_common_preset_params;
+
+	/* Holds the AdjSynth settings parameters ?*/
 	_settings_params_t active_adj_synth_settings_params;
+	
 	/* Holds the ModSynth general settings parameters */
 	//_setting_params_t active_adj_synth_general_settings_params;
 	

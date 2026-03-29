@@ -25,28 +25,29 @@
 
 
 
-int InstrumentAnalogSynth::set_default_settings_parameters(_settings_params_t *params, int prog)
+int InstrumentAnalogSynth::set_default_settings_parameters(_settings_params_t *preset_params, 
+															_settings_params_t *global_params)
 {
 	int res = 0;
 
-	res = adjheart_synth->set_default_preset_parameters(params, 0);
+	//res = adjheart_synth->set_default_preset_parameters(params, 0);
 
-	/*
-	res = adjheart_synth->set_default_preset_parameters_amp(params, 0);
-	res |= adjheart_synth->set_default_preset_parameters_distortion(params, 0);
-	res |= adjheart_synth->set_default_preset_parameters_filter(params, 0);
-	res |= adjheart_synth->set_default_preset_parameters_kps(params, 0);
-	res |= adjheart_synth->set_default_preset_parameters_modulators(params, 0);
-	res |= adjheart_synth->set_default_preset_parameters_mso(params, 0);
-	res |= adjheart_synth->set_default_preset_parameters_noise(params, 0);
-	res |= adjheart_synth->set_default_preset_parameters_pad(params, 0);
-	res |= adjheart_synth->set_default_preset_parameters_vco(params, 0);
-	*/
 	
-	res |= adjheart_synth->set_default_settings_parameters_equalizer(params);
-	res |= adjheart_synth->set_default_settings_parameters_keyboard(params);
-	res |= adjheart_synth->set_default_settings_parameters_mixer(params);
-	res |= adjheart_synth->set_default_settings_parameters_reverb(params);
+	res = adjheart_synth->set_default_preset_parameters_amp(preset_params, 0);
+	res |= adjheart_synth->set_default_preset_parameters_distortion(preset_params, 0);
+	res |= adjheart_synth->set_default_preset_parameters_filter(preset_params, 0);
+	res |= adjheart_synth->set_default_preset_parameters_kps(preset_params, 0);
+	res |= adjheart_synth->set_default_preset_parameters_modulators(preset_params, 0);
+	res |= adjheart_synth->set_default_preset_parameters_mso(preset_params, 0);
+	res |= adjheart_synth->set_default_preset_parameters_noise(preset_params, 0);
+	res |= adjheart_synth->set_default_preset_parameters_pad(preset_params, 0);
+	res |= adjheart_synth->set_default_preset_parameters_vco(preset_params, 0);
+	
+	
+	res |= adjheart_synth->set_default_settings_parameters_equalizer(global_params);
+	res |= adjheart_synth->set_default_settings_parameters_keyboard(global_params);
+	res |= adjheart_synth->set_default_settings_parameters_mixer(global_params);
+	res |= adjheart_synth->set_default_settings_parameters_reverb(global_params);
 
 	jack_out_connection_left.in_client_name = "";
 	jack_out_connection_left.in_client_port_name = "";
@@ -73,7 +74,7 @@ int InstrumentAnalogSynth::set_default_settings_parameters(_settings_params_t *p
 		return_val_if_true(instrument_settings == NULL, _SETTINGS_BAD_PARAMETERS);
 
 		res = instrument_settings->write_settings_file(
-			active_settings_params,
+			active_preset_settings_params,
 			instrument_settings->get_settings_version(),
 			"",
 			path,
@@ -92,7 +93,7 @@ int InstrumentAnalogSynth::open_analog_synth_settings_file(string path)
 
 	XML_files *xml_files = new XML_files();
 
-	int res = instrument_settings->read_settings_file(active_settings_params, path, "adj_synth_settings_params");
+	int res = instrument_settings->read_settings_file(active_preset_settings_params, path, "adj_synth_settings_params");
 	
 
 	if (res == 0)

@@ -155,61 +155,61 @@ int ModSynthPatches::set_synth_settings(mod_synth_preset_t *preset)
 		ModSynth::get_instance()->get_fluid_synth()->get_fluid_synth_interface()->set_fluid_synth_chorus_waveform_value(preset->fluid_preset.chorus_waveform);
 		ModSynth::get_instance()->get_fluid_synth()->get_fluid_synth_interface()->set_fluid_synth_chorus_params();
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_31_LEVEL,
 			preset->adj_preset.equalizer_31_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_62_LEVEL,
 			preset->adj_preset.equalizer_62_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_125_LEVEL,
 			preset->adj_preset.equalizer_125_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_250_LEVEL,
 			preset->adj_preset.equalizer_250_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_500_LEVEL,
 			preset->adj_preset.equalizer_500_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_1K_LEVEL,
 			preset->adj_preset.equalizer_1K_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_2K_LEVEL,
 			preset->adj_preset.equalizer_2K_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_4K_LEVEL,
 			preset->adj_preset.equalizer_4K_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_8K_LEVEL,
 			preset->adj_preset.equalizer_8K_level,
 			ModSynth::get_instance()->adj_synth->get_active_settings_params());
 				
-		ModSynth::get_instance()->adj_synth->band_equilizer_event(
+		ModSynth::get_instance()->adj_synth->band_equalizer_event(
 			_BAND_EQUALIZER_EVENT, 
 			_BAND_EQUALIZER_BAND_16K_LEVEL,
 			preset->adj_preset.equalizer_16K_level,

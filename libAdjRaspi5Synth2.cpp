@@ -615,11 +615,11 @@ int mod_synth_distortion_event_bool(int distid, int eventid, bool val)
 		AdjSynth::get_instance()->get_active_sketch());
 }
 
-int mod_synth_band_equilizer_event(int beqid, int eventid, int val)
+int mod_synth_band_equalizer_event(int beqid, int eventid, int val)
 {
-	return AdjSynth::get_instance()->band_equilizer_event(
+	return AdjSynth::get_instance()->band_equalizer_event(
 		beqid, eventid, val,
-		AdjSynth::get_instance()->get_active_preset_params());
+		AdjSynth::get_instance()->get_active_common_params());
 }
 
 int mod_synth_filter_event_int(int filtid, int eventid, int val)
@@ -733,7 +733,7 @@ int mod_synth_reverb_event_int(int revid, int eventid, int val)
 		revid,
 		eventid,
 		val,
-		AdjSynth::get_instance()->get_active_preset_params());
+		AdjSynth::get_instance()->get_active_common_params());
 }
 
 int mod_synth_reverb_event_bool(int revid, int eventid, bool val)
@@ -742,7 +742,7 @@ int mod_synth_reverb_event_bool(int revid, int eventid, bool val)
 		revid,
 		eventid,
 		val,
-		AdjSynth::get_instance()->get_active_preset_params());
+		AdjSynth::get_instance()->get_active_common_params());
 }
 
 int mod_synth_vco_event_int(int vcoid, int eventid, int val)
@@ -919,7 +919,7 @@ void mod_synth_panic_action()
 
 void mod_synth_adj_synt_panic_action()
 {
-	AdjSynth::get_instance()->synth_panic_ection();
+	AdjSynth::get_instance()->synth_panic_action();
 }
 
 void mod_synth_register_set_osc_1_unison_mode_callback(func_ptr_void_int_t ptr)
@@ -1125,7 +1125,7 @@ int mod_synth_get_active_fluid_synth_volume()
 	_settings_float_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.volume", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1143,7 +1143,7 @@ int mod_synth_get_active_fluid_synth_reverb_room_size()
 	_settings_float_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.reverb.room-size", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1159,7 +1159,7 @@ int mod_synth_get_active_fluid_synth_reverb_damp()
 	_settings_float_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.reverb.damp", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1175,7 +1175,7 @@ int mod_synth_get_active_fluid_synth_reverb_width()
 	_settings_float_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.reverb.width", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1191,7 +1191,7 @@ int mod_synth_get_active_fluid_synth_reverb_level()
 	_settings_float_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.reverb.level", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1207,7 +1207,7 @@ int mod_synth_get_active_fluid_synth_chorus_number()
 	_settings_int_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_int_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.chorus.nr", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1223,7 +1223,7 @@ int mod_synth_get_active_fluid_synth_chorus_level()
 	_settings_float_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.chorus.level", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1239,7 +1239,7 @@ int mod_synth_get_active_fluid_synth_chorus_speed()
 	_settings_float_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.chorus.speed", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1255,7 +1255,7 @@ int mod_synth_get_active_fluid_synth_chorus_depth()
 	_settings_float_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.chorus.depth", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1271,7 +1271,7 @@ int mod_synth_get_active_fluid_synth_chorus_waveform()
 	_settings_int_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_int_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.chorus.waveform", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1287,7 +1287,7 @@ bool mod_synth_get_active_fluid_synth_reverb_activation_state()
 	_settings_bool_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_bool_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.reverb.active", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1303,7 +1303,7 @@ bool mod_synth_get_active_fluid_synth_chorus_activation_state()
 	_settings_bool_param_t param;
 
 	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_bool_param(
-		mod_synthesizer->get_fluid_synth()->active_settings_params, 
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
 		"fluid.synth.chorus.active", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1357,7 +1357,7 @@ int mod_synth_open_fluid_synth_preset_file(string path, int preset_num){
 
 	mod_synthesizer->get_fluid_synth()->open_fluid_synth_preset_file(
 		path,
-		mod_synthesizer->get_fluid_synth()->active_settings_params,
+		mod_synthesizer->get_fluid_synth()->active_preset_settings_params,
 		&mod_synthesizer->get_fluid_synth()->presets_summary_str[preset_num]);
 
 	mod_synthesizer->get_fluid_synth()->generate_fluid_synth_prest_summary(
@@ -1545,6 +1545,16 @@ void mod_synth_midi_player_pause()
 void mod_synth_midi_player_stop()
 {
 	mod_synthesizer->get_midi_player()->stop();
+}
+
+void mod_synth_midi_player_backward()
+{
+	mod_synthesizer->midi_player->backward();
+}
+
+void mod_synth_midi_player_forward()
+{
+	mod_synthesizer->midi_player->forward();
 }
 
 void mod_synth_register_midi_player_potision_update_callback(func_ptr_void_int_t ptr)
@@ -1775,11 +1785,11 @@ int mod_synth_load_patch_file(std::string file_path)
 	// TODO: selcte file name base on patch name or instrument names
 	file_path = xml_files->get_xml_file_path(file_path) + "Adj-Analog-Synth-settings.xml";
 
-	
-	res |= mod_synthesizer->get_analog_synth()->instrument_settings->read_settings_file(
-		mod_synthesizer->get_analog_synth()->active_settings_params,
-		file_path,
-		_ADJ_SYNTH_PRESET_PARAMS, _SKETCH_PROGRAM_1); // TODO: fix sketch number
+	/* Moved to patches.cpp*/
+	//res |= mod_synthesizer->get_analog_synth()->instrument_settings->read_settings_file(
+	//	mod_synthesizer->get_analog_synth()->active_preset_settings_params,
+	//	file_path,
+	//	_ADJ_SYNTH_PRESET_PARAMS, _SKETCH_PROGRAM_1); // TODO: fix sketch number
 
 	return res;
 }

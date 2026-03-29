@@ -40,7 +40,8 @@ SynthVoice::SynthVoice(
 	int prg,
 	int samp_rate,
 	int block_size,
-	_settings_params_t *params,
+	_settings_params_t *params, // No need for this - the program will update the voice 
+								// parameters when a voice is assigned to a program.
 	DSP_MorphingSinusOscWTAB *msotab,
 	Wavetable *synth_pad_wavetable, 
 	AudioManager *aud_mng)
@@ -64,7 +65,8 @@ SynthVoice::SynthVoice(
 	voice_num = vnum;
 	set_allocated_program(prg);
 	allocated_to_program_voice_num = -1;
-	settings_manager->settings_params_deep_copy(&active_params, params);
+	// No need for this - the program will update the voice parameters when a voice is assigned to a program.
+	//settings_manager->settings_params_deep_copy(&active_params, params);
 		
 	dsp_voice = new DSP_Voice(voice_num, sample_rate, audio_block_size, mso_wtab, pad_wavetable, NULL); //<<<<<< 
 	audio_voice = new AudioVoiceFloat(
@@ -82,7 +84,8 @@ SynthVoice::SynthVoice(
 		audio_manager->audio_block_stereo_float_shared_memory_voices_output[voice_num], // Output sample shared memory page 
 																						// (not to be confused with audio output buffer -> Jack)
 		&audio_first_update[_AUDIO_STAGE_7],
-		voice_num); // id
+		voice_num,  // id
+		false); // disable limiter for now (will be added later in the master output block)
 	
 	// Audio connections - Synth Voice -> Audio Output
 	connection_voice_out_ch1 = audio_manager->connections_manager->get_audio_connection();
@@ -93,7 +96,8 @@ SynthVoice::SynthVoice(
 
 	settings_manager = new Settings(&active_params);
 
-	set_voice_params(&active_params);
+	// No need for this - the program will update the voice parameters when a voice is assigned to a program.
+	//set_voice_params(&active_params);
 }
 
 /**

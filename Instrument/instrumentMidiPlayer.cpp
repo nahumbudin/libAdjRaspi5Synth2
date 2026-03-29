@@ -1,12 +1,14 @@
 /**
 *	@file		instrumenyMidiPlayer.cpp
 *	@author		Nahum Budin
-*	@date		8-Aug-2024
-*	@version	1.0
+*	@date		28-Mar-2026
+*	@version	1.1
+*			1. Added support for going forward and backward in the file.
 *
 *	@brief		MIDI files player.
 *
 *	History:\n
+*		Version 1.0 8-Aug-2024 Initial
 *
 *	Based on my Android TilTune Player Java Project 
 *
@@ -207,6 +209,16 @@ void InstrumentMidiPlayer::stop()
 	set_off_all_on_notes();
 	send_all_notes_off_command();
 	send_all_sounds_off_command();
+}
+
+void InstrumentMidiPlayer::backward()
+{
+	midi_playback_threads->go_backward();
+}
+
+void InstrumentMidiPlayer::forward()
+{
+	midi_playback_threads->go_forward();
 }
 
 /* Set all played on notes */

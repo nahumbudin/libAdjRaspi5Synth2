@@ -1,17 +1,21 @@
 /**
-* @file			oscilator.h
-*	@author		Nahum Budin
-*	@date		24-Sep-2025
-*	@version	1.1
-*					1. Code refactoring and notaion presetes renamed to patches (presets are used for settings)
-*	
-*	History:\n
-*		version 1.0		13-Sep-2024: First version
-*	
-*	@brief		Provides the Oscilators related API
-*	
-*	Based on libAdjHeartModSynth_1.h Ver 1.3 9-Jan-2021
-*/
+ * @file			oscilator.h
+ *	@author		Nahum Budin
+ *	@date		24-Mar-2026
+ *	@version	1.2
+ *					1. Adding reverb mode presets defines.
+ *
+ *	History:\n
+ *		version 1.0		13-Sep-2024: First version
+ *
+ *	@brief		Provides the Oscilators related API
+ *
+ *	@History:
+ *				Version 1.1		24-Sep-2025
+ *					Code refactoring and notaion presetes renamed to patches (presets are used for settings)
+ *
+ *	Based on libAdjHeartModSynth_1.h Ver 1.3 9-Jan-2021
+ */
 
 #pragma once
 
@@ -570,7 +574,27 @@ Error - must be no more than 64
 #define _REVERB3M_ENABLE							908
 
 #define _REVERP_PRESET_CUSTOM						0
-	
+
+#define _REVERB_PRESET_DEFAULT 0
+#define _REVERB_PRESET_SMALL_HALL_1 1
+#define _REVERB_PRESET_SMALL_HALL_2 2
+#define _REVERB_PRESET_MEDIUM_HALL_1 3
+#define _REVERB_PRESET_MEDIUM_HALL_2 4
+#define _REVERB_PRESET_LARGE_HALL_1 5
+#define _REVERB_PRESET_LARGE_HALL_2 6
+#define _REVERB_PRESET_SMALL_ROOM_1 7
+#define _REVERB_PRESET_SMALL_ROOM_2 8
+#define _REVERB_PRESET_MEDIUM_ROOM_1 9
+#define _REVERB_PRESET_MEDIUM_ROOM_2 10
+#define _REVERB_PRESET_LARGE_ROOM_1 11
+#define _REVERB_PRESET_LARGE_ROOM_2 12
+#define _REVERB_PRESET_MEDIUM_R_1 13
+#define _REVERB_PRESET_MEDIUM_R_2 14
+#define _REVERB_PRESET_PLATE_HIGH 15
+#define _REVERB_PRESET_PLATE_LOW 16
+#define _REVERB_PRESET_LONG_REVERB_1 17
+#define _REVERB_PRESET_LONG_REVERB_2 18
+
 #define _PLAY_MODE									1000
 #define _PLAY_MODE_POLY								0
 #define _PLAY_MODE_SOLO								1

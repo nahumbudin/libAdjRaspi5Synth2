@@ -6,6 +6,7 @@
  *					1. Code refactoring and notaion.
  *					2. Add id number (for debug).
  *					3. change LEFT/RIGHT defines to _SYNTH_VOICE_OUT_1/2
+ *					4. Adding audio limiter in update() to avoid clipping 
  *
  *
  *	@brief		Audio system output block.
@@ -25,6 +26,7 @@
 #pragma once
 
 #include "audioBlock.h"
+#include "audioMasterLimiter.h"
 #include "../LibAPI/audio.h"
 #include "../DSP/dspAmp.h"
 
@@ -36,13 +38,17 @@ public:
 		int block_size = _DEFAULT_BLOCK_SIZE,	
 		shared_memory_audio_block_float_stereo_struct_t *shared_memory = NULL,
 		AudioBlockFloat **audio_first_update_ptr = NULL, 
-		int vid = -1);
+		int vid = -1,
+		bool use_limiter = false);
 
 	int set_audio_block_size(int size);
 	int get_audio_block_size();
 	
 	void set_master_volume(int vol);
 	int get_master_volume();
+	
+	void set_use_limiter(bool use);
+	bool get_use_limiter();
 	
 		
 	virtual void update(void);
@@ -53,7 +59,12 @@ private:
 	// Shared memory for transfering data to audio driver
 	shared_memory_audio_block_float_stereo_struct_t *audio_block_stereo_float_shared_memory;
 	
+	MasterLimiter *master_limiter_left;
+	MasterLimiter *master_limiter_right;
+	
 	int audio_block_size;
+	
+	bool use_the_limiter;
 
 	int voice_id;
 	

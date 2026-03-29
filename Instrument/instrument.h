@@ -4,6 +4,10 @@
 *	@date		24-09-2025
 *	@version	1.1	
 *					1. Adding a pointer to a AdjSynth object
+*					2. Splitting the settings parameters to two groups: active_preset_settings_params and active_common_settings_params,
+*					3. Splitting active_preset_settings_params to two groups: active_program_settings_params and active_common_settings_params, 
+*					   used for the AdjSynth setting params and adding a active_fluid_synth_settings_params for the FluidSynth settings params
+*					   
 *					
 *	@brief		The basic music generating object, e.g., analog-synthesizer,
 *				FluidSynth SoundFont synthesizer, organ, etc.
@@ -70,7 +74,16 @@ public:
 	AdjSynth *adjheart_synth;
 
 	Settings *instrument_settings;
-	_settings_params_t *active_settings_params;
+	
+	// Program settings parameters, used to store the current program settings parameters, 
+	// which are used when a voice is assigned to the program, and when the program is changed.
+	_settings_params_t *active_preset_settings_params;
+	
+	// Settings parameters, used to store the common resources (e.g. Equalizer, Reverbration, Keyboard) settings parameters, 
+	_settings_params_t *active_common_settings_params;
+	
+	// Settings parameters, used to store the FluidSynth settings parameters, 
+	_settings_params_t *active_fluid_synth_settings_params;
 
 //	InstrumentConnectionsControl *instrument_connections_control;
 	AlsaMidiSysControl *alsa_connections;

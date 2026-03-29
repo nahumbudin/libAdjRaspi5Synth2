@@ -1,12 +1,14 @@
 /**
 *	@file		instrumenyMidiPlayerPlaybackTread.h
 *	@author		Nahum Budin
-*	@date		14-Aug-2024
-*	@version	1.0
+*	@date		28-Mar-2026
+*	@version	1.1
+*			1. Added support for going forward and backward in the file.
 *
-*	@brief		MIDI files player main playback thread.
+*	@brief		MIDI files player.
 *
 *	History:\n
+*		Version 1.0 14-Aug-2024 Initial
 *
 *	Based on my Android TilTune Player Java Project 
 *
@@ -41,6 +43,8 @@ class MidiPlaybackThread
 	static void start_playing();
 	static void pause_playing();
 	static void stop_playing();
+	static void go_backward();
+	static void go_forward();
 
 	static bool is_playback_thread_running();
 	static bool is_update_thread_running();	

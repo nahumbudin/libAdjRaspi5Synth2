@@ -631,6 +631,66 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 					&ModSynth::get_instance()->get_fluid_synth()->presets[0],
 					ModSynth::get_instance()->get_fluid_synth()->presets_summary_str);
 			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
+			{
+				ModSynth::get_instance()->get_analog_synth()->instrument_settings->read_settings_file(
+					ModSynth::get_instance()->get_analog_synth()->active_preset_settings_params,
+					settings_file_path,
+					_ADJ_SYNTH_PRESET_PARAMS, _SKETCH_PROGRAM_1); // TODO: fix sketch number
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_PADSYNTH_SYNTH_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_MIXER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_MAPPER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_REVERB_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_DISTORTION_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_GRAPHIC_EQUALIZER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_CONTROL_BOX_HANDLER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_EXT_MIDI_INT_CONTROL_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_KEYBOARD_CONTROL_STR_KEY)
+			{
+				//ModSynth::get_instance()->get_keyboard_control()->open_adj_synth_patch_file(settings_file_path);
+			}
 		}
 	}
 	
