@@ -9,6 +9,8 @@
 *					3. Add AdjSynth panic pushbutton
 *					4. Added MIDI mixer Pan modulation LFO level and selection control definitions
  *					5. Added MIDI mixer Send control definition
+ *					6. Added MIDI Player Backward and Forward control and auto loop back playing control.
+ *					7. Added MIDI Player playback volume control
 *
 *	History:
 *			Ver1.0  8-May-2024 Initial
@@ -1555,6 +1557,25 @@ void mod_synth_midi_player_backward()
 void mod_synth_midi_player_forward()
 {
 	mod_synthesizer->midi_player->forward();
+}
+
+void mod_synth_midi_player_set_auto_loop_back(bool state)
+{
+	mod_synthesizer->midi_player->set_auto_loop_back(state);
+}
+
+bool mod_synth_midi_player_get_auto_loop_back()
+{
+	return mod_synthesizer->midi_player->is_auto_loop_back_on();
+}
+
+void mod_synth_midi_player_set_playback_volume(int vol)
+{
+	mod_synthesizer->midi_player->set_playback_volume(vol);
+}
+int mod_synth_midi_player_get_playback_volume()
+{
+	return mod_synthesizer->midi_player->get_playback_volume();
 }
 
 void mod_synth_register_midi_player_potision_update_callback(func_ptr_void_int_t ptr)

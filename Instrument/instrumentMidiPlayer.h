@@ -4,6 +4,8 @@
 *	@date		28-Mar-2026
 *	@version	1.1
 *			1. Added support for going forward and backward in the file.
+*			2. Added suport for loopback playing control.
+*			3. Added support for playback volume control.
 *
 *	@brief		MIDI files player.
 *
@@ -67,6 +69,12 @@ class InstrumentMidiPlayer : public Instrument
 	void stop();
 	void backward();
 	void forward();
+	
+	void set_auto_loop_back(bool state);
+	bool is_auto_loop_back_on();
+	
+	void set_playback_volume(int vol);
+	int get_playback_volume();
 	
 
 	void set_off_all_on_notes();

@@ -1,10 +1,11 @@
 /**
-*	@file		instrumenyMidiMapper.cpp
-*	@author		Nahum Budin
-*	@date		27-Jan-2026
-*	@version	1.1
-*					1. Added MIDI mixer Pan modulation LFO level and selection control handling
-*					2. Added MIDI mixer Send control handling
+ *	@file		instrumenyMidiMapper.cpp
+ *	@author		Nahum Budin
+ *	@date		27-Jan-2026
+ *	@version	1.1
+ *					1. Added MIDI mixer Pan modulation LFO level and selection control handling
+ *					2. Added MIDI mixer Send control handling
+ *					3. Added mutex to protect all snd_rawmidi_write() calls.
 *
 *	@brief		MIDI mapper instrument.
 *				It processes incoming MIDI events and generates control events for the synth. 
@@ -75,6 +76,7 @@ void InstrumentMidiMapper::set_midi_channel_volume(int chan, int vol)
 		bytes[1] = _MIDI_EVENT_CHANNEL_VOLUME_BYTE_2;
 		bytes[2] = (int)vol_scale;
 
+		std::lock_guard<std::mutex> lock(midiout_mutex);
 		if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
 		{
 			printf("Problem writing midi mapper change channel volume to MIDI output: %s", snd_strerror(status));
@@ -116,7 +118,8 @@ void InstrumentMidiMapper::set_midi_channel_pan(int chan, int pan)
 		bytes[0] = _MIDI_EVENT_CONTROL_CHANGE + (chan & 0x0f);
 		bytes[1] = _MIDI_EVENT_CHANNEL_BALANCE_BYTE_2;
 		bytes[2] = (int)pan_scale;
-		
+
+		std::lock_guard<std::mutex> lock(midiout_mutex);
 		if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
 		{
 			printf("Problem writing midi mapper change channel pan to MIDI output: %s", snd_strerror(status));
@@ -146,6 +149,7 @@ void InstrumentMidiMapper::set_midi_channel_send(int chan, int snd)
 		bytes[1] = _MIDI_EVENT_CHANNEL_SEND_BYTE_2;
 		bytes[2] = (int)snd_scale;
 
+		std::lock_guard<std::mutex> lock(midiout_mutex);
 		if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
 		{
 			printf("Problem writing midi mapper change channel send to MIDI output: %s", snd_strerror(status));
@@ -176,6 +180,7 @@ void InstrumentMidiMapper::set_midi_channel_pan_mod_lfo(int chan, int lfo)
 		bytes[1] = _MIDI_EVENT_CHANNEL_PAN_MOD_LFO_SELECT_BYTE_2;
 		bytes[2] = (int)lfo;
 
+		std::lock_guard<std::mutex> lock(midiout_mutex);
 		if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
 		{
 			printf("Problem writing midi mapper change channel volume to MIDI output: %s", snd_strerror(status));
@@ -206,6 +211,7 @@ void InstrumentMidiMapper::set_midi_channel_pan_mod_lfo_level(int chan, int lev)
 		bytes[1] = _MIDI_EVENT_CHANNEL_PAN_MOD_LFO_LEVEL_BYTE_2;
 		bytes[2] = (int)lev;
 
+		std::lock_guard<std::mutex> lock(midiout_mutex);
 		if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
 		{
 			printf("Problem writing midi mapper change channel volume to MIDI output: %s", snd_strerror(status));
@@ -288,8 +294,8 @@ void InstrumentMidiMapper::note_on_handler(uint8_t channel, uint8_t note, uint8_
 	bytes[1] = note;
 	// bytes[2] = (int)(velocity * midi_channel_volume_scale[channel]);
 	bytes[2] = velocity;
-	
 
+	std::lock_guard<std::mutex> lock(midiout_mutex);
 	if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
 	{
 		printf("Problem writing midi mapper note on data to MIDI output: %s", snd_strerror(status));
@@ -305,6 +311,7 @@ void InstrumentMidiMapper::note_off_handler(uint8_t channel, uint8_t num, uint8_
 	bytes[1] = num;
 	bytes[2] = val;
 
+	std::lock_guard<std::mutex> lock(midiout_mutex);
 	if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
 	{
 		printf("Problem writing midi mapper note off data to MIDI output: %s", snd_strerror(status));
@@ -363,6 +370,7 @@ void InstrumentMidiMapper::controller_event_handler(uint8_t channel, uint8_t num
 	bytes[1] = num;
 	bytes[2] = val;
 
+	std::lock_guard<std::mutex> lock(midiout_mutex);
 	if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
 	{
 		printf("Problem writing midi mapper change control data to MIDI output: %s", snd_strerror(status));

@@ -4,6 +4,8 @@
 *	@date		28-Mar-2026
 *	@version	1.1
 *			1. Added support for going forward and backward in the file.
+*			2. Added suport for loopback playing control
+*			3. Added support for playback volume control.
 *
 *	@brief		MIDI files player.
 *
@@ -55,6 +57,7 @@ int MidiPlaybackThread::remaining_file_play_msec = 0;
 int MidiPlaybackThread::remaining_file_play_sec = 0;
 int MidiPlaybackThread::remaining_file_play_min = 0;
 bool MidiPlaybackThread::paused = false;
+bool MidiPlaybackThread::seek_in_progress = false;
 
 func_ptr_void_void_t MidiPlaybackThread::clear_all_playing_notes_callback_ptr = NULL;
 func_ptr_void_uint8_t_uint8_t MidiPlaybackThread::midi_change_program_callback_ptr = NULL;
@@ -123,6 +126,23 @@ void MidiPlaybackThread::set_pulses_per_ms(double ppm)
 void MidiPlaybackThread::set_playback_speed(float spd)
 {
 	speed = spd	;
+}
+
+void MidiPlaybackThread::set_playback_volume(int vol)
+{
+	if (vol < 0)
+	{
+		vol = 0;
+	}
+	else if (vol > 100)
+	{
+		vol = 100;
+	}
+	playback_volume = vol;
+}
+int MidiPlaybackThread::get_playback_volume()
+{
+	return playback_volume;
 }
 
 void MidiPlaybackThread::start_playing()
@@ -194,9 +214,30 @@ void MidiPlaybackThread::stop_playing()
 
 void MidiPlaybackThread::go_backward()
 {
-	if (midi_file == NULL)
+	// Early return conditions
+	if (midi_file == NULL || seek_in_progress)
 	{
 		return;
+	}
+
+	// Lock seeking
+	seek_in_progress = true;
+
+	// Remember if we were playing
+	bool was_playing = (player_state == _MIDI_PLAYER_STATE_PLAYING);
+
+	// Pause playback first if currently playing
+	if (was_playing)
+	{
+		pause_playing();
+		
+		// Wait for pause to complete
+		int wait_count = 0;
+		while (player_state != _MIDI_PLAYER_STATE_PAUSED && wait_count < 50)
+		{
+			usleep(10000); // Wait 10ms
+			wait_count++;
+		}
 	}
 
 	const double skip_duration_ms = 5000.0; // 5 seconds
@@ -211,8 +252,8 @@ void MidiPlaybackThread::go_backward()
 		target_pulse_time = 0;
 	}
 
-	// Search for target event index
-	std::vector<MidiFileEvent> file_events = midi_file->get_combined_track();
+	// Search BACKWARDS from current position for efficiency
+	const std::vector<MidiFileEvent> &file_events = midi_file->get_combined_track();
 	int target_index = 0;
 
 	for (int i = next_played_event_index; i >= 0; i--)
@@ -220,12 +261,9 @@ void MidiPlaybackThread::go_backward()
 		if (file_events[i].start_time <= target_pulse_time)
 		{
 			target_index = i;
-			break;
+			break; // Found the closest event, stop searching
 		}
 	}
-
-	// Remember if we were playing
-	bool was_playing = (player_state == _MIDI_PLAYER_STATE_PLAYING);
 
 	// Clear any playing notes
 	if (clear_all_playing_notes_callback_ptr != NULL)
@@ -245,19 +283,48 @@ void MidiPlaybackThread::go_backward()
 	// Adjust start time as if we had been playing from the new position
 	start_playing_time_ms = current_time_ms - target_elapsed_ms - pause_duration_time_msec;
 
-	// If we were playing, playback will continue automatically
-	// The playback thread will pick up from the new next_played_event_index
+	//fprintf(stderr,
+	//	"Jumped backward to %.2fs (index %d)%s\n",
+	//	target_elapsed_ms / 1000.0,
+	//	target_index,
+	//	was_playing ? " - will resume" : "");
 
-	fprintf(stderr, "Jumped backward to %.2fs (index %d)%s\n",
-			target_elapsed_ms / 1000.0, target_index,
-			was_playing ? " - continuing playback" : "");
+	// Resume playback if it was playing before
+	if (was_playing)
+	{
+		start_playing();
+	}
+
+	// Unlock seeking
+	seek_in_progress = false;
 }
 
 void MidiPlaybackThread::go_forward()
 {
-	if (midi_file == NULL)
+	// Early return conditions
+	if (midi_file == NULL || seek_in_progress)
 	{
 		return;
+	}
+
+	// Lock seeking
+	seek_in_progress = true;
+
+	// Remember if we were playing
+	bool was_playing = (player_state == _MIDI_PLAYER_STATE_PLAYING);
+
+	// Pause playback first if currently playing
+	if (was_playing)
+	{
+		pause_playing();
+		
+		// Wait for pause to complete
+		int wait_count = 0;
+		while (player_state != _MIDI_PLAYER_STATE_PAUSED && wait_count < 50)
+		{
+			usleep(10000); // Wait 10ms
+			wait_count++;
+		}
 	}
 
 	const double skip_duration_ms = 5000.0; // 5 seconds
@@ -272,8 +339,8 @@ void MidiPlaybackThread::go_forward()
 		target_pulse_time = midi_file->get_total_pulses();
 	}
 
-	// Search FORWARD from current position (already efficient)
-	std::vector<MidiFileEvent> file_events = midi_file->get_combined_track();
+	// Search FORWARD from current position
+	const std::vector<MidiFileEvent> &file_events = midi_file->get_combined_track();
 	int target_index = next_played_event_index;
     
 	for (int i = next_played_event_index; i < file_events.size(); i++)
@@ -288,21 +355,45 @@ void MidiPlaybackThread::go_forward()
 		}
 	}
 
-	// Update playback position
-	next_played_event_index = target_index;
-    
-	// Adjust timing references
-	long current_time_ms = get_current_time_ms();
-	long elapsed_time_ms = (long)(target_pulse_time / pulses_per_msec);
-	start_playing_time_ms = current_time_ms - elapsed_time_ms - pause_duration_time_msec;
-	current_pulse_time = target_pulse_time;
-	prev_pulse_time = target_pulse_time;
-
 	// Clear any playing notes
 	if (clear_all_playing_notes_callback_ptr != NULL)
 	{
 		clear_all_playing_notes_callback_ptr();
 	}
+
+	// Update playback position
+	next_played_event_index = target_index;
+	current_pulse_time = target_pulse_time;
+	prev_pulse_time = target_pulse_time;
+    
+	// Adjust timing references
+	long current_time_ms = get_current_time_ms();
+	long elapsed_time_ms = (long)(target_pulse_time / pulses_per_msec);
+	start_playing_time_ms = current_time_ms - elapsed_time_ms - pause_duration_time_msec;
+
+	//fprintf(stderr,
+	//	"Jumped forward to %.2fs (index %d)%s\n",
+	//	elapsed_time_ms / 1000.0,
+	//	target_index,
+	//	was_playing ? " - will resume" : "");
+
+	// Resume playback if it was playing before
+	if (was_playing)
+	{
+		start_playing();
+	}
+
+	// Unlock seeking
+	seek_in_progress = false;
+}
+
+void MidiPlaybackThread::set_auto_loop_back(bool auto_loop_back)
+{
+	auto_loop_back_on = auto_loop_back;
+}
+bool MidiPlaybackThread::is_auto_loop_back_on()
+{
+	return auto_loop_back_on;
 }
 
 void MidiPlaybackThread::do_play()
@@ -479,6 +570,12 @@ void *MidiPlaybackThread::playback_thread(void *thread_id)
 							midi_change_channel_volume_callback_ptr(chan, vol);
 						}
 					}
+				}
+				// Trap Note On events for controling the volume of the played notes
+				else if ((current_event.event_command == _MIDI_EVENT_NOTE_ON) &&
+						 (current_event.velocity > 0))
+				{
+					current_event.velocity = (uint8_t)((current_event.velocity * playback_volume) / 100);
 				}
 				/* Calculate elapsed playing time from start-playing time (ref as zero) */
 				actual_play_time_msec = (long)(get_current_time_ms() - start_playing_time_ms - pause_duration_time_msec);

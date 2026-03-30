@@ -4,6 +4,8 @@
 *	@date		28-Mar-2026
 *	@version	1.1
 *			1. Added support for going forward and backward in the file.
+*			2. Added suport for loopback playing control.
+*			3. Added support for playback volume control.
 *
 *	@brief		MIDI files player.
 *
@@ -39,12 +41,18 @@ class MidiPlaybackThread
 	~MidiPlaybackThread();
 
 	void set_playback_speed(float spd);
+	
+	void set_playback_volume(int vol);
+	int get_playback_volume();
 
 	static void start_playing();
 	static void pause_playing();
 	static void stop_playing();
 	static void go_backward();
 	static void go_forward();
+	
+	void set_auto_loop_back(bool auto_loop_back);
+	bool is_auto_loop_back_on();
 
 	static bool is_playback_thread_running();
 	static bool is_update_thread_running();	
@@ -64,6 +72,8 @@ class MidiPlaybackThread
 	static bool paused;
 	/* St true to auto loopback */
 	static bool auto_loop_back_on;
+	/* Used in go backward and forward */
+	static bool seek_in_progress;
 
 	/* MIDI file parameters */
 	/* The number of pulses per millisec */

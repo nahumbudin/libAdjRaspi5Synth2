@@ -5,6 +5,7 @@
 *	@version	1.1
 *					1. Added MIDI mixer Pan modulation LFO level and selection control handling
 *					2. Added MIDI mixer Send control handling
+*					3. Added mutex to protect all snd_rawmidi_write() calls.
 *
 *	@brief		MIDI mapper instrument.
 *				It processes incoming MIDI events and generates control events for the synth. 
@@ -26,6 +27,8 @@
 */
 
 #pragma once
+
+#include <mutex>
 
 #include "instrument.h"
 
@@ -81,6 +84,8 @@ class InstrumentMidiMapper : public Instrument
 
   private:
 	static InstrumentMidiMapper *instrument_midi_mapper_instance;
+
+	std::mutex midiout_mutex; // Protects midiout from concurrent access
 
 	float midi_channel_volume_scale[16];
 	float midi_channel_pan_scale[16];

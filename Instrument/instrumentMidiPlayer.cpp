@@ -4,6 +4,8 @@
 *	@date		28-Mar-2026
 *	@version	1.1
 *			1. Added support for going forward and backward in the file.
+*			2. Added suport for loopback playing control.
+*			3. Added support for playback volume control.
 *
 *	@brief		MIDI files player.
 *
@@ -219,6 +221,25 @@ void InstrumentMidiPlayer::backward()
 void InstrumentMidiPlayer::forward()
 {
 	midi_playback_threads->go_forward();
+}
+
+void InstrumentMidiPlayer::set_auto_loop_back(bool state)
+{
+	midi_playback_threads->set_auto_loop_back(state);
+}
+bool InstrumentMidiPlayer::is_auto_loop_back_on()
+{
+	return midi_playback_threads->is_auto_loop_back_on();
+}
+
+void InstrumentMidiPlayer::set_playback_volume(int vol)
+{
+	midi_playback_threads->set_playback_volume(vol);
+}
+
+int InstrumentMidiPlayer::get_playback_volume()
+{
+	return midi_playback_threads->get_playback_volume();
 }
 
 /* Set all played on notes */
