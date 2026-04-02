@@ -4,6 +4,7 @@
  *	@date		13-Oct-2025
  *	@version	1.3
  *					1. Add all notes/sounds off commands.
+ *					2. Added mutexes to update_all and thread creation.
  *
  *	@brief		Handle midi streams and definitions
  *
@@ -17,6 +18,10 @@
  *		1. Added mutex to control blocks allocation operations.
  *	version 1.1		3-Feb-2021	 Code refactoring and notaion.
  *	version 1.0		13-Oct-2019: First version
+ *	version	1.2
+ *					1. Code refactoring and notaion.
+ *					2. Adding more AUX controls SYSEX messages
+ *					3. Added mutexes to update_all and thread creation.
 *
 */
 
@@ -338,6 +343,7 @@ class MidiStream {
 
 public:
 	MidiStream(uint8_t ninput, midi_stream_mssg_block_t** iqueue, uint8_t stage = 0);
+	virtual ~MidiStream();
 
 	static void initialize_midi_stream_memory(midi_stream_mssg_block_t* data, unsigned int num);
 	static void initialize_rawdata_mssgs_memory(raw_data_mssg_block_t* data, unsigned int num);
@@ -353,6 +359,9 @@ public:
 
 	static void update_all(void);
 	static bool update_is_in_progress();
+
+	static std::mutex update_all_mutex;
+	static std::mutex thread_creation_mutex;
 
 	//	friend class MidiOutputPrint;
 

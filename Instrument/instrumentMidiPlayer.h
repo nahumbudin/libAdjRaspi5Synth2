@@ -5,7 +5,8 @@
 *	@version	1.1
 *			1. Added support for going forward and backward in the file.
 *			2. Added suport for loopback playing control.
-*			3. Added support for playback volume control.
+*			3. Added support for playback volume and speedcontrol.
+*			4. Added support for retrieving midi file meta data.
 *
 *	@brief		MIDI files player.
 *
@@ -75,13 +76,17 @@ class InstrumentMidiPlayer : public Instrument
 	
 	void set_playback_volume(int vol);
 	int get_playback_volume();
+
+	void set_playback_speed(int spd);
+	int get_playback_speed();
 	
+	midi_file_meta_data_t get_file_metadata();
 
 	void set_off_all_on_notes();
 	void send_all_notes_off_command();
 	void send_all_sounds_off_command();
 
-	void send_midi_commands(vector<MidiFileEvent> events, int vol);
+	void send_midi_commands(const vector<MidiFileEvent> events, int vol);
 
   private:
 	MidiPlaybackThread *midi_playback_threads;

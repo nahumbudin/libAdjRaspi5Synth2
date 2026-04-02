@@ -1,5 +1,5 @@
 /**
-*	@file		midiFile.h
+*	@file		midiFile.cpp
 *	@author		Nahum Budin
 *	@date		7-Feb-2026
 *	@version	1.1
@@ -7,6 +7,8 @@
 *					   a min-heap (priority queue) to merge events from all 
 *					   tracks in O(n log k) time, where n is the total number 
 *					   of events and k is the number of tracks (GitHub Copilot).
+*					 2. Added support for channels and notes counting and auto scale detection.
+*					   
 *
 *	@brief		MIDI files handling.
 *
@@ -28,6 +30,7 @@
 #include "midiFileReader.h"
 #include "midiFileException.h"
 #include "math.h"
+#include "../LibAPI/Scales.h"
 
 
 /** Creates an empty MidiFile */
@@ -182,6 +185,35 @@ int MidiFile::get_total_pulses()
 	return total_pulses;
 }
 
+midi_file_meta_data_t MidiFile::get_file_metadata()
+{
+	midi_file_meta_data_t data;
+	
+	// Get the data
+	data.file_name = midi_file_path;
+	
+	for (int i = 0; i < 16; i++)
+	{
+		data.channels_counters[i] = channels_counters[i];
+	}
+	
+	data.least_used_channel = least_used_channel;
+	data.second_least_used_channel = second_least_used_channel;
+	data.third_least_used_channel = third_least_used_channel;
+	data.fourth_least_used_channel = fourth_least_used_channel;
+	
+	for (int scale = 0; scale < 4; scale++)
+	{
+		data.max_scale_peak_pos_val[scale][0] = max_scale_peak_pos_val[scale][0]; 
+		data.max_scale_peak_pos_val[scale][1] = max_scale_peak_pos_val[scale][1];
+	}
+	
+	data.major_scale_text = get_detected_scale_info(0);
+	data.minor_scale_text = get_detected_scale_info(1);
+
+	return data;
+}
+
 /** Get the combined MIDI events track */
 std::vector<MidiFileEvent> MidiFile::get_combined_track()
 { 
@@ -215,7 +247,7 @@ std::vector<MidiFileEvent> MidiFile::get_processed_and_combined_text_and_lyrics_
 /** Get the Scale detection cross correlation peak position (TODO: Automation) */
 int *MidiFile::get_scale_detect_cross_correlation_peak_pos() 
 { 
-	return &max_scale_peak_pos[0][0]; 
+	return &max_scale_peak_pos_val[0][0]; 
 }
 
 /** Parse the given Midi file, and return an instance of this MidiFile
@@ -231,6 +263,8 @@ int MidiFile::parse(std::vector<uint8_t> raw_data, bool auto_scl, bool auto_drm)
 {
 	std::string id_str;
 	int len;
+
+	total_pulses = 0;
 
 	std::vector<MidiFileTrack> tracks;
 	track_per_channel = false;
@@ -276,6 +310,9 @@ int MidiFile::parse(std::vector<uint8_t> raw_data, bool auto_scl, bool auto_drm)
 		{
 			total_pulses = last.get_start_time() + last.get_duration();
 		}
+
+		//fprintf(stderr, "Get length: total_pulses=%d, start_time=%d, duration=%d\n",
+		//		total_pulses, last.get_start_time(), last.get_duration());
 	}
 
 	/* If we only have one track with multiple channels, then treat
@@ -288,9 +325,201 @@ int MidiFile::parse(std::vector<uint8_t> raw_data, bool auto_scl, bool auto_drm)
 	}
 
 	/* Look for the file Musical-Scale and for a free MIDI channel */
-	if (auto_scl)
+	if (true /*auto_scl*/)
 	{
-		// TODO:
+		// Clear counters
+		for (int i = 0; i < 12; i++)
+		{
+			notes_conters[i] = 0;
+		}
+		
+		for (int i = 0; i < 16; i++)
+		{
+			channels_counters[i] = 0;
+		}
+		
+		for (int track_num = 0; track_num < all_events.size(); track_num++)
+		{
+			for (MidiFileEvent event : all_events.at(track_num))
+			{
+				if ((event.event_command == _MIDI_EVENT_NOTE_ON) 
+						&&  (event.velocity > 0) 
+						&& (event.channel != 9)) // Drum channel is 9, skip it for scale detection
+				{
+					int note_num = event.note_number % 12;
+					notes_conters[note_num]++;
+				}
+				if (event.event_command == _MIDI_EVENT_NOTE_ON && 
+					event.velocity > 0 && 
+					event.channel >= 0 && event.channel < 16)
+				{
+					channels_counters[event.channel]++;
+				}
+			}
+		}
+
+		// Look for the least used channel (except drum channel 9)
+		int min_channel_count = channels_counters[15];
+		least_used_channel = 15;
+		for (int ch = 14; ch >= 0; ch--)
+		{
+			// Look for the minimum excluding the percussion channel
+			if (ch != 9 && channels_counters[ch] <= min_channel_count)
+			{
+				min_channel_count = channels_counters[ch];
+				least_used_channel = ch;
+			}
+		}
+
+		// Look for the 2nd least used channel
+		min_channel_count = channels_counters[15];
+		second_least_used_channel = 15;
+		for (int ch = 14; ch >= 0; ch--)
+		{
+			// Look for the minimum excluding the percussion channel
+			if (ch != 9 && ch != least_used_channel && channels_counters[ch] <= min_channel_count)
+			{
+				min_channel_count = channels_counters[ch];
+				second_least_used_channel = ch;
+			}
+		}
+
+		// Look for the 3rd least used channel
+		min_channel_count = channels_counters[15];
+		third_least_used_channel = 15;
+		for (int ch = 14; ch >= 0; ch--)
+		{
+			// Look for the minimum excluding the percussion channel
+			if (ch != 9 && ch != least_used_channel && ch != second_least_used_channel && 
+				channels_counters[ch] <= min_channel_count)
+			{
+				min_channel_count = channels_counters[ch];
+				third_least_used_channel = ch;
+			}
+		}
+
+		// Look for the 4th least used channel
+		min_channel_count = channels_counters[15];
+		fourth_least_used_channel = 15;
+		for (int ch = 14; ch >= 0; ch--)
+		{
+			// Look for the minimum excluding the percussion channel
+			if (ch != 9 && ch != least_used_channel && ch != second_least_used_channel &&
+				ch != third_least_used_channel && channels_counters[ch] <= min_channel_count)
+			{
+				min_channel_count = channels_counters[ch];
+				fourth_least_used_channel = ch;
+			}
+		}
+
+		/* Find scale pattern (7 most used notes) */
+		// Clear the scale pattern
+		for (int i = 0; i < 12; i++)
+		{
+			scale_pattern[i] = 0;
+		}
+
+		// After counting note frequencies, find the most common note (likely the tonic)
+		int most_common_note = 0;
+		int max_count = notes_conters[0];
+
+		for (int n = 1; n < 12; n++)
+		{
+			if (notes_conters[n] > max_count)
+			{
+				max_count = notes_conters[n];
+				most_common_note = n;
+			}
+		}
+
+		// Find the 7 most used notes out of the 12 notes - this is the scale pattern
+		// Mark the 7 most used notes in the scale pattern by 1, and the rest by 0
+		for (int i = 0; i < 7; i++)
+		{
+			int max_note_count = notes_conters[0];
+			int max_note_num = 0;
+			for (int n = 1; n < 12; n++)
+			{
+				if (notes_conters[n] > max_note_count)
+				{
+					max_note_count = notes_conters[n];
+					max_note_num = n;
+				}
+			}
+			scale_pattern[max_note_num] = max_note_count;  // 1
+			notes_conters[max_note_num] = -1; // Mark this note as used
+		}
+		
+		// Calculate the Cross Correlation between a Track Scale Pattern
+        //   and the standard scale-paterns (Major, Minor: Natural, Melodic, Harmonic
+		
+		// Initialize
+		for (int s = 0; s < 4; s++)
+		{
+			for (int t = 0; t < 12; t++)
+			{
+				correlation_results[s][t] = 0;
+			}
+		}
+		
+		int scale_type;
+		int scale_note_count;
+
+		// Calculate the weigthed cross-correlation with the scales masks
+		for (scale_type = 0; scale_type < 4; scale_type++)
+		{
+			scale_note_count = 0;
+			for (int n = 0; n < 12; n++)
+			{
+				scale_note_count += scale_pattern[n];
+			}
+			
+			// For each scale type (Major, Minor: Natural, Melodic, Harmonic)
+			for (int t = 0; t < 12; t++)
+			{
+				// for each possible scale root (0-11)
+				int accumulator = 0;
+				for (int n = 0; n < 12; n++)
+				{
+					// For each note in the scale pattern
+					accumulator += scale_pattern[n] * scales_templates[scale_type][(12 - t + n)];
+				}
+
+				// Normalize by total note count
+				if (scale_note_count > 0)
+				{
+					correlation_results[scale_type][t] = (accumulator * 100) / scale_note_count;
+				}
+			}
+		}
+
+		// Boost the correlation for scales where the most common note is the tonic
+		for (scale_type = 0; scale_type < 4; scale_type++)
+		{
+			for (int t = 0; t < 12; t++)
+			{
+				// Add bonus if the root of this scale matches the most common note
+				if (t == most_common_note)
+				{
+					correlation_results[scale_type][t] += 20; // Boost by 20%
+				}
+			}
+		}
+
+		// Search for the maximum correlation result and its position (scale type and root)
+		for (scale_type = 0; scale_type < 4; scale_type++)
+		{
+			max_scale_peak_pos_val[scale_type][0] = correlation_results[scale_type][0]; // max
+			max_scale_peak_pos_val[scale_type][1] = 0; // location (root)
+			for (int t = 1; t < 12; t++)
+			{
+				if (correlation_results[scale_type][t] > max_scale_peak_pos_val[scale_type][0])
+				{
+					max_scale_peak_pos_val[scale_type][0] = correlation_results[scale_type][t];
+					max_scale_peak_pos_val[scale_type][1] = t;
+				}
+			}
+		}
 	}
 
 	/* Build an arpeggio track  */
@@ -355,25 +584,71 @@ int MidiFile::parse(std::vector<uint8_t> raw_data, bool auto_scl, bool auto_drm)
 	return 0;
 }
 
+string MidiFile::get_detected_scale_info(int scale_type)
+{
+	const char *major_scales_names[] = {"C", "Db (5b)", "D (2#)", "Eb (3b)", "E (4#)", "F (1b)", 
+									   "F#/Gb (6#/b)", "G (1#)", "Ab (4b)", "A (3#)", "Bb (2b)", "B (5#)"};
+	
+	const char *minor_scales_names[] = {"C (3b)", "C# (4#)", "D (1b)", "D#/Eb (6#/b)", "E (1#)", "F (4b)",
+									    "F# (3#)", "G (2b)", "G# (5#)", "A", "Bb (5b)", "B (2#)"};
+
+	// Scale type names
+	const char *scale_type_names[] = {"Major", "Minor"};
+
+	int root_note;
+	int correlation_value;
+
+
+	if (scale_type < 0)
+	{
+		scale_type = 0; // Default to Major if invalid
+	}
+	else if (scale_type > 0)
+	{
+		scale_type = 1; // If not major, default to natural minor
+	}
+
+	root_note = max_scale_peak_pos_val[scale_type][1];
+	correlation_value = max_scale_peak_pos_val[scale_type][0];
+
+	// Build result string
+	std::string result;
+	if (scale_type == 0)
+	{
+		// Major scale
+		result = std::string(major_scales_names[root_note]) + " " +
+				 std::string(scale_type_names[scale_type]) +
+				 " (correlation: " + std::to_string(correlation_value - 20) + "%)"; // Boosted by 20 when calc correlation
+	}
+	else
+	{
+		// Minor scale
+		result = std::string(minor_scales_names[root_note]) + " " +
+				 std::string(scale_type_names[scale_type]) +
+				 " (correlation: " + std::to_string(correlation_value - 20) + "%)";
+	}
+
+	return result;
+}
 
 /** Parse a single Midi track into a list of MidiEvents.
  * Entering this function, the file offset should be at the start of
  * the MTrk header.  Upon exiting, the file offset should be at the
  * start of the next MTrk header.
  */
-std::vector<MidiFileEvent> MidiFile::read_track(MidiFileReader *file, int track_num)
+std::vector<MidiFileEvent> MidiFile::read_track(MidiFileReader * file, int track_num)
 {
 	std::vector<MidiFileEvent> result; //(20);
 	int start_time = 0;
-	
+
 	std::string id = file->read_string(4);
-	
+
 	/* Every track starts with a MTrk header */
 	if (id != ("MTrk"))
 	{
-		throw new MidiFileException("Bad MTrk header", file->get_offset() - 4);
+		throw MidiFileException("Bad MTrk header", file->get_offset() - 4);
 	}
-	
+
 	int track_len = file->read_int();
 	int track_end = track_len + file->get_offset();
 
@@ -403,7 +678,7 @@ std::vector<MidiFileEvent> MidiFile::read_track(MidiFileReader *file, int track_
 		/* Get next event and update its start time based on the accumulated delta-times. */
 		MidiFileEvent mevent;
 		//= new MidiFileEvent();
-		//result.push_back(mevent);
+		// result.push_back(mevent);
 		mevent.delta_time = delta_time;
 		mevent.start_time = start_time;
 
@@ -498,18 +773,18 @@ std::vector<MidiFileEvent> MidiFile::read_track(MidiFileReader *file, int track_
 			mevent.metaevent = file->read_byte();
 			mevent.meta_length = file->read_var_len();
 			mevent.raw_values = file->read_bytes(mevent.meta_length);
-			
+
 			if (mevent.meta_length == 0)
 			{
 				mevent.meta_length = 1;
 			}
-			
+
 			if (mevent.metaevent == _MIDI_META_EVENT_TIME_SIGNATURE)
 			{
 				if (mevent.meta_length < 2)
 				{
-					throw new MidiFileException(
-						"Meta Event Time Signature len == " + 
+					throw MidiFileException(
+						"Meta Event Time Signature len == " +
 							std::to_string(mevent.meta_length) + " != 4",
 						file->get_offset());
 				}
@@ -523,15 +798,15 @@ std::vector<MidiFileEvent> MidiFile::read_track(MidiFileReader *file, int track_
 			{
 				if (mevent.meta_length != 3)
 				{
-					throw new MidiFileException(
-						"Meta Event Tempo len == " + 
+					throw MidiFileException(
+						"Meta Event Tempo len == " +
 							std::to_string(mevent.meta_length) +
 							" != 3",
 						file->get_offset());
 				}
 				mevent.tempo = ((mevent.raw_values[0] & 0xFF) << 16) |
-								((mevent.raw_values[1] & 0xFF) << 8) |
-								(mevent.raw_values[2] & 0xFF);
+							   ((mevent.raw_values[1] & 0xFF) << 8) |
+							   (mevent.raw_values[2] & 0xFF);
 			}
 			else if (mevent.metaevent == _MIDI_META_EVENT_END_OF_TRACK)
 			{
@@ -540,13 +815,13 @@ std::vector<MidiFileEvent> MidiFile::read_track(MidiFileReader *file, int track_
 		}
 		else
 		{
-			throw new MidiFileException("Unknown event " + 
+			throw MidiFileException("Unknown event " +
 										std::to_string(mevent.event_command),
-										file->get_offset() - 1);
+									file->get_offset() - 1);
 		}
-		
+
 		result.push_back(mevent);
-		
+
 		/* Recover last valid running status value */
 		event_flag = last_valid_running_status;
 	}
@@ -787,7 +1062,7 @@ void MidiFile::check_start_times(std::vector<MidiFileTrack> tracks)
 		{
 			if (note.get_start_time() < prevtime)
 			{
-				throw new MidiFileException("Internal parsing error", 0);
+				throw MidiFileException("Internal parsing error", 0);
 			}
 			
 			prevtime = note.get_start_time();

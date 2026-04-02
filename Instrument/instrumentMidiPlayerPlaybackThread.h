@@ -5,7 +5,8 @@
 *	@version	1.1
 *			1. Added support for going forward and backward in the file.
 *			2. Added suport for loopback playing control.
-*			3. Added support for playback volume control.
+*			3. Added support for playback volume amd speed control.
+*			4. Added support for retrieving midi file meta data.
 *
 *	@brief		MIDI files player.
 *
@@ -40,8 +41,9 @@ class MidiPlaybackThread
 
 	~MidiPlaybackThread();
 
-	void set_playback_speed(float spd);
-	
+	void set_playback_speed(int spd);
+	int get_playback_speed();
+
 	void set_playback_volume(int vol);
 	int get_playback_volume();
 
@@ -60,8 +62,15 @@ class MidiPlaybackThread
 	static bool is_player_playing();
 
 	void set_pulses_per_ms(double ppm);
+	
+	midi_file_meta_data_t get_file_metadata();
+
+	// Method to ensure threads are fully stopped
+	static void wait_for_threads_to_exit();
 
   private:
+	// Mutex for protecting all static state
+	static pthread_mutex_t state_mutex;
 	/* True when Playback thread is running */
 	static bool playback_thread_is_running;
 	/* True when Update thread is running */

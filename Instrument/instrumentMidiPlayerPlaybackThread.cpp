@@ -5,7 +5,8 @@
 *	@version	1.1
 *			1. Added support for going forward and backward in the file.
 *			2. Added suport for loopback playing control
-*			3. Added support for playback volume control.
+*			3. Added support for playback volume and speed control.
+*			4. Added support for retrieving midi file meta data.
 *
 *	@brief		MIDI files player.
 *
@@ -58,6 +59,7 @@ int MidiPlaybackThread::remaining_file_play_sec = 0;
 int MidiPlaybackThread::remaining_file_play_min = 0;
 bool MidiPlaybackThread::paused = false;
 bool MidiPlaybackThread::seek_in_progress = false;
+pthread_mutex_t MidiPlaybackThread::state_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 func_ptr_void_void_t MidiPlaybackThread::clear_all_playing_notes_callback_ptr = NULL;
 func_ptr_void_uint8_t_uint8_t MidiPlaybackThread::midi_change_program_callback_ptr = NULL;
@@ -123,9 +125,61 @@ void MidiPlaybackThread::set_pulses_per_ms(double ppm)
 	pulses_per_msec = ppm;
 }
 
-void MidiPlaybackThread::set_playback_speed(float spd)
+midi_file_meta_data_t MidiPlaybackThread::get_file_metadata()
 {
-	speed = spd	;
+	if (midi_file != NULL)
+	{
+		return midi_file->get_file_metadata();
+	}
+	else
+	{
+		midi_file_meta_data_t empty_data;
+		return empty_data;
+	}
+}
+
+void MidiPlaybackThread::set_playback_speed(int spd)
+{
+	float new_speed = spd / 100.0;
+
+	if (new_speed < 0.5f)
+	{
+		new_speed = 0.5f;
+	}
+	else if (new_speed > 1.5f)
+	{
+		new_speed = 1.5f;
+	}
+
+	pthread_mutex_lock(&state_mutex); // ← LOCK ENTIRE OPERATION
+
+	// If not playing, just set speed and return
+	if (player_state != _MIDI_PLAYER_STATE_PLAYING)
+	{
+		speed = new_speed;
+		pthread_mutex_unlock(&state_mutex);
+		return;
+	}
+
+	// If playing, just update speed and timing in-place
+	// No need to pause/resume
+	long current_time_ms = get_current_time_ms();
+	long target_elapsed_ms = (long)(current_pulse_time / (pulses_per_msec * speed));
+
+	// Update speed
+	speed = new_speed;
+
+	// Recalculate start time for new speed
+	start_playing_time_ms = current_time_ms -
+							(long)(current_pulse_time / (pulses_per_msec * speed)) -
+							pause_duration_time_msec;
+
+	pthread_mutex_unlock(&state_mutex);
+}
+
+int MidiPlaybackThread::get_playback_speed()
+{
+	return (int)(speed * 100);
 }
 
 void MidiPlaybackThread::set_playback_volume(int vol)
@@ -365,6 +419,12 @@ void MidiPlaybackThread::go_forward()
 	next_played_event_index = target_index;
 	current_pulse_time = target_pulse_time;
 	prev_pulse_time = target_pulse_time;
+
+	fprintf(stderr, "FORWARD: target_pulse=%f, total_pulses=%d, index=%d, total_events=%zu\n",
+			target_pulse_time,
+			midi_file->get_total_pulses(),
+			target_index,
+			file_events.size());
     
 	// Adjust timing references
 	long current_time_ms = get_current_time_ms();
@@ -424,12 +484,18 @@ void MidiPlaybackThread::do_play()
  *  and clearing the state. */
 void MidiPlaybackThread::do_stop()
 {
+	pthread_mutex_lock(&state_mutex);
 	player_state = _MIDI_PLAYER_STATE_STOPPED;
 	start_pulse_time = 0;
 	current_pulse_time = 0;
 	prev_pulse_time = 0;
+	pthread_mutex_unlock(&state_mutex);
+
 	stop_play_midi_file_events();
-	stop_update_thread(); // TODO: ?
+	stop_update_thread();
+
+	// Wait for threads to actually exit
+	wait_for_threads_to_exit();
 }
 
 /** Performs the actual start of the MIDI events playback  */
@@ -477,9 +543,13 @@ void MidiPlaybackThread::start_playback_thread()
 	int ret, err, policy;
 	pthread_attr_t tattr;
 	struct sched_param params;
-	// Verify that the playback thread is not allready running
+
+	pthread_mutex_lock(&state_mutex);
+
+	// Verify that the playback thread is not already running
 	if (playback_thread_is_running)
 	{
+		pthread_mutex_unlock(&state_mutex);
 		return;
 	}
 
@@ -494,24 +564,38 @@ void MidiPlaybackThread::start_playback_thread()
 	ret = pthread_attr_setschedpolicy(&tattr, policy);
 	// set the new scheduling param
 	ret = pthread_attr_setschedparam(&tattr, &params);
-	//	err = errno; // for debug
-	//	ret = pthread_setschedparam(updatThreadId, SCHED_RR, &params);
+
 	if (ret != 0)
 	{
 		// Print the error
 		fprintf(stderr, "Unsuccessful in setting MIDI Playback thread realtime prio\n");
 	}
-	// Set the control flag
+
+	// Set the control flag BEFORE creating thread
 	playback_thread_is_running = true;
+
 	// Create and start the thread
 	ret = pthread_create(&playback_thread_id, &tattr, playback_thread, (void *)100);
+
+	if (ret != 0)
+	{
+		fprintf(stderr, "Failed to create playback thread: %d\n", ret);
+		playback_thread_is_running = false;
+		pthread_mutex_unlock(&state_mutex);
+		return;
+	}
+
 	char thname[] = {"midi_playback_thread"};
 	pthread_setname_np(playback_thread_id, &thname[0]);
+
+	pthread_mutex_unlock(&state_mutex);
 }
 
 void MidiPlaybackThread::stop_playback_thread()
 {
+	pthread_mutex_lock(&state_mutex);
 	playback_thread_is_running = false;
+	pthread_mutex_unlock(&state_mutex);
 }
 
 void *MidiPlaybackThread::playback_thread(void *thread_id)
@@ -579,7 +663,7 @@ void *MidiPlaybackThread::playback_thread(void *thread_id)
 				}
 				/* Calculate elapsed playing time from start-playing time (ref as zero) */
 				actual_play_time_msec = (long)(get_current_time_ms() - start_playing_time_ms - pause_duration_time_msec);
-				current_pulse_time = actual_play_time_msec * pulses_per_msec;
+				current_pulse_time = actual_play_time_msec * pulses_per_msec * speed;
 				/* Is it time to send next MIDI event(s) */
 				if (current_pulse_time >= events.at(0).start_time)
 				{
@@ -624,6 +708,7 @@ void *MidiPlaybackThread::playback_thread(void *thread_id)
 			{
 				/* Not in loop mode */
 				stop_play_midi_file_events();
+				player_state = _MIDI_PLAYER_STATE_STOPPED;
 				InstrumentMidiPlayer::get_instrument_midi_player_instance()->send_all_notes_off_command();
 				InstrumentMidiPlayer::get_instrument_midi_player_instance()->send_all_sounds_off_command();
 			}
@@ -658,9 +743,13 @@ void MidiPlaybackThread::start_update_thread()
 	int ret, err, policy;
 	pthread_attr_t tattr;
 	struct sched_param params;
-	// Verify that the update thread is not allready running
+
+	pthread_mutex_lock(&state_mutex);
+
+	// Verify that the update thread is not already running
 	if (update_thread_is_running)
 	{
+		pthread_mutex_unlock(&state_mutex);
 		return;
 	}
 
@@ -675,24 +764,37 @@ void MidiPlaybackThread::start_update_thread()
 	ret = pthread_attr_setschedpolicy(&tattr, policy);
 	// set the new scheduling param
 	ret = pthread_attr_setschedparam(&tattr, &params);
-	//	err = errno; // for debug
-	//	ret = pthread_setschedparam(updatThreadId, SCHED_RR, &params);
+
 	if (ret != 0)
 	{
 		// Print the error
 		fprintf(stderr, "Unsuccessful in setting MIDI Playback Update thread realtime prio\n");
 	}
-	// Set the control flag
+
+	// Set the control flag BEFORE creating thread
 	update_thread_is_running = true;
+
 	// Create and start the thread
 	ret = pthread_create(&update_thread_id, &tattr, update_thread, (void *)100);
+
+	if (ret != 0)
+	{
+		fprintf(stderr, "Failed to create update thread: %d\n", ret);
+		update_thread_is_running = false;
+		pthread_mutex_unlock(&state_mutex);
+		return;
+	}
+
 	char thname[] = {"midi_playback_update_thread"};
 	pthread_setname_np(update_thread_id, &thname[0]);
-}
 
+	pthread_mutex_unlock(&state_mutex);
+}
 void MidiPlaybackThread::stop_update_thread()
 {
+	pthread_mutex_lock(&state_mutex);
 	update_thread_is_running = false;
+	pthread_mutex_unlock(&state_mutex);
 }
 
 bool MidiPlaybackThread::is_update_thread_running()
@@ -700,119 +802,185 @@ bool MidiPlaybackThread::is_update_thread_running()
 	return update_thread_is_running;
 }
 
+void MidiPlaybackThread::wait_for_threads_to_exit()
+{
+	pthread_t playback_tid = 0;
+	pthread_t update_tid = 0;
+	bool wait_playback = false;
+	bool wait_update = false;
+
+	pthread_mutex_lock(&state_mutex);
+
+	if (playback_thread_is_running && playback_thread_id != 0)
+	{
+		playback_tid = playback_thread_id;
+		wait_playback = true;
+	}
+
+	if (update_thread_is_running && update_thread_id != 0)
+	{
+		update_tid = update_thread_id;
+		wait_update = true;
+	}
+
+	pthread_mutex_unlock(&state_mutex);
+
+	// Wait outside the mutex to avoid deadlock
+	if (wait_playback)
+	{
+		pthread_join(playback_tid, NULL);
+	}
+
+	if (wait_update)
+	{
+		pthread_join(update_tid, NULL);
+	}
+}
+
 void *MidiPlaybackThread::update_thread(void *thread_id)
 {
-	/* The periodic update.
-     *  If the MIDI file is still playing, update the current_pulse_time.
-     *  If a stop or pause has been initiated (by someone clicking
-     *  the stop or pause button), than stop the timer.
-     */
 	long lmsec = 0;
+	long local_start_time;
+	long local_pause_duration;
 
 	while (update_thread_is_running)
 	{
+		pthread_mutex_lock(&state_mutex);
 
 		if (midi_file == NULL)
 		{
 			player_state = _MIDI_PLAYER_STATE_STOPPED;
 			update_thread_is_running = false;
+			pthread_mutex_unlock(&state_mutex);
 			return 0;
 		}
-		else
+
+		// Copy timing values while holding lock
+		local_start_time = start_playing_time_ms;
+		local_pause_duration = pause_duration_time_msec;
+		int local_player_state = player_state;
+		double local_current_pulse = current_pulse_time;
+
+		pthread_mutex_unlock(&state_mutex);
+
+		lmsec = (long)(get_current_time_ms() - (local_start_time + local_pause_duration));
+
+		switch (local_player_state)
 		{
-			lmsec = (long)(get_current_time_ms() - (start_playing_time_ms + pause_duration_time_msec));
+		case _MIDI_PLAYER_STATE_STOPPED:
+		case _MIDI_PLAYER_STATE_PAUSED:
+			break;
+
+		case _MIDI_PLAYER_STATE_INIT_STOP:
+			break;
+
+		case _MIDI_PLAYER_STATE_PLAYING: {
+			pthread_mutex_lock(&state_mutex);
+
+			//pulses_per_msec = pulses_per_msec * speed; // should not be updated every event
+			prev_pulse_time = current_pulse_time;
+
+			file_position = (int)(current_pulse_time / midi_file->get_total_pulses() * 100);
+
+			remaining_file_play_msec = (int)(midi_file->get_total_pulses() / (pulses_per_msec * speed));
+
+			//static int debug_count = 0;
+			//if (debug_count++ % 10 == 0) // Print every 10th time
+			//{
+			//	fprintf(stderr, "DEBUG: total_pulses=%d, ppm=%f, speed=%f, total_ms=%d (%d:%02d)\n",
+			//			midi_file->get_total_pulses(),
+			//			pulses_per_msec,
+			//			speed,
+			//			remaining_file_play_msec,
+			//			remaining_file_play_msec / 60000,
+			//			(remaining_file_play_msec / 1000) % 60);
+			//}
+
+			pthread_mutex_unlock(&state_mutex);
+
+			if (midi_player_potision_update_callback_ptr != NULL)
+			{
+				midi_player_potision_update_callback_ptr(file_position);
+			}
+
+			// Calculate times (using local copy of lmsec to avoid corruption)
+			file_total_playing_time_seconds = (int)((remaining_file_play_msec / 1000) % 60);
+			file_total_playing_time_minutes = (int)((remaining_file_play_msec / 1000) / 60);
+
+			if (midi_player_file_total_time_update_callback_ptr != NULL)
+			{
+				midi_player_file_total_time_update_callback_ptr(file_total_playing_time_minutes, file_total_playing_time_seconds);
+			}
+
+			//fprintf(stderr, "Playing Time: %i : %i\n", file_playing_time_minutes, file_playing_time_seconds);
+			
+			/* Update Playing time */
+			file_playing_time_seconds = (int)((lmsec / 1000) % 60);
+			file_playing_time_minutes = (int)((lmsec / 1000) / 60);
+
+			if (midi_player_playing_time_update_callback_ptr != NULL)
+			{
+				midi_player_playing_time_update_callback_ptr(file_playing_time_minutes, file_playing_time_seconds);
+			}
+
+			//pthread_mutex_lock(&state_mutex);
+			//remaining_file_play_msec = (int)(midi_file->get_total_pulses() / (pulses_per_msec * speed));
+			//pthread_mutex_unlock(&state_mutex);
+
+			remaining_file_play_sec = (int)(((remaining_file_play_msec - lmsec) / 1000) % 60);
+			remaining_file_play_min = (int)(((remaining_file_play_msec - lmsec) / 1000) / 60);
+
+			if (midi_player_file_remaining_time_update_callback_ptr != NULL)
+			{
+				midi_player_file_remaining_time_update_callback_ptr(remaining_file_play_min, remaining_file_play_sec);
+			}
+
+			//file_total_playing_time_seconds = (int)((remaining_file_play_msec / 1000) % 60);
+			//file_total_playing_time_minutes = (int)(((remaining_file_play_msec / 1000) - file_total_playing_time_seconds) / 60);
+			//
+			//if (midi_player_file_total_time_update_callback_ptr != NULL)
+			//{
+			//	midi_player_file_total_time_update_callback_ptr(file_total_playing_time_minutes, file_total_playing_time_seconds);
+			//}
+
+			pthread_mutex_lock(&state_mutex);
+
+			if (current_pulse_time > midi_file->get_total_pulses())
+			{
+				if (auto_loop_back_on)
+				{
+					pthread_mutex_unlock(&state_mutex);
+					stop_play_midi_file_events();
+					do_play();
+					pthread_mutex_lock(&state_mutex);
+				}
+				else
+				{
+					player_state = _MIDI_PLAYER_STATE_INIT_STOP;
+					pthread_mutex_unlock(&state_mutex);
+					stop_playing();
+					break;
+				}
+			}
+
+			pthread_mutex_unlock(&state_mutex);
+			break;
 		}
 
-		switch (player_state)
-		{
-			case _MIDI_PLAYER_STATE_STOPPED:
-			case _MIDI_PLAYER_STATE_PAUSED:
-				/* This case should never happen */
-				break;
+		case _MIDI_PLAYER_STATE_INIT_PAUSE: {
+			pthread_mutex_lock(&state_mutex);
+			pause_start_time_msec = get_current_time_ms();
+			prev_pulse_time = current_pulse_time;
+			paused = true;
+			player_state = _MIDI_PLAYER_STATE_PAUSED;
+			pthread_mutex_unlock(&state_mutex);
 
-			case _MIDI_PLAYER_STATE_INIT_STOP:
-				break;
-
-			case _MIDI_PLAYER_STATE_PLAYING:
-				/* Update progress */
-				pulses_per_msec = pulses_per_msec * speed;
-				prev_pulse_time = current_pulse_time;
-
-				/* Update progress bar */
-				file_position = (int)(current_pulse_time / midi_file->get_total_pulses() * 100);
-
-				if (midi_player_potision_update_callback_ptr != NULL)
-				{
-					midi_player_potision_update_callback_ptr(file_position);
-				}
-
-				/* Update Playing time */
-				file_playing_time_seconds = ((int)lmsec / 1000) % 60;
-				file_playing_time_minutes = (((int)lmsec / 1000) - file_playing_time_seconds) / 60;
-			
-				printf("Playing Time: %i : %i\n", file_playing_time_minutes, file_playing_time_seconds);
-			
-				if (midi_player_playing_time_update_callback_ptr != NULL)
-				{
-					midi_player_playing_time_update_callback_ptr(file_playing_time_minutes, file_playing_time_seconds);
-				}
-				/* Update Remaining Playing time */
-				remaining_file_play_msec = (int)(midi_file->get_total_pulses() / pulses_per_msec);
-				remaining_file_play_sec = (int)(((remaining_file_play_msec - lmsec) / 1000) % 60);
-				remaining_file_play_min = (int)((((remaining_file_play_msec - lmsec) / 1000) - remaining_file_play_sec) / 60);
-
-				if (midi_player_file_remaining_time_update_callback_ptr != NULL)
-				{
-					midi_player_file_remaining_time_update_callback_ptr(remaining_file_play_min, remaining_file_play_sec);
-				}
-				/* Update Total  Playing time */
-
-				file_total_playing_time_seconds = (int)((remaining_file_play_msec / 1000) % 60);
-				file_total_playing_time_minutes = (int)(((remaining_file_play_msec / 1000) - file_total_playing_time_seconds) / 60);
-
-				if (midi_player_file_total_time_update_callback_ptr != NULL)
-				{
-					midi_player_file_total_time_update_callback_ptr(file_total_playing_time_minutes, file_total_playing_time_seconds);
-				}
-				
-				/* Stop or loop if we've reached the end of the song */
-
-				if (current_pulse_time > midi_file->get_total_pulses())
-				{
-					/* Enf of file */
-					if (auto_loop_back_on)
-					{
-						stop_play_midi_file_events();
-						do_play();
-					}
-					else
-					{
-						player_state = _MIDI_PLAYER_STATE_INIT_STOP;
-						stop_playing();
-						break;
-					}
-				}
-			
-				break;
-
-			case _MIDI_PLAYER_STATE_INIT_PAUSE:
-
-				pause_start_time_msec = get_current_time_ms();
-
-				/* Player sends MIDI commands out through BT serial service */
-				// TODO:  stop playing MIDI events
-				stop_play_midi_file_events();
-
-				prev_pulse_time = current_pulse_time;
-
-				paused = true;
-				player_state = _MIDI_PLAYER_STATE_PAUSED;
-
-				break;
+			stop_play_midi_file_events();
+			break;
+		}
 		}
 
 		usleep(100000);
-		//printf("Update thread timer\n");
 	}
 
 	return 0;

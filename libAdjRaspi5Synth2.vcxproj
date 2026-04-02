@@ -305,6 +305,7 @@
     <ClInclude Include="LibAPI\midi.h" />
     <ClInclude Include="LibAPI\modSynthAPI.h" />
     <ClInclude Include="LibAPI\patch.h" />
+    <ClInclude Include="LibAPI\Scales.h" />
     <ClInclude Include="LibAPI\settingsApi.h" />
     <ClInclude Include="LibAPI\synthesizer.h" />
     <ClInclude Include="LibAPI\types.h" />

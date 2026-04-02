@@ -7,6 +7,8 @@
 *					   a min-heap (priority queue) to merge events from all 
 *					   tracks in O(n log k) time, where n is the total number 
 *					   of events and k is the number of tracks (GitHub Copilot).
+*					2. Added support for channels and notes counting and auto scale detection.
+*					3. Added support for retrieving midi file meta data.
 *
 *	@brief		MIDI files handling.
 *
@@ -189,6 +191,8 @@
 #include <list>
 #include <vector>
 
+#include "../LibAPI/midi.h"
+
 #include "midiFileTrack.h"
 #include "midiFileEvent.h"
 #include "midiFileTimeSignature.h"
@@ -200,6 +204,8 @@ typedef struct parser_args
 	bool auto_scl;
 	bool auto_drm;
 } parser_args_t;
+
+
 
 class MidiFile
 {
@@ -220,6 +226,8 @@ class MidiFile
 	MidiFileTimeSignature *get_time_signature();
 	std::string get_file_path();
 	int get_total_pulses();
+	
+	midi_file_meta_data_t get_file_metadata();
 
 	void update_control_change(std::vector<MidiFileEvent> new_events, MidiFileEvent change_event);
 	std::vector<std::vector<MidiFileEvent>> start_at_pause_time(vector<vector<MidiFileEvent>> list,
@@ -228,6 +236,8 @@ class MidiFile
 	int open_midi_file(std::string path, std::vector<uint8_t> *data);
 
 	int parse(std::vector<uint8_t> raw_data, bool auto_scl = false, bool auto_drm = false);
+
+	string get_detected_scale_info(int scale_type);
 
   private:
 	std::string event_name_string(int midi_event_code);
@@ -283,13 +293,17 @@ class MidiFile
 	/** The 4th lest used channel */
 	int fourth_least_used_channel = 20;
 	/** Scale-pattern: the 7 most used notes */
-	int scale_pattern[7];
+	int scale_pattern[12];
 	/** Peak value of Scale pattern cross correlation */
 	int max_scale_peak_val;
+	
+	int correlation_results[4][12];	
 	/** Peaks location of Scale pattern cross correlation */
-	int max_scale_peak_pos[4][7];
+	int max_scale_peak_pos_val[4][2];
 	/* Detected scale type (TODO:) */
 	int scale_type;
+	
+	midi_file_meta_data_t file_meta_data;
 
 	// Arpeggio processor
 	//Arpeggios mMidiArpeggios;

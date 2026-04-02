@@ -7,7 +7,7 @@
  *					2. Added MIDI mixer Pan modulation LFO level and selection control definitions
  *					3. Added MIDI mixer Send control definition
  *					4. Added MIDI Player Backward and Forward control and auto loop back playing control.
- *					5. Added MIDI Player playback volume control
+ *					5. Added MIDI Player playback volume and speedcontrol
  *
  *	@brief		Provides the MIDI related API
  *
@@ -212,6 +212,20 @@ static std::string midi_instruments_names[129] = {
 	"Percussion"};
 /* End Instruments */
 
+typedef struct midi_file_meta_data
+{
+	string file_name;
+	int channels_counters[16];
+	int least_used_channel;
+	int second_least_used_channel;
+	int third_least_used_channel;
+	int fourth_least_used_channel;
+	// Cross correlations results
+	int max_scale_peak_pos_val[4][2];
+	string major_scale_text;
+	string minor_scale_text;
+} midi_file_meta_data_t;
+
 /**
 *	@brief	Set the active MIDI channel of aninstrument
 *	@param	string		instrument_name		instrument id string
@@ -247,6 +261,10 @@ bool mod_synth_midi_player_get_auto_loop_back();
 void mod_synth_midi_player_set_playback_volume(int vol);
 int mod_synth_midi_player_get_playback_volume();
 
+void mod_synth_midi_player_set_playback_speed(int spd);
+int mod_synth_midi_player_get_playback_speed();
+
+midi_file_meta_data_t mod_synth_midi_player_get_file_metadata();
 
 /**
 *	@brief	Set a MIDI mixer channel volume

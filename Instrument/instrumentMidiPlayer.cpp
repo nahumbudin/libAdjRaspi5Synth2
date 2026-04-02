@@ -5,7 +5,8 @@
 *	@version	1.1
 *			1. Added support for going forward and backward in the file.
 *			2. Added suport for loopback playing control.
-*			3. Added support for playback volume control.
+*			3. Added support for playback volume and speed control.
+*			4. Added support for retrieving midi file meta data.
 *
 *	@brief		MIDI files player.
 *
@@ -42,7 +43,7 @@ func_ptr_void_int_int_t InstrumentMidiPlayer::midi_player_file_remaining_time_up
 
 InstrumentMidiPlayer *InstrumentMidiPlayer::instrument_midi_player_instance = NULL;
 
-void send_midi_commands_wrapper(std::vector<MidiFileEvent> events, int vol){
+void send_midi_commands_wrapper(const std::vector<MidiFileEvent> events, int vol){
 	
 	InstrumentMidiPlayer::get_instrument_midi_player_instance()->send_midi_commands(events, vol);
 }
@@ -79,7 +80,8 @@ void InstrumentMidiPlayer::terminate()
 			midi_playback_threads->stop_playing();
 		}
 
-		//delete midi_playback_thread;
+		// Wait for threads to fully exit before deleting
+		MidiPlaybackThread::wait_for_threads_to_exit();
 	}
 }
 
@@ -140,6 +142,8 @@ int InstrumentMidiPlayer::init_new_file(std::string path, std::string title)
 
 	/* Terminate all running playback threads. */
 	terminate();
+	// Ensure threads have fully exited
+	MidiPlaybackThread::wait_for_threads_to_exit();
 
 	if (!file_data_bytes.empty() && file_data_bytes.size() >= 6 && has_midi_header(file_data_bytes))
 	{
@@ -242,6 +246,20 @@ int InstrumentMidiPlayer::get_playback_volume()
 	return midi_playback_threads->get_playback_volume();
 }
 
+void InstrumentMidiPlayer::set_playback_speed(int spd)
+{
+	midi_playback_threads->set_playback_speed(spd);
+}
+int InstrumentMidiPlayer::get_playback_speed()
+{
+	return midi_playback_threads->get_playback_speed();
+}
+
+midi_file_meta_data_t InstrumentMidiPlayer::get_file_metadata()
+{
+	return midi_playback_threads->get_file_metadata();
+}
+
 /* Set all played on notes */
 void InstrumentMidiPlayer::set_off_all_on_notes()
 {
@@ -306,7 +324,7 @@ void InstrumentMidiPlayer::send_all_sounds_off_command()
 	}
 }
 
-void InstrumentMidiPlayer::send_midi_commands(std::vector<MidiFileEvent> events, int vol)
+void InstrumentMidiPlayer::send_midi_commands(const std::vector<MidiFileEvent> events, int vol)
 {
 	int status;
 	uint8_t bytes[512] = {0};

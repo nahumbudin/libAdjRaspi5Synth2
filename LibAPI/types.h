@@ -123,7 +123,7 @@ typedef void (*func_ptr_void_int_int_t)(int, int);
 typedef void (*func_ptr_void_int_bool_t)(int, bool);
 
 /* void foo(std::vector<MidiFileEvent>, int) function pointer */
-typedef void (*func_ptr_void_midi_events_vector_int)(std::vector<MidiFileEvent>, int);
+typedef void (*func_ptr_void_midi_events_vector_int)(const std::vector<MidiFileEvent>, int);
 
 /* void foo(std::vector<int>) function pointer */
 typedef void (*func_ptr_void_int_vector_t)(std::vector<int>);

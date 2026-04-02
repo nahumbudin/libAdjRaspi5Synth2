@@ -181,6 +181,9 @@
     <Filter Include="Source files\Insrtument\Control Box">
       <UniqueIdentifier>{2090f1bb-3456-475f-b6b3-79acf57a60ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\Music">
+      <UniqueIdentifier>{0eab7f1c-bed3-4686-b23b-79620f7eaa2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjSynth\synthKeyboard.cpp">
@@ -1027,6 +1030,9 @@
     </ClInclude>
     <ClInclude Include="Audio\audioMasterLimiter.h">
       <Filter>Header files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="LibAPI\Scales.h">
+      <Filter>Header files\LibApi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -150,7 +150,7 @@ void MidiFileTrack::add_note(MidiFileNote note)
  */
 void MidiFileTrack::note_off_event(int chan, int note_num, int end_t)
 {
-	for (MidiFileNote note : notes)
+	for (MidiFileNote &note : notes)
 	{
 		if (note.get_channel() == chan &&
 			note.get_note_number() == note_num &&

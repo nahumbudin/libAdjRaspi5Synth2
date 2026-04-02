@@ -10,7 +10,7 @@
 *					4. Added MIDI mixer Pan modulation LFO level and selection control definitions
  *					5. Added MIDI mixer Send control definition
  *					6. Added MIDI Player Backward and Forward control and auto loop back playing control.
- *					7. Added MIDI Player playback volume control
+ *					7. Added MIDI Player playback volume and speed control
 *
 *	History:
 *			Ver1.0  8-May-2024 Initial
@@ -38,6 +38,7 @@
 #include "utils\log.h"
 #include <stdio.h>
 #include <string>
+#include <mutex>
 
 #include "modSynth.h"
 #include "./Settings/settings.h"
@@ -57,8 +58,7 @@
 
 #include "libAdjRaspi5Synth2.h"
 
-
-
+static std::mutex pad_spectrum_mutex;
 
 /******************************************************************
  *********************** ModSynth Management API **************************
@@ -938,22 +938,30 @@ void mod_synth_callback_set_osc_1_unison_mode(int mode)
 }
 
 float *mod_synth_get_pad_base_harmony_profile() 
-{ 
+{
+	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
+	
 	return AdjSynth::get_instance()->synth_program[mod_synth_get_active_sketch()]->synth_pad_creator->get_profile_data(); 
 }
 
 int mod_synth_get_pad_base_harmony_profile_size() 
 {
+	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
+	
 	return AdjSynth::get_instance()->synth_program[mod_synth_get_active_sketch()]->synth_pad_creator->get_profile_size();
 }
 
 float *mod_synth_get_pad_spectrum()  
-{ 
+{
+	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
+	
 	return AdjSynth::get_instance()->synth_program[mod_synth_get_active_sketch()]->synth_pad_creator->get_spectrum_data();
 }
 
 int mod_synth_get_pad_spectrum_size() 
-{ 
+{
+	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
+	
 	return AdjSynth::get_instance()->synth_program[mod_synth_get_active_sketch()]->synth_pad_creator->get_spectrum_size();
 }
 
@@ -1577,6 +1585,23 @@ int mod_synth_midi_player_get_playback_volume()
 {
 	return mod_synthesizer->midi_player->get_playback_volume();
 }
+
+void mod_synth_midi_player_set_playback_speed(int spd)
+{
+	return mod_synthesizer->midi_player->set_playback_speed(spd);
+}
+
+int mod_synth_midi_player_get_playback_speed()
+{
+	return mod_synthesizer->midi_player->get_playback_speed();
+}
+
+midi_file_meta_data_t mod_synth_midi_player_get_file_metadata()
+{
+	return mod_synthesizer->midi_player->get_file_metadata();
+}
+
+
 
 void mod_synth_register_midi_player_potision_update_callback(func_ptr_void_int_t ptr)
 {

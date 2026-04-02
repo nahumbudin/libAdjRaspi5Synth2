@@ -1,24 +1,27 @@
 /**
-*	@file		midiStream.cpp
-*	@author		Nahum Budin
-*	@date		11-May-2024
-*	@version	1.2
-*					1. Code refactoring and notaion.
-*					2. Adding more AUX controls SYSEX messages
-*
-*	@brief		Handle midi streams and definitions
-*
-*  Based on Music Open Lab Library.
-*	Copyright AdjHeart Nahum Budin May 2017 and
-*	Teensyduino Core Library AudioStream Audio-blocks concept
-*
-*	History:\n
-*
-*	version 1.0		13-Oct-2019:
-*		First version
-*		1. Added mutex to control blocks allocation operations.
-*	version 1.1		3-Feb-2021
-*		1. Code refactoring and notaion.
+ *	@file		midiStream.cpp
+ *	@author		Nahum Budin
+ *	@date		13-Oct-2025
+ *	@version	1.3
+ *					1. Add all notes/sounds off commands.
+ *					2. Added mutexes to update_all and thread creation.
+ *
+ *	@brief		Handle midi streams and definitions
+ *
+ *  Based on Music Open Lab Library.
+ *	Copyright AdjHeart Nahum Budin May 2017 and
+ *	Teensyduino Core Library AudioStream Audio-blocks concept
+ *
+ *	History:\n
+ *
+ *
+ *		1. Added mutex to control blocks allocation operations.
+ *	version 1.1		3-Feb-2021	 Code refactoring and notaion.
+ *	version 1.0		13-Oct-2019: First version
+ *	version	1.2
+ *					1. Code refactoring and notaion.
+ *					2. Adding more AUX controls SYSEX messages
+ *					3. Added mutexes to update_all and thread creation.
 *
 */
 
@@ -43,6 +46,9 @@ MidiStream* MidiStream::first_update[_MAX_STAGES_NUM];
 bool MidiStream::thread_is_running = false;
 bool MidiStream::update_in_progress = false;
 pthread_t MidiStream::midi_thread;
+
+std::mutex MidiStream::update_all_mutex;
+std::mutex MidiStream::thread_creation_mutex;
 
 std::mutex MidiStream::allocations_manage_mutex;
 
@@ -166,6 +172,50 @@ MidiStream::MidiStream(uint8_t ninput, midi_stream_mssg_block_t** iqueue, uint8_
 	next_update[stage_num] = NULL;
 
 	num_outputs = _MAX_REF_COUNT;
+}
+
+MidiStream::~MidiStream()
+{
+	// Wait for any ongoing update to complete
+	while (update_in_progress)
+	{
+		usleep(100);
+	}
+
+	std::lock_guard<std::mutex> lock(update_all_mutex);
+
+	update_stop();
+
+	// Remove this object from the linked list
+	MidiStream *p;
+	MidiStream *prev = NULL;
+
+	for (p = first_update[stage_num]; p; prev = p, p = p->next_update[stage_num])
+	{
+		if (p == this)
+		{
+			if (prev == NULL)
+			{
+				first_update[stage_num] = next_update[stage_num];
+			}
+			else
+			{
+				prev->next_update[stage_num] = next_update[stage_num];
+			}
+			break;
+		}
+	}
+
+	// Clean up connections where this object is the source
+	while (destination_list)
+	{
+		MidiConnection *next = destination_list->next_dest;
+		destination_list->dst->active = false;
+		delete destination_list;
+		destination_list = next;
+	}
+
+	update_setup();
 }
 
 /**
@@ -545,31 +595,33 @@ void MidiStream::dbg_print_update_list(void)
 */
 void MidiStream::start_thread()
 {
-	int ret, err, policy;
+	std::lock_guard<std::mutex> lock(thread_creation_mutex);
+
+	if (thread_is_running)
+	{
+		fprintf(stderr, "MIDI Stream thread already running\n");
+		return;
+	}
+
+	int ret, policy;
 	pthread_attr_t tattr;
 	struct sched_param params;
 
-	// initialized with default attributes
 	ret = pthread_attr_init(&tattr);
-	// safe to get existing scheduling param
 	ret = pthread_attr_getschedparam(&tattr, &params);
-	// set the priority; others are unchanged
 	params.sched_priority = sched_get_priority_max(SCHED_RR) - _THREAD_PRIORITY_MIDI_STREAM;
 	ret = pthread_attr_setinheritsched(&tattr, PTHREAD_EXPLICIT_SCHED);
 	policy = SCHED_RR;
 	ret = pthread_attr_setschedpolicy(&tattr, policy);
-	// setting the new scheduling param
 	ret = pthread_attr_setschedparam(&tattr, &params);
-	//	err = errno;
-		//	ret = pthread_setschedparam(updatThreadId, SCHED_RR, &params);
+
 	if (ret != 0)
 	{
-		// Print the error
 		fprintf(stderr, "Unsuccessful in setting MIDI Stream thread realtime prio\n");
 	}
 
 	thread_is_running = true;
-	pthread_create(&midi_thread, &tattr, run_midi, (void*)11);
+	pthread_create(&midi_thread, &tattr, run_midi, (void *)11);
 }
 
 /**
@@ -585,25 +637,25 @@ void MidiStream::stop_thread()
 /**
 * Initiate and update process of all the blocks
 */
-void MidiStream::update_all(void) {
+void MidiStream::update_all(void)
+{
+	std::lock_guard<std::mutex> lock(update_all_mutex);
 
-	MidiStream* p;
+	MidiStream *p;
 	uint8_t stage;
 
 	update_in_progress = true;
 	for (stage = 0; stage < _MAX_STAGES_NUM; stage++)
 	{
-		// Blocks are updated in sequential stages order - Update all blocks in this stage
 		for (p = MidiStream::first_update[stage]; p; p = p->next_update[stage])
 		{
-			if (p->active) {
+			if (p->active)
+			{
 				p->update();
 			}
 		}
 	}
 	update_in_progress = false;
-
-	//	fprintf(stderr, "MIDI Stream thread update timer\n");
 }
 
 /**
