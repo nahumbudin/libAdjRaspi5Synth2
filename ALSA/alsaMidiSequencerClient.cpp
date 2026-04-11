@@ -141,33 +141,45 @@ void* AlsaMidiSequencerInputClient::midi_in_seq_client_thread()
 	while (midi_in_client_thread_is_running)
 	{
 		if (poll(pfd, npfd, 1000) > 0) { // 100000
+			
 			do {
-				snd_seq_event_input(midi_in, &ev);
+				int ret =snd_seq_event_input(midi_in, &ev);
 
-				qev = new snd_seq_event_t();
-				memcpy(qev, ev, sizeof(snd_seq_event_t));
-				alsa_seq_client_rx_queue->enqueue(qev);
-				/*
-								switch (ev->type) {
-									case SND_SEQ_EVENT_CONTROLLER:
-										fprintf(stderr, "Control event on Channel %2d: %5d       \r",
-											ev->data.control.channel, ev->data.control.value);
-										break;
-									case SND_SEQ_EVENT_PITCHBEND:
-										fprintf(stderr, "Pitchbender event on Channel %2d: %5d   \r",
-											ev->data.control.channel, ev->data.control.value);
-										break;
-									case SND_SEQ_EVENT_NOTEON:
-										fprintf(stderr, "Note On event on Channel %2d: %5d       \r",
-											ev->data.control.channel, ev->data.note.note);
-										break;
-									case SND_SEQ_EVENT_NOTEOFF:
-										fprintf(stderr, "Note Off event on Channel %2d: %5d      \r",
-											ev->data.control.channel, ev->data.note.note);
-										break;
-								}
-				*/
-				snd_seq_free_event(ev);
+				// Check if event input was successful and ev is not NULL
+				if (ret > 0 && ev != NULL)
+				{
+					qev = new snd_seq_event_t();
+					memcpy(qev, ev, sizeof(snd_seq_event_t));
+					alsa_seq_client_rx_queue->enqueue(qev);
+					/*
+									switch (ev->type) {
+										case SND_SEQ_EVENT_CONTROLLER:
+											fprintf(stderr, "Control event on Channel %2d: %5d       \r",
+												ev->data.control.channel, ev->data.control.value);
+											break;
+										case SND_SEQ_EVENT_PITCHBEND:
+											fprintf(stderr, "Pitchbender event on Channel %2d: %5d   \r",
+												ev->data.control.channel, ev->data.control.value);
+											break;
+										case SND_SEQ_EVENT_NOTEON:
+											fprintf(stderr, "Note On event on Channel %2d: %5d       \r",
+												ev->data.control.channel, ev->data.note.note);
+											break;
+										case SND_SEQ_EVENT_NOTEOFF:
+											fprintf(stderr, "Note Off event on Channel %2d: %5d      \r",
+												ev->data.control.channel, ev->data.note.note);
+											break;
+									}
+					*/
+					snd_seq_free_event(ev);
+				}
+				else if (ret < 0)
+				{
+					// Error occurred
+					fprintf(stderr, "ALSA MIDI sequencer: Error reading event: %s\n", snd_strerror(ret));
+					break; // Exit the do-while loop on error
+				}
+				// If ret == 0 or ev == NULL, just skip this iteration
 			} while (snd_seq_event_input_pending(midi_in, 0) > 0);
 		}
 	}

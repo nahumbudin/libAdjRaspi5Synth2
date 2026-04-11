@@ -141,7 +141,8 @@ void AdjSynthPrograms::set_program_preset_params(_settings_params_t *preset_para
 			
 		if (voice)
 		{
-			voice->set_voice_params(active_preset_params);
+			voice->set_voice_params(active_preset_params,
+				ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
 		}
 	}
 }
@@ -164,7 +165,8 @@ int AdjSynthPrograms::assign_voice_with_preset_program_params(SynthVoice *voice,
 	voice->set_allocated_program(program_num);
 
 	// Set the voice with the program preset parameters values
-	voice->set_voice_params(active_preset_params);
+	voice->set_voice_params(active_preset_params, 
+		ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
 	
 	// Set the MSO wavetable
 	voice->dsp_voice->mso_1->set_wavetable(mso_wtab);
@@ -256,7 +258,8 @@ int AdjSynthPrograms::refresh_all_program_voices_with_preset_params(_settings_pa
 			voice = AdjSynth::get_instance()->synth_voice[v];
 			if (voice)
 			{
-				voice->set_voice_params(active_preset_params);
+				voice->set_voice_params(active_preset_params, 
+					ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
 			}
 		}
 	}

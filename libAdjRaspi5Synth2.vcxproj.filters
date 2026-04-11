@@ -184,6 +184,24 @@
     <Filter Include="Header files\Music">
       <UniqueIdentifier>{0eab7f1c-bed3-4686-b23b-79620f7eaa2c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\Instrument\Midi Mixer">
+      <UniqueIdentifier>{0c350c46-5395-4cf4-9a39-953f97fd7f2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Insrtument\Midi Mixer">
+      <UniqueIdentifier>{e0740947-8f13-49f8-bd85-1e5e13d32997}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Instrument\Analog Equalizer">
+      <UniqueIdentifier>{58ca121d-53ff-46a8-93e0-3122b1d3ee97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\Instrument\Analog Reverbration">
+      <UniqueIdentifier>{b5e2507e-0952-48c0-8f59-dabc72aee1bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Insrtument\Analog Equalizer">
+      <UniqueIdentifier>{d468bd17-f12d-4a25-ad8c-0dc96b7cfe7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Insrtument\Analog Reverbration">
+      <UniqueIdentifier>{cb7d0a28-dc51-4c28-a040-c5fb101f3913}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjSynth\synthKeyboard.cpp">
@@ -708,6 +726,18 @@
     <ClCompile Include="Audio\audioMasterLimiter.cpp">
       <Filter>Source files\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="Instrument\midiMixerPresets.cpp">
+      <Filter>Source files\Insrtument\Midi Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrument\instrumentMidiMixer.cpp">
+      <Filter>Source files\Insrtument\Midi Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrument\instrumentAnalogEqualizer.cpp">
+      <Filter>Source files\Insrtument\Analog Equalizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrument\analogEqualizerPresets.cpp">
+      <Filter>Source files\Insrtument\Analog Equalizer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdjSynth\synthKeyboard.h">
@@ -1033,6 +1063,12 @@
     </ClInclude>
     <ClInclude Include="LibAPI\Scales.h">
       <Filter>Header files\LibApi</Filter>
+    </ClInclude>
+    <ClInclude Include="Instrument\instrumentMidiMixer.h">
+      <Filter>Header files\Instrument\Midi Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Instrument\instrumentAnalogEqualizer.h">
+      <Filter>Header files\Instrument\Analog Equalizer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

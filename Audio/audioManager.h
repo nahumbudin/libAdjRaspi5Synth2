@@ -72,8 +72,8 @@ public:
 	void start_alsa_main_thread();
 	void stop_alsa_main_thread();	
 	void start_jack_connect_thread();
-	void stop_jack_connect_thread();	
-	
+	void stop_jack_connect_thread();
+
 	int set_period_time_us(unsigned long ptu);
 	unsigned long get_period_time_us();
 	int start_update_process_periodic_timer();

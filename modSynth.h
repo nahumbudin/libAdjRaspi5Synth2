@@ -42,6 +42,8 @@
 
 #include "./I2C/i2cInterface.h"
 
+//#include "./Instrument/instrumentMidiMixer.h"
+
 //#include "./Instrument/instrumentFluidSynth.h"
 //#include "./Instrument/instrumentHammondOrgan.h"
 
@@ -63,6 +65,7 @@ class InstrumentAnalogSynth;
 class InstrumentMidiPlayer;
 class InstrumentMidiMapper;
 class InstrumentControlBoxEventsHandler;
+class InstrumentMidiMixer;
 
 class AdjSynth;
 
@@ -105,6 +108,7 @@ public:
 	InstrumentHammondOrgan *get_hammond_organ();
 	InstrumentMidiPlayer *get_midi_player();
 	InstrumentMidiMapper *get_midi_mapper();
+	InstrumentMidiMixer *get_midi_mixer();
 	
 	int set_adj_synth_default_settings(_settings_params_t *params);
 	int set_default_general_settings_parameters(_settings_params_t *params);
@@ -195,6 +199,8 @@ public:
 	;
 
 	MidiExtInterface *midi_ext_interface;
+	
+	InstrumentMidiMixer *midi_mixer_instrument;
 	
 	InstrumentFluidSynth *fluid_synth;
 	InstrumentHammondOrgan *hammond_organ;

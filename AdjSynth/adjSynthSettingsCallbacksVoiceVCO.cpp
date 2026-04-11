@@ -449,7 +449,8 @@ int set_voice_block_osc_1_hammond_percussion_mode_cb(int pmode, int voice, int p
 			AdjSynth::get_instance()->get_active_settings_params(), prog);
 	}
 
-	synth_voice->set_voice_params(AdjSynth::get_instance()->get_active_settings_params());
+	synth_voice->set_voice_params(AdjSynth::get_instance()->get_active_settings_params(),
+		ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
 	
 	return 0;
 }

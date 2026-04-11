@@ -11,6 +11,7 @@
  *					5. Added MIDI mixer Send control definition
  *					6. Added MIDI Player Backward and Forward control and auto loop back playing control.
  *					7. Added MIDI Player playback volume and speed control
+ *					8. Added MIDI Mixer GUI update callbacks
 *
 *	History:
 *			Ver1.0  8-May-2024 Initial
@@ -52,6 +53,7 @@
 #include "./Instrument/instrumentFluidSynth.h"
 #include "./Instrument/instrumentMidiPlayer.h"
 #include "./Instrument/instrumentMidiMapper.h"
+#include "./Instrument/instrumentMidiMixer.h"
 #include "./Instrument/instrumentAnalogSynth.h"
 
 #include "./utils/xmlFiles.h"
@@ -157,6 +159,17 @@ int mod_synth_init_midi_services()
 
 void mod_synth_on_exit()
 {
+	static bool cleanup_done = false;
+
+	if (cleanup_done)
+	{
+		printf("mod_synth_on_exit: cleanup already performed, skipping\n");
+		return;
+	}
+
+	printf("mod_synth_on_exit: performing cleanup\n");
+	cleanup_done = true;
+	
 	//	jackExit(); ???
 	mod_synth_deinit_bt_services();
 	mod_synth_deinit_midi_services();
@@ -370,6 +383,7 @@ int mod_synth_connect_jack_connection(
 {
 	int res;
 	s_jack_connection_t jack_connection;
+	bool is_analog_synth = false;
 
 	// All analog based instruments uses the AdjHeartSynth output
 	std::string client_out_name = out_client_name;
@@ -381,6 +395,8 @@ int mod_synth_connect_jack_connection(
 		(out_client_name == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY) ||
 		(out_client_name == _INSTRUMENT_NAME_PADSYNTH_SYNTH_STR_KEY))
 	{
+		is_analog_synth = true;
+
 		client_out_name = "AdjHeartSynth_out";
 		
 		if (out_client_port_name == "left")
@@ -408,21 +424,38 @@ int mod_synth_connect_jack_connection(
 			jack_connection.in_client_port_name = in_client_port_name;
 			jack_connection.out_client_name = client_out_name;
 			jack_connection.out_client_port_name = client_port_out_name;
-			
-			if (out_client_port_name == "left")
+
+			if (is_analog_synth)
 			{
-				mod_synthesizer->get_analog_synth()->set_analog_synth_left_jack_output_connection(
-					jack_connection);
+				if (out_client_port_name == "left")
+				{
+					mod_synthesizer->get_analog_synth()->set_analog_synth_left_jack_output_connection(
+						jack_connection);
+				}
+				else if (out_client_port_name == "right")
+				{
+					mod_synthesizer->get_analog_synth()->set_analog_synth_right_jack_output_connection(
+						jack_connection);
+				}
 			}
-			else if (out_client_port_name == "right")
+			else if (out_client_name == _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY)
 			{
-				mod_synthesizer->get_analog_synth()->set_analog_synth_right_jack_output_connection(
-					jack_connection);
+				if (out_client_port_name == "left")
+				{
+					mod_synthesizer->get_fluid_synth()->set_fluid_synth_left_jack_output_connection(
+						jack_connection);
+				}
+				else if (out_client_port_name == "right")
+				{
+					mod_synthesizer->get_fluid_synth()->set_fluid_synth_right_jack_output_connection(
+						jack_connection);
+				}
 			}
 		}
 	}
 	else
 	{
+		// Disconnect
 		res = mod_synthesizer->jack_connections->disconnect_jack_connection(
 			in_client_name,
 			in_client_port_name,
@@ -1159,8 +1192,8 @@ int mod_synth_get_active_fluid_synth_reverb_room_size()
 	{
 		return _SETTINGS_FAILED;
 	}
-	// 0-1.0 -> 0-100
-	return (int)(param.value * 100.0);
+	// 0-1.0 -> 0-120
+	return (int)(param.value * 120.0);
 }
 
 int mod_synth_get_active_fluid_synth_reverb_damp()
@@ -1432,6 +1465,11 @@ int mod_synth_open_adj_synth_patch_file(std::string path, int channel)
 	return mod_synthesizer->open_adj_synth_patch_file(path, channel);
 }
 
+int mod_synth_save_midi_mixer_patch_file(string path)
+{
+	return mod_synthesizer->get_midi_mixer()->save_midi_mixer_presets_file(path);
+}
+
 
 std::string mod_synth_get_program_patch_name(int prog)
 {
@@ -1661,7 +1699,7 @@ void mod_synth_midi_mixer_set_channel_volume(int chan, int vol)
 	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_LEVEL + chan,
 		vol,
-												ModSynth::get_instance()->adj_synth->get_active_settings_params());
+		ModSynth::get_instance()->adj_synth->get_active_common_params());
 
 	mod_synthesizer->midi_mapper->set_midi_channel_volume(chan, vol);
 }
@@ -1677,7 +1715,7 @@ void mod_synth_midi_mixer_set_channel_pan(int chan, int pan)
 	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_PAN + chan,
 		pan,
-		ModSynth::get_instance()->adj_synth->get_active_settings_params());
+		ModSynth::get_instance()->adj_synth->get_active_common_params());
 
 	mod_synthesizer->midi_mapper->set_midi_channel_pan(chan, pan);
 }
@@ -1690,7 +1728,7 @@ void mod_synth_midi_mixer_set_channel_pan_mod_level(int chan, int lvl)
 	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_PAN_MOD_LFO_LEVEL + chan,
 		lvl,
-		ModSynth::get_instance()->adj_synth->get_active_settings_params());
+		ModSynth::get_instance()->adj_synth->get_active_common_params());
 	
 	switch (chan_allocated_instrument)
 	{
@@ -1715,7 +1753,7 @@ void mod_synth_midi_mixer_set_channel_pan_mod_lfo(int chan, int lfo)
 	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_PAN_MOD_LFO + chan,
 		lfo,
-		ModSynth::get_instance()->adj_synth->get_active_settings_params());
+		ModSynth::get_instance()->adj_synth->get_active_common_params());
 	
 	switch (chan_allocated_instrument)
 	{
@@ -1741,7 +1779,7 @@ void mod_synth_midi_mixer_set_channel_send_level(int chan, int snd)
 	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_SEND + chan,
 		snd,
-		ModSynth::get_instance()->adj_synth->get_active_settings_params());
+		ModSynth::get_instance()->adj_synth->get_active_common_params());
 	
 	switch (chan_allocated_instrument)
 	{
@@ -1758,11 +1796,6 @@ void mod_synth_midi_mixer_set_channel_send_level(int chan, int snd)
 	}
 }
 
-void mod_synth_register_midi_mixer_channel_volume_update_callback(func_ptr_void_int_int_t ptr)
-{
-	
-}
-
 void mod_synth_midi_mixer_set_channel_static_volume(int chan, bool state)
 {
 	if (state)
@@ -1775,9 +1808,35 @@ void mod_synth_midi_mixer_set_channel_static_volume(int chan, bool state)
 	}
 }
 
+void mod_synth_midi_mixer_update_gui()
+{
+	mod_synthesizer->get_midi_mixer()->update_midi_mixer_gui();
+}
+
+void mod_synth_register_midi_mixer_channel_volume_update_callback(func_ptr_void_int_int_t ptr)
+{
+	mod_synthesizer->get_midi_mixer()->register_midi_mixer_channel_volume_update_callback(ptr);
+}
+
+
 void mod_synth_register_midi_mixer_channel_pan_update_callback(func_ptr_void_int_int_t ptr)
 {
-	
+	mod_synthesizer->get_midi_mixer()->register_midi_mixer_channel_pan_update_callback(ptr);
+}
+
+void mod_synth_register_midi_mixer_channel_send_update_callback(func_ptr_void_int_int_t ptr)
+{
+	mod_synthesizer->get_midi_mixer()->register_midi_mixer_channel_send_update_callback(ptr);
+}
+
+void mod_synth_register_midi_mixer_channel_pan_mod_lfo_update_callback(func_ptr_void_int_int_t ptr)
+{
+	mod_synthesizer->get_midi_mixer()->register_midi_mixer_channel_pan_mod_lfo_update_callback(ptr);
+}
+
+void mod_synth_register_midi_mixer_channel_pan_mod_lfo_level_update_callback(func_ptr_void_int_int_t ptr)
+{
+	mod_synthesizer->get_midi_mixer()->register_midi_mixer_channel_pan_mod_lfo_level_update_callback(ptr);
 }
 
 void mod_synth_register_midi_mixer_channel_static_volume_update_callback(func_ptr_void_int_bool_t ptr)

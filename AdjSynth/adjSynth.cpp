@@ -1298,6 +1298,41 @@ _settings_params_t *AdjSynth::get_active_settings_params()
 }
 
 /**
+*   @brief  Set a program voices paramters using the setting parameters
+*   @param  program_num     the program number (only sketches1)
+*   @param  key_filter "all" to update all parameters, or specific key to update only one
+*   @return 0 if successful, -1 if specific key not found, -2 illegal program number
+*/
+int AdjSynth::update_program_voices_parameter(int program_num, const char* param_key)
+{
+	int result = -2;
+	
+	if ((program_num < _PROGRAM_16) || (program_num > _PROGRAM_18))
+	{
+		return result;
+	}
+	
+	_settings_params_t* program_params = synth_program[program_num]->get_active_program_preset_params();
+	
+	for (int v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (synth_voice[v]->get_allocated_program() == program_num)
+		{
+			pthread_mutex_lock(&update_mutex[v]);
+            
+			// Update single parameter or all
+			result = synth_voice[v]->set_voice_params(program_params, 
+				ModSynth::get_instance()->adj_synth->get_active_common_params(), 
+				param_key);
+            
+			pthread_mutex_unlock(&update_mutex[v]);
+		}
+	}
+	
+	return result;
+}
+
+/**
 *   @brief  retruns a pointer to the active general settings params struct TODO: reevaluate the setting params types.
 *   @param  none
 *   @return a pointer to the active general settings params struct

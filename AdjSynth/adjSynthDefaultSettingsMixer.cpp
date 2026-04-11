@@ -78,6 +78,38 @@ int AdjSynth::set_default_settings_parameters_mixer(_settings_params_t *params)
 			_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL |
 			_SET_TYPE | _SET_CALLBACK,
 			channel);
+		
+		sprintf(keyString, "adjsynth.mixer_channel_%i.pan_mod_lfo", channel + 1);
+		res |= adj_synth_settings_manager->set_int_param
+		(params,
+			string(keyString),
+			_LFO_NONE,
+			_LFO_6,
+			_LFO_NONE,
+			"instrument_settings_param",
+			set_mixer_channel_pan_cb,
+			0,
+			0,
+			NULL,
+			_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL |
+			_SET_TYPE | _SET_CALLBACK,
+			channel);
+		
+		sprintf(keyString, "adjsynth.mixer_channel_%i.pan_mod_lfo_level", channel + 1);
+		res |= adj_synth_settings_manager->set_int_param
+		(params,
+			string(keyString),
+			0,
+			100,
+			0,
+			"instrument_settings_param",
+			set_mixer_channel_pan_cb,
+			0,
+			0,
+			NULL,
+			_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL |
+			_SET_TYPE | _SET_CALLBACK,
+			channel);
 	}
 	
 	return res;

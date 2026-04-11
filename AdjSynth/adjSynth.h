@@ -108,6 +108,8 @@ public:
 	_settings_params_t *get_active_settings_params();
 	//_setting_params_t *get_active_general_settings_params();
 	
+	int update_program_voices_parameter(int program_num, const char* param_key);
+	
 	int get_num_of_voices();
 	int get_num_of_programs();
 	void set_active_sketch(int ask);

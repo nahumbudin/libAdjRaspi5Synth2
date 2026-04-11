@@ -117,6 +117,12 @@ fluid_res_t FluidSynthInterface::deinitialize_fluid_synthesizer()
 	delete_fluid_synth(synth);
 	delete_fluid_settings(settings);
 
+	// Set pointers to NULL to prevent double cleanup
+	synth = NULL;
+	adriver = NULL;
+	mdriver = NULL;
+	settings = NULL;
+
 	return res;
 }
 

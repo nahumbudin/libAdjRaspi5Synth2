@@ -59,6 +59,8 @@ _FILTER_BAND_LPF, _FILTER_BAND_HPF, _FILTER_BAND_BPF, _FILTER_BAND_PASS_ALL\n
 */
 int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	switch (eventid)
 	{
 	case _FILTER_FREQ:
@@ -69,7 +71,10 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				"adjsynth.filter1.frequency",
 				val,
 				_EXEC_CALLBACK,
-				program);	
+				program);
+		
+			result = update_program_voices_parameter(program, "adjsynth.filter1.frequency");
+			
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -79,6 +84,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.frequency");
 		}
 		break;
 
@@ -91,6 +98,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter1.octave");
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -100,6 +109,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.octave");
 		}
 		break;
 
@@ -112,6 +123,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter1.q");	
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -121,6 +134,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.q");
 		}
 		break;
 
@@ -133,6 +148,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter1.band");
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -142,6 +159,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.band");
 		}
 		break;
 
@@ -154,6 +173,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter1.keyboard_track");
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -163,6 +184,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.keyboard_track");
 		}
 
 		break;	
@@ -176,6 +199,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter1.freq_modulation_lfo_num");
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -185,6 +210,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.freq_modulation_lfo_num");
 		}
 		break;
 
@@ -197,6 +224,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter1.freq_modulation_lfo_level");
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -206,6 +235,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.freq_modulation_lfo_level");
 		}
 		break;
 
@@ -218,6 +249,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter1.freq_modulation_env_num");
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -227,6 +260,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.freq_modulation_env_num");
 		}
 		break;
 
@@ -239,6 +274,8 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter1.freq_modulation_env_level");
 		}
 		else if (filtid == _FILTER_2_EVENT)
 		{
@@ -248,11 +285,13 @@ int AdjSynth::filter_event(int filtid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.filter2.freq_modulation_env_level");
 		}
 		
 		break;
 	}
 	
-	return 0;
+	return result;
 }
 

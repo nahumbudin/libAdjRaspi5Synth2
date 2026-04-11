@@ -56,6 +56,8 @@
 */
 int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	switch (eventid)
 	{
 	case _NOISE_COLOR:
@@ -64,7 +66,9 @@ int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_param
 			"adjsynth.noise.color",
 			val,
 			_EXEC_CALLBACK,
-			program);	
+			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.noise.color");
 			
 		break;
 
@@ -74,7 +78,9 @@ int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_param
 			"adjsynth.noise.send_filter_1",
 			val,
 			_EXEC_CALLBACK,
-			program);	
+			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.noise.send_filter_1");
 			
 		break;
 
@@ -85,6 +91,8 @@ int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_param
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.noise.send_filter_2");
 			
 		break;
 
@@ -95,6 +103,8 @@ int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_param
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.noise.amp_modulation_lfo_num");
 			
 		break;
 
@@ -105,6 +115,8 @@ int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_param
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.noise.amp_modulation_lfo_level");
 			
 		break;
 
@@ -115,6 +127,8 @@ int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_param
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.noise.amp_modulation_env_num");
 			
 		break;
 
@@ -125,11 +139,13 @@ int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_param
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.noise.amp_modulation_env_level");
 			
 		break;			
 	}
 	
-	return 0;
+	return result;
 }
 
 /**
@@ -144,6 +160,8 @@ int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_param
 */
 int AdjSynth::noise_event_bool(int noiseid, int eventid, bool val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	switch (eventid)
 	{
 	case _NOISE_ENABLE:
@@ -155,6 +173,8 @@ int AdjSynth::noise_event_bool(int noiseid, int eventid, bool val, _settings_par
 				true,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.noise.enabled");
 		}
 		else
 		{
@@ -164,10 +184,12 @@ int AdjSynth::noise_event_bool(int noiseid, int eventid, bool val, _settings_par
 				false,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.noise.enabled");
 		}
 		
 		break;
 	}
 	
-	return 0;
+	return result;
 }

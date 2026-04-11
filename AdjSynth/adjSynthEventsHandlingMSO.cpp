@@ -59,6 +59,7 @@ _ENV_NONE, _ENV_1, _ENV_2, _ENV_3, ENV_4, ENV_5
 int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t *params, int program)
 {
 	int voice, i, logLev, j = 0, value = val;
+	int result = -1;
 
 	switch (msoid)
 	{
@@ -70,7 +71,9 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				"adjsynth.mso_synth.segment_position_a",
 				val,
 				_EXEC_CALLBACK,
-				program);	
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.segment_position_a");
 		}
 		else if (eventid == _MSO_SEGMENT_B_POSITION)
 		{
@@ -80,6 +83,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.segment_position_b");
 		}
 		else if (eventid == _MSO_SEGMENT_C_POSITION)
 		{
@@ -89,6 +94,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.segment_position_c");
 		}
 		else if (eventid == _MSO_SEGMENT_D_POSITION)
 		{
@@ -98,6 +105,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.segment_position_d");
 		}
 		else if (eventid == _MSO_SEGMENT_E_POSITION)
 		{
@@ -107,6 +116,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.segment_position_e");
 		}
 		else if (eventid == _MSO_SEGMENT_F_POSITION)
 		{
@@ -116,6 +127,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.segment_position_f");
 		}
 		else if (eventid == _MSO_SYMETRY)
 		{
@@ -125,6 +138,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.symmetry");
 		}
 		else if (eventid == _MSO_CALC_BASE_LUT)
 		{
@@ -155,6 +170,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.tune_offset_oct");
 		}
 		else if (eventid == _MSO_DETUNE_SEMITONES)
 		{
@@ -165,6 +182,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.tune_offset_semitones");
 		}
 		else if (eventid == _MSO_DETUNE_CENTS)
 		{
@@ -176,6 +195,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.tune_offset_cents");
 		}
 		else if (eventid == _MSO_FILTER_SEND_1)
 		{
@@ -185,6 +206,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.send_filter_1");
 		}
 		else if (eventid == _MSO_FILTER_SEND_2)
 		{
@@ -194,6 +217,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.send_filter_2");
 		}
 		else if (eventid == _MSO_FREQ_MOD_LFO)
 		{
@@ -203,6 +228,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.freq_modulation_lfo_num");
 		}
 		else if (eventid == _MSO_FREQ_MOD_LFO_LEVEL)
 		{
@@ -212,6 +239,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.freq_modulation_lfo_level");
 		}
 		else if (eventid == _MSO_FREQ_MOD_ENV)
 		{
@@ -221,6 +250,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.freq_modulation_env_num");
 		}
 		else if (eventid == _MSO_FREQ_MOD_ENV_LEVEL)
 		{
@@ -230,6 +261,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.freq_modulation_env_level");
 		}
 		else if (eventid == _MSO_PWM_MOD_LFO)
 		{
@@ -239,6 +272,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.pwm_modulation_lfo_num");
 		}
 		else if (eventid == _MSO_PWM_MOD_LFO_LEVEL)
 		{
@@ -248,6 +283,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.pwm_modulation_lfo_level");
 		}
 		else if (eventid == _MSO_PWM_MOD_ENV)
 		{
@@ -257,6 +294,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.pwm_modulation_env_num");
 		}
 		else if (eventid == _MSO_PWM_MOD_ENV_LEVEL)
 		{
@@ -266,6 +305,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.pwm_modulation_env_level");
 		}
 		else if (eventid == _MSO_AMP_MOD_LFO)
 		{
@@ -275,6 +316,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.amp_modulation_lfo_num");
 		}
 		else if (eventid == _MSO_AMP_MOD_LFO_LEVEL)
 		{
@@ -284,6 +327,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.amp_modulation_lfo_level");
 		}
 		else if (eventid == _MSO_AMP_MOD_ENV)
 		{
@@ -293,6 +338,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.amp_modulation_env_num");
 		}
 		else if (eventid == _MSO_AMP_MOD_ENV_LEVEL)
 		{
@@ -302,10 +349,12 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.amp_modulation_env_level");
 		}
 	}
 	
-	return 0;
+	return result;
 }
 
 /**
@@ -321,6 +370,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 */
 int AdjSynth::mso_event_bool(int msoid, int eventid, bool val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	switch (msoid)
 	{
 	case _MSO_1_EVENT:
@@ -333,9 +384,11 @@ int AdjSynth::mso_event_bool(int msoid, int eventid, bool val, _settings_params_
 				_EXEC_CALLBACK,
 				program);
 			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.enabled");
+			
 		}
 		break;
 	}
 	
-	return 0;
+	return result;
 }

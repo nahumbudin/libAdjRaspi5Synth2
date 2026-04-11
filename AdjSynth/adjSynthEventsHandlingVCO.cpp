@@ -98,6 +98,7 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 	int j = 0;
 	int value = val;
 	int _tmp_val;
+	int result = -1;
 	_settings_int_param_t _int_param;
 
 	if ((vcoid < 0) || (vcoid > _NUM_OF_VCOS))
@@ -110,12 +111,16 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 	case _OSC_PARAM_WAVEFORM:
 		if (vcoid == _OSC_1_EVENT)
 		{
+			// Set settings parameter
 			adj_synth_settings_manager->set_int_param_value
 				(params,
 				"adjsynth.osc1.waveform",
 				val,
 				_EXEC_CALLBACK,
-				program);					
+				program);
+			
+			// Set active playing voice settings
+			result = update_program_voices_parameter(program, "adjsynth.osc1.waveform");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -125,6 +130,9 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			// Set active playing voice settings
+			result = update_program_voices_parameter(program, "adjsynth.osc2.waveform");
 		}
 		break;
 
@@ -138,6 +146,9 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			// Set active playing voice settings
+			result = update_program_voices_parameter(program, "adjsynth.osc1.symmetry");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -147,6 +158,9 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			// Set active playing voice settings
+			result = update_program_voices_parameter(program, "adjsynth.osc2.symmetry");
 		}
 		break;
 
@@ -160,6 +174,9 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			// Set active playing voice settings
+			result = update_program_voices_parameter(program, "adjsynth.osc1.tune_offset_oct");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -169,6 +186,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.tune_offset_oct");
 		}
 		break;
 
@@ -182,6 +201,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.tune_offset_semitones");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -191,6 +212,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.tune_offset_semitones");
 		}
 		break;
 
@@ -206,6 +229,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.tune_offset_cents");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -215,6 +240,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.tune_offset_cents");
 		}
 		break;
 
@@ -228,7 +255,7 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				_EXEC_CALLBACK,
 				program);
 				
-			adj_synth_settings_manager->get_int_param(params, "adjsynth.osc1.hammond_percussion_mode", &_int_param);
+			adj_synth_settings_manager->get_int_param(params, "adjsynth.osc1.send_filter_1", &_int_param);
 				
 			if ((_int_param.value != _HAMMOND_PERCUSION_MODE_OFF) &&  hammond_percussion_on)
 			{
@@ -241,6 +268,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				{
 					_tmp_val = val;
 				}
+				
+				result = update_program_voices_parameter(program, "adjsynth.osc1.hammond_percussion_mode");
 					
 				adj_synth_settings_manager->set_int_param_value
 					(params,
@@ -248,6 +277,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 					_tmp_val,
 					_EXEC_CALLBACK,
 					program);
+				
+				result = update_program_voices_parameter(program, "adjsynth.osc2.send_filter_1");
 					
 				update_ui_callback();
 			}
@@ -260,6 +291,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.send_filter_1");
 		}
 		break;
 
@@ -272,6 +305,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.send_filter_2");
 				
 			adj_synth_settings_manager->get_int_param(params, "adjsynth.osc1.hammond_percussion_mode", &_int_param);
 				
@@ -293,6 +328,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 					_tmp_val,
 					_EXEC_CALLBACK,
 					program);
+				
+				result = update_program_voices_parameter(program, "adjsynth.osc2.send_filter_2");
 					
 				update_ui_callback();
 			}
@@ -305,6 +342,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.send_filter_2");
 		}
 			
 		break;
@@ -318,6 +357,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_mode");
 		}
 		break;
 
@@ -332,6 +373,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				
 			set_hammond_percusion_mode(val, params, program);
 			//				setSynthesizerParams(activeParams_x);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.hammond_percussion_mode");
 		}
 		break;
 
@@ -345,6 +388,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 					val,
 					_EXEC_CALLBACK,
 					program);
+				
+				result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_1");
 			}
 		}
 		break;
@@ -358,6 +403,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_2");
 		}
 		break;
 
@@ -370,6 +417,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_3");
 		}
 		break;
 
@@ -382,6 +431,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_4");
 		}
 		break;
 
@@ -394,6 +445,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_5");
 		}
 		break;
 
@@ -406,6 +459,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_6");
 		}
 		break;
 
@@ -418,6 +473,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_7");
 		}
 		break;
 
@@ -430,6 +487,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_8");
 		}
 		break;
 
@@ -442,6 +501,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_9");
 		}
 		break;
 
@@ -454,6 +515,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_distortion");
 		}
 		break;
 
@@ -466,6 +529,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_detune");
 		}
 		break;
 
@@ -479,6 +544,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.freq_modulation_lfo_num");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -488,6 +555,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.freq_modulation_lfo_num");
 		}
 		break;
 
@@ -500,6 +569,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.freq_modulation_lfo_level");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -509,6 +580,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.freq_modulation_lfo_level");
 		}
 		break;
 
@@ -521,6 +594,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.freq_modulation_env_num");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -530,6 +605,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_level_1");
 		}
 		break;
 
@@ -542,6 +619,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.freq_modulation_env_level");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -551,6 +630,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.freq_modulation_env_level");
 		}
 		break;
 
@@ -563,6 +644,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.pwm_modulation_lfo_num");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -572,6 +655,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.pwm_modulation_lfo_num");
 		}
 		break;
 
@@ -584,6 +669,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.pwm_modulation_lfo_level");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -593,6 +680,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.pwm_modulation_lfo_level");
 		}
 		break;
 
@@ -605,6 +694,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.pwm_modulation_env_num");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -614,6 +705,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.pwm_modulation_env_num");
 		}
 		break;
 
@@ -626,6 +719,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.pwm_modulation_env_level");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -635,6 +730,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.pwm_modulation_env_level");
 		}
 		break;
 
@@ -647,6 +744,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.amp_modulation_lfo_num");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -656,6 +755,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.amp_modulation_lfo_num");
 		}
 		break;
 
@@ -668,6 +769,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.amp_modulation_lfo_level");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -677,6 +780,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.amp_modulation_lfo_level");
 		}
 		break;
 
@@ -689,6 +794,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.amp_modulation_env_num");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -698,6 +805,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.amp_modulation_env_num");
 		}
 		break;
 
@@ -710,6 +819,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.amp_modulation_env_level");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -719,6 +830,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.amp_modulation_env_level");
 		}
 		break;			
 	} 
@@ -741,7 +854,8 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 */
 int AdjSynth::vco_event_bool(int vcoid, int eventid, bool val, _settings_params_t *params, int program)
 {
-
+	int result = -1;
+		
 	switch (eventid)
 	{
 	case _OSC_ENABLE:
@@ -753,6 +867,8 @@ int AdjSynth::vco_event_bool(int vcoid, int eventid, bool val, _settings_params_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.enabled");
 		}
 		else if (vcoid == _OSC_2_EVENT)
 		{
@@ -762,6 +878,8 @@ int AdjSynth::vco_event_bool(int vcoid, int eventid, bool val, _settings_params_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.enabled");
 		}
 		break;	
 		
@@ -774,6 +892,8 @@ int AdjSynth::vco_event_bool(int vcoid, int eventid, bool val, _settings_params_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.sync_on_osc_1");
 		}
 			
 		break;
@@ -787,11 +907,13 @@ int AdjSynth::vco_event_bool(int vcoid, int eventid, bool val, _settings_params_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.unison_square_wave");
 		}
 			
 		break;
 			
 	}
 	
-	return 0;
+	return result;
 }

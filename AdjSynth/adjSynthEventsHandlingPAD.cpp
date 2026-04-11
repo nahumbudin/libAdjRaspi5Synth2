@@ -83,6 +83,7 @@ _PAD_BASE_NOTE_C6, _PAD_BASE_NOTE_G6
 int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t *params, int program)
 {
 	int value = val;
+	int result = -1;
 		
 	if (eventid == _PAD_DETUNE_OCTAVE)
 	{
@@ -92,7 +93,9 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			"adjsynth.pad_synth.tune_offset_octave",
 			val,
 			_EXEC_CALLBACK,
-			program);	
+			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.tune_offset_octave");
 	}
 	else if (eventid == _PAD_DETUNE_SEMITONES)
 	{
@@ -103,6 +106,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.tune_offset_semitones");
 	}
 	else if (eventid == _PAD_DETUNE_CENTS)
 	{
@@ -114,6 +119,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.tune_offset_cent");
 	}
 	else if (eventid == _PAD_FILTER_SEND_1)
 	{
@@ -123,6 +130,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.send_filter_1");
 	}
 	else if (eventid == _PAD_FILTER_SEND_2)
 	{
@@ -132,6 +141,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_BLOCK_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.send_filter_2");
 	}
 	else if (eventid == _PAD_FREQ_MOD_LFO)
 	{
@@ -141,6 +152,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.freq_modulation_lfo_num");
 	}
 	else if (eventid == _PAD_FREQ_MOD_LFO_LEVEL)
 	{
@@ -150,6 +163,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.freq_modulation_lfo_level");
 	}
 	else if (eventid == _PAD_FREQ_MOD_ENV)
 	{
@@ -159,6 +174,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.freq_modulation_env_num");
 	}
 	else if (eventid == _PAD_FREQ_MOD_ENV_LEVEL)
 	{
@@ -168,6 +185,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.freq_modulation_env_level");
 	}
 	else if (eventid == _PAD_AMP_MOD_LFO)
 	{
@@ -177,6 +196,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.amp_modulation_lfo_num");
 	}
 	else if (eventid == _PAD_AMP_MOD_LFO_LEVEL)
 	{
@@ -186,6 +207,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.amp_modulation_lfo_level");
 	}
 	else if (eventid == _PAD_AMP_MOD_ENV)
 	{
@@ -195,6 +218,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.amp_modulation_env_num");
 	}
 	else if (eventid == _PAD_AMP_MOD_ENV_LEVEL)
 	{
@@ -204,6 +229,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.amp_modulation_env_level");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_1)
 	{
@@ -213,6 +240,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_0");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_2)
 	{
@@ -222,6 +251,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_1");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_3)
 	{
@@ -231,6 +262,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_2");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_4)
 	{
@@ -240,6 +273,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_3");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_5)
 	{
@@ -249,6 +284,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_4");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_6)
 	{
@@ -258,6 +295,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_5");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_7)
 	{
@@ -267,6 +306,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_6");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_8)
 	{
@@ -276,6 +317,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_7");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_9)
 	{
@@ -285,6 +328,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_8");
 	}
 	else if (eventid == _PAD_HARMONY_LEVEL_10)
 	{
@@ -294,6 +339,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_level_9");
 	}
 	else if (eventid == _PAD_DETUNE)
 	{
@@ -303,6 +350,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.harmonies_detune");
 	}
 	else if (eventid == _PAD_QUALITY)
 	{
@@ -312,6 +361,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.quality");
 	}
 	else if (eventid == _PAD_SHAPE)
 	{
@@ -321,6 +372,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.shape");
 	}
 	else if (eventid == _PAD_BASE_NOTE)
 	{
@@ -330,6 +383,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.base_note");
 	}
 	else if (eventid == _PAD_BASE_WIDTH)
 	{
@@ -339,6 +394,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.base_width");
 	}
 	else if (eventid == _PAD_GENERATE)
 	{
@@ -354,9 +411,11 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.shape_cutoff");
 	}
 
-	return 0;
+	return result;
 }
 
 
@@ -372,6 +431,8 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 */
 int AdjSynth::pad_event_bool(int padid, int eventid, bool val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	if (eventid == _PAD_ENABLE)
 	{
 		adj_synth_settings_manager->set_bool_param_value
@@ -380,8 +441,10 @@ int AdjSynth::pad_event_bool(int padid, int eventid, bool val, _settings_params_
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.enabled");
 	}	
 	
-	return 0;
+	return result;
 }
 

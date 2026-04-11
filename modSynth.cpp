@@ -41,6 +41,7 @@
 
 #include "./Instrument/instrumentMidiPlayer.h"
 #include "./Instrument/instrumentMidiMapper.h"
+#include "./Instrument/instrumentMidiMixer.h"
 
 #include "./Instrument/instrumentControlBoxHandler.h"
 
@@ -159,6 +160,9 @@ ModSynth::ModSynth()
 	instruments_manager = InstrumentsManager::get_instance();
 	
 	// TODO: create instances only when oppened ?.
+	
+	// Midi Mixer Instrument
+	midi_mixer_instrument = new InstrumentMidiMixer();
 
 	// A FLuidSynth instument
 	fluid_synth = new InstrumentFluidSynth();
@@ -175,6 +179,11 @@ ModSynth::ModSynth()
 	analog_synth = new InstrumentAnalogSynth(this->adj_synth);
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY,
 										analog_synth);
+	
+	// Midi Mixer Instrument
+	midi_mixer_instrument = new InstrumentMidiMixer();
+	instruments_manager->add_instrument(_INSTRUMENT_NAME_MIDI_MIXER_STR_KEY, 
+										midi_mixer_instrument);
 
 	// A MIDI Mapper Instrument. Maps MIDI cahnnel events to assigned synthesizers (FluidSynth, Analog Synth, Hammond Organ, etc.).
 	midi_mapper = new InstrumentMidiMapper(alsa_midi_system_control,
@@ -581,6 +590,16 @@ InstrumentAnalogSynth *ModSynth::get_analog_synth()
 InstrumentHammondOrgan *ModSynth::get_hammond_organ()
 {
 	return hammond_organ;
+}
+
+/**
+*   @brief  retruns a pointer to the MIDI-Mixer instrument object
+*   @param  none
+*   @return a pointer to the MIDI-Mixer instrument object
+*/
+InstrumentMidiMixer *ModSynth::get_midi_mixer()
+{
+	return midi_mixer_instrument;
 }
 
 /**

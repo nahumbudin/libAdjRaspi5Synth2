@@ -383,7 +383,8 @@ void SynthProgram::set_num_of_voices(int nov)
 					mso_wtab,
 					program_wavetable,
 					audio_manager);
-				synth_voices[i]->set_voice_params(&active_preset_params);
+				synth_voices[i]->set_voice_params(&active_preset_params,
+					ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
 			}
 		}
 	}	

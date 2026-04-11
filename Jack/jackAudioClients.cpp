@@ -255,7 +255,7 @@ void connect_jack_audio_ports_out()
 */
 void disconnect_jack_audio_ports_out()
 {
-	if (initiated_out && client_out && output_port[_LEFT] && *ports_audio_out && output_port[_RIGHT])
+	if (initiated_out && client_out && output_port[_LEFT] && ports_audio_out && output_port[_RIGHT])
 	{
 		if (jack_disconnect(client_out, jack_port_name(output_port[_LEFT]), ports_audio_out[_LEFT])) 
 		{
@@ -503,7 +503,7 @@ void connect_jack_audio_ports_in()
 */
 void disconnect_jack_audio_ports_in()
 {
-	if (initiated_in && client_in && input_port[_LEFT] && *ports_audio_in && input_port[_RIGHT])
+	if (initiated_in && client_in && input_port[_LEFT] && ports_audio_in && input_port[_RIGHT])
 	{
 		if (jack_disconnect(client_in, jack_port_name(input_port[_LEFT]), ports_audio_in[_LEFT])) 
 		{
@@ -622,6 +622,116 @@ void jack_exit()
 	jack_client_close(client_out);
 	fprintf(stderr, "jack exit\n");
 	sleep(2);
+}
+
+/**
+*   @brief  Deactivate JACK clients to stop callbacks
+*   @param  none
+*   @return void
+*/
+void deactivate_jack_clients()
+{
+	// Deactivate output client
+	if (client_out != NULL && initiated_out)
+	{
+		if (jack_deactivate(client_out) != 0)
+		{
+			fprintf(stderr, "Jack: Failed to deactivate output client\n");
+		}
+		else
+		{
+			fprintf(stderr, "Jack: Output client deactivated\n");
+		}
+	}
+	
+	// Deactivate input client
+	if (client_in != NULL && initiated_in)
+	{
+		if (jack_deactivate(client_in) != 0)
+		{
+			fprintf(stderr, "Jack: Failed to deactivate input client\n");
+		}
+		else
+		{
+			fprintf(stderr, "Jack: Input client deactivated\n");
+		}
+	}
+}
+
+/**
+*   @brief  Close JACK client connections completely
+*   @param  none
+*   @return void
+*/
+void close_jack_clients()
+{
+	// Close output client
+	if (client_out != NULL)
+	{
+		if (jack_client_close(client_out) != 0)
+		{
+			fprintf(stderr, "Jack: Failed to close output client\n");
+		}
+		else
+		{
+			fprintf(stderr, "Jack: Output client closed\n");
+		}
+		client_out = NULL;
+		initiated_out = false;
+	}
+	
+	// Close input client
+	if (client_in != NULL)
+	{
+		if (jack_client_close(client_in) != 0)
+		{
+			fprintf(stderr, "Jack: Failed to close input client\n");
+		}
+		else
+		{
+			fprintf(stderr, "Jack: Input client closed\n");
+		}
+		client_in = NULL;
+		initiated_in = false;
+	}
+	
+	// Free allocated client/server name strings
+	if (client_name_out != NULL)
+	{
+		free(client_name_out);
+		client_name_out = NULL;
+	}
+	
+	if (server_name_out != NULL)
+	{
+		free(server_name_out);
+		server_name_out = NULL;
+	}
+	
+	if (client_name_in != NULL)
+	{
+		free(client_name_in);
+		client_name_in = NULL;
+	}
+	
+	if (server_name_in != NULL)
+	{
+		free(server_name_in);
+		server_name_in = NULL;
+	}
+	
+	// Free ports arrays if allocated
+	if (ports_audio_out != NULL)
+	{
+		jack_free(ports_audio_out);
+		ports_audio_out = NULL;
+	}
+	
+	if (ports_audio_in != NULL)
+	{
+		jack_free(ports_audio_in);
+		ports_audio_in = NULL;
+	}
 }
 
 int set_jack_mode(int mode)

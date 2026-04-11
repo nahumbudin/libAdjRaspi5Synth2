@@ -47,6 +47,8 @@
 */
 int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	if (eventid == _AMP_LEVEL)
 	{
 		// Master Volume - common to all programs
@@ -57,6 +59,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 															val,
 															_EXEC_CALLBACK,
 															program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.amp_ch1.level");
 		}
 		else if (ampid == _AMP_CH2_EVENT)
 		{
@@ -65,6 +69,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 															val,
 															_EXEC_CALLBACK,
 															program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.amp_ch2.level");			
 		}
 	}
 	else if (eventid == _AMP_SEND)
@@ -77,6 +83,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 															val,
 															_EXEC_CALLBACK,
 															program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.amp_ch1.send");
 		}
 		else if (ampid == _AMP_CH2_EVENT)
 		{
@@ -85,6 +93,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 															val,
 															_EXEC_CALLBACK,
 															program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.amp_ch2.send");
 		}
 	}
 	else
@@ -106,6 +116,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 						val,
 						_EXEC_CALLBACK,
 						program);
+					
+					result = update_program_voices_parameter(program, "adjsynth.amp_ch1.pan");
 				}
 				else if (ampid == _AMP_CH2_EVENT)
 				{
@@ -115,6 +127,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 						val,
 						_EXEC_CALLBACK,
 						program);
+					
+					result = update_program_voices_parameter(program, "adjsynth.amp_ch2.pan");
 				}
 
 				break;
@@ -128,6 +142,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 						val,
 						_EXEC_BLOCK_CALLBACK,
 						program);
+					
+					result = update_program_voices_parameter(program, "adjsynth.amp_ch1.pan_modulation_lfo_num");
 				}
 				else if (ampid == _AMP_CH2_EVENT)
 				{
@@ -137,6 +153,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 						val,
 						_EXEC_BLOCK_CALLBACK,
 						program);
+					
+					result = update_program_voices_parameter(program, "adjsynth.amp_ch2.pan_modulation_lfo_num");
 				}
 
 				break;
@@ -150,6 +168,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 						val,
 						_EXEC_BLOCK_CALLBACK,
 						program);
+					
+					result = update_program_voices_parameter(program, "adjsynth.amp_ch1.pan_modulation_lfo_level");
 				}
 				else if (ampid == _AMP_CH2_EVENT)
 				{
@@ -159,6 +179,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 						val,
 						_EXEC_BLOCK_CALLBACK,
 						program);
+					
+					result = update_program_voices_parameter(program, "adjsynth.amp_ch2.pan_modulation_lfo_level");
 				}
 
 				break;
@@ -172,6 +194,8 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 						true,
 						_EXEC_BLOCK_CALLBACK,
 						program);
+					
+					result = update_program_voices_parameter(program, "adjsynth.amp.fixed_levels_enabled");
 				}
 				else if (val == _AMP_FIXED_LEVELS_DISABLE)
 				{
@@ -181,12 +205,14 @@ int AdjSynth::amp_event(int ampid, int eventid, int val, _settings_params_t *par
 						false,
 						_EXEC_BLOCK_CALLBACK,
 						program);
+					
+					result = update_program_voices_parameter(program, "adjsynth.amp.fixed_levels_enabled");
 				}
 
 				break;
 		}
 	}
 
-	return 0;
+	return result;
 	
 }

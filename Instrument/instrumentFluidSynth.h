@@ -105,6 +105,13 @@ public:
 	int events_handler(int moduleid, int paramid, float val, _settings_params_t *params, int program = -1);
 	int events_handler(int moduleid, int paramid, bool val, _settings_params_t *params, int program = -1);
 	int events_handler(int moduleid, int paramid, string val, _settings_params_t *params, int program = -1);
+	
+	
+	int set_fluid_synth_left_jack_output_connection(s_jack_connection_t connection);
+	int set_fluid_synth_right_jack_output_connection(s_jack_connection_t connection);
+	
+	s_jack_connection_t get_fluid_synth_left_jack_output_connection();
+	s_jack_connection_t get_fluid_synth_right_jack_output_connection();
 
 	int active_preset;
 	_settings_params_t presets[_NUM_OF_FLUID_PRESETS];
@@ -114,6 +121,9 @@ public:
 
   private:
 	FluidSynthInterface *fluid_synth_int_instance;
+	
+	/* Holds the stereo L and R Jack outputs connections */
+	s_jack_connection_t jack_out_connection_left, jack_out_connection_right;
 
 	func_ptr_void_string_t callback_ptr_update_fluid_synth_preset_text;
 	

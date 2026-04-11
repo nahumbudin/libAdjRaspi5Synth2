@@ -21,6 +21,7 @@
 #include "../Instrument/instrumentsManager.h"
 #include "../Instrument/instrumentFluidSynth.h"
 #include "../Instrument/instrumentAnalogSynth.h"
+#include "../Instrument/instrumentMidiMixer.h"
 #include "../utils/utils.h"
 #include "../LibAPI/connections.h"
 #include "../LibAPI/defines.h"
@@ -200,14 +201,32 @@ int PatchsHandler::save_patch_file(std::string file_path)
 			// TODO:
 
 			writer.EndArray(); // jack_audio_input_connections
-			writer.EndObject();
+			writer.EndObject();			
 
 			writer.StartObject();
 			writer.Key("jack_audio_right_output_connections");
 			writer.StartArray();
 
-			jack_connection =
-				ModSynth::get_instance()->get_analog_synth()->get_analog_synth_right_jack_output_connection();
+			//jack_connection =
+			//	ModSynth::get_instance()->get_analog_synth()->get_analog_synth_right_jack_output_connection();
+
+			if (instrument_name == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
+			{
+				jack_connection =
+					ModSynth::get_instance()->get_analog_synth()->get_analog_synth_right_jack_output_connection();
+			}
+			else if (instrument_name == _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY)
+			{
+				jack_connection =
+					ModSynth::get_instance()->get_fluid_synth()->get_fluid_synth_right_jack_output_connection();
+			}
+			else
+			{
+				jack_connection.in_client_name = "";
+				jack_connection.in_client_port_name = "";
+				jack_connection.out_client_name = "";
+				jack_connection.out_client_port_name = "";			
+			}
 
 			writer.String(jack_connection.in_client_name.c_str());
 			writer.String(jack_connection.in_client_port_name.c_str());
@@ -221,8 +240,26 @@ int PatchsHandler::save_patch_file(std::string file_path)
 			writer.Key("jack_audio_left_output_connections");
 			writer.StartArray();
 
-			jack_connection =
-				ModSynth::get_instance()->get_analog_synth()->get_analog_synth_left_jack_output_connection();
+			//jack_connection =
+			//	ModSynth::get_instance()->get_analog_synth()->get_analog_synth_left_jack_output_connection();
+
+			if (instrument_name == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
+			{
+				jack_connection =
+					ModSynth::get_instance()->get_analog_synth()->get_analog_synth_left_jack_output_connection();
+			}
+			else if (instrument_name == _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY)
+			{
+				jack_connection =
+					ModSynth::get_instance()->get_fluid_synth()->get_fluid_synth_left_jack_output_connection();
+			}
+			else
+			{
+				jack_connection.in_client_name = "";
+				jack_connection.in_client_port_name = "";
+				jack_connection.out_client_name = "";
+				jack_connection.out_client_port_name = "";
+			}
 
 			writer.String(jack_connection.in_client_name.c_str());
 			writer.String(jack_connection.in_client_port_name.c_str());
@@ -324,8 +361,8 @@ int PatchsHandler::load_patch_file(std::string file_path)
 					{
 						midi_input_interfaces.clear();
 
-						jack_right_output_connections_vector.clear();
-						jack_left_output_connections_vector.clear();
+						//jack_right_output_connections_vector.clear();
+						//jack_left_output_connections_vector.clear();
 						
 						const Value &m = itr->value[i];
 						for (auto &v : m.GetObject())
@@ -450,6 +487,22 @@ void PatchsHandler::register_callback_get_active_instruments_names_list(func_ptr
 	callback_get_active_instruments_names_list_ptr = ptr;
 }
 
+std::string PatchsHandler::get_jack_client_name_for_instrument(const std::string &instrument_name)
+{
+	if (instrument_name == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
+	{
+		return "Adj-Analog-Synth";
+	}
+	else if (instrument_name == _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY)
+	{
+		return "Adj-Fluid-Synth";
+	}
+	else
+	{
+		return "";
+	}
+}
+
 int PatchsHandler::close_current_oppened_instruments()
 {
 	vector<string> instruments_names;
@@ -523,12 +576,15 @@ int PatchsHandler::disconnect_current_oppened_instruments_midi_in_connections()
 int PatchsHandler::create_active_instruments_settings_files(vector<string> inst_names, string patch_file_path)
 {
 	string settings_file_path;
+	
 
 	for (string instrument_name : inst_names)
 	{
+		settings_file_path = patch_file_path + instrument_name + "-settings.html";
+		
 		if (instrument_name == _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY)
 		{
-			settings_file_path = patch_file_path + instrument_name + "-settings.html";
+			//settings_file_path = patch_file_path + instrument_name + "-settings.html";
 			mod_synth_save_fluid_synth_preset_file(settings_file_path);
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY)
@@ -537,7 +593,7 @@ int PatchsHandler::create_active_instruments_settings_files(vector<string> inst_
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
 		{
-			settings_file_path = patch_file_path + instrument_name + "-settings.html";
+			//settings_file_path = patch_file_path + instrument_name + "-settings.html";
 			mod_synth_save_adj_synth_patch_file(settings_file_path);
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY)
@@ -558,7 +614,7 @@ int PatchsHandler::create_active_instruments_settings_files(vector<string> inst_
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_MIDI_MIXER_STR_KEY)
 		{
-			// TODO:
+			mod_synth_save_midi_mixer_patch_file(settings_file_path);
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_MIDI_MAPPER_STR_KEY)
 		{
@@ -622,7 +678,7 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 		if (settings_files.at(m) != "")
 		{
 			settings_file_path = filesystem::path(file_path).parent_path().c_str();
-			settings_file_path += "/" + active_instruments.at(m) + "-settings.html";
+			settings_file_path += "/" + active_instruments.at(m) + "-settings.xml";
 
 			if (active_instruments.at(m) == _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY)
 			{
@@ -661,7 +717,10 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 			}
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_MIXER_STR_KEY)
 			{
-				
+				ModSynth::get_instance()->get_midi_mixer()->open_midi_mixer_presets_file(
+					settings_file_path,
+					ModSynth::get_instance()->get_midi_mixer()->active_preset_settings_params,
+					&ModSynth::get_instance()->get_midi_mixer()->presets_summary_str[0]);
 			}
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_MAPPER_STR_KEY)
 			{

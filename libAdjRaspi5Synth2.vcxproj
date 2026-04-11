@@ -171,16 +171,20 @@
     <ClCompile Include="FluidSynth\fluidSynthInterface.cpp" />
     <ClCompile Include="FluidSynth\fluidSynthPresets.cpp" />
     <ClCompile Include="I2C\i2cInterface.cpp" />
+    <ClCompile Include="Instrument\analogEqualizerPresets.cpp" />
     <ClCompile Include="Instrument\Instrument.cpp" />
+    <ClCompile Include="Instrument\instrumentAnalogEqualizer.cpp" />
     <ClCompile Include="Instrument\instrumentAnalogSynth.cpp" />
     <ClCompile Include="Instrument\instrumentConnectionsControl.cpp" />
     <ClCompile Include="Instrument\instrumentControlBoxHandler.cpp" />
     <ClCompile Include="Instrument\instrumentFluidSynth.cpp" />
     <ClCompile Include="Instrument\instrumentHammondOrgan.cpp" />
     <ClCompile Include="Instrument\instrumentMidiMapper.cpp" />
+    <ClCompile Include="Instrument\instrumentMidiMixer.cpp" />
     <ClCompile Include="Instrument\instrumentMidiPlayer.cpp" />
     <ClCompile Include="Instrument\instrumentMidiPlayerPlaybackThread.cpp" />
     <ClCompile Include="Instrument\instrumentsManager.cpp" />
+    <ClCompile Include="Instrument\midiMixerPresets.cpp" />
     <ClCompile Include="Jack\jackAudioClients.cpp" />
     <ClCompile Include="Jack\JackConfigurationFile.cpp" />
     <ClCompile Include="Jack\jackConnections.cpp" />
@@ -281,6 +285,7 @@
     <ClInclude Include="FluidSynth\fluidSynthInterface.h" />
     <ClInclude Include="I2C\i2cInterface.h" />
     <ClInclude Include="Instrument\instrument.h" />
+    <ClInclude Include="Instrument\instrumentAnalogEqualizer.h" />
     <ClInclude Include="Instrument\instrumentAnalogSynth.h" />
     <ClInclude Include="Instrument\instrumentConnectionsControl.h" />
     <ClInclude Include="Instrument\instrumentControlBoxHandler.h" />
@@ -290,6 +295,7 @@
     <ClInclude Include="Instrument\instrumentMidiPlayer.h" />
     <ClInclude Include="Instrument\instrumentMidiPlayerPlaybackThread.h" />
     <ClInclude Include="Instrument\instrumentsManager.h" />
+    <ClInclude Include="Instrument\instrumentMidiMixer.h" />
     <ClInclude Include="Jack\jackAudioClients.h" />
     <ClInclude Include="Jack\JackConfigurationFile.h" />
     <ClInclude Include="Jack\jackConnections.h" />

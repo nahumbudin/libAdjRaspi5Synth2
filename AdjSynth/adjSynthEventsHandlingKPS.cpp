@@ -66,6 +66,8 @@
 */
 int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	switch (karlplusid)
 	{
 	case _KARPLUS_1_EVENT:
@@ -76,7 +78,9 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				"adjsynth.karplus_synth.excitation_waveform_type",
 				val,
 				_EXEC_CALLBACK,
-				program);	
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.excitation_waveform_type");
 		}
 		else if (eventid == _KARPLUS_STRONG_EXCITATION_WAVEFORM_VARIATIONS)
 		{
@@ -86,6 +90,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.excitation_waveform_variations");
 		}
 		else if (eventid == _KARPLUS_STRONG_STRING_DUMP_CALC_MODE)
 		{
@@ -95,6 +101,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.string_damping_calculation_mode");
 		}
 		else if (eventid == _KARPLUS_STRONG_STRING_DAMPING)
 		{
@@ -104,6 +112,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.string_damping");
 		}
 		else if (eventid == _KARPLUS_STRONG_STRING_DAMPING_VARIATION)
 		{
@@ -113,6 +123,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.string_damping_variations");
 		}
 		else if (eventid == _KARPLUS_STRONG_PLUCK_DAMPING)
 		{
@@ -122,6 +134,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.pluck_damping");
 		}
 		else if (eventid == _KARPLUS_STRONG_PLUCK_DAMPING_VARIATION)
 		{
@@ -131,6 +145,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.pluck_damping_variations");
 		}
 		else if (eventid == _KARPLUS_STRONG_ON_DECAY)
 		{
@@ -140,6 +156,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.on_decay");
 		}
 		else if (eventid == _KARPLUS_STRONG_OFF_DECAY)
 		{
@@ -149,6 +167,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.off_decay");
 		}
 		else if (eventid == _KARPLUS_STRONG_SEND_1)
 		{
@@ -158,6 +178,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.send_filter_1");
 		}
 		else if (eventid == _KARPLUS_STRONG_SEND_2)
 		{
@@ -167,11 +189,13 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.send_filter_2");
 		}
 		break;
 	}
 	
-	return 0;
+	return result;
 }
 
 
@@ -192,6 +216,8 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 */
 int AdjSynth::karplus_event_bool(int karplusid, int eventid, bool val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	switch (karplusid)
 	{
 	case _KARPLUS_1_EVENT:
@@ -203,11 +229,13 @@ int AdjSynth::karplus_event_bool(int karplusid, int eventid, bool val, _settings
 				val,
 				_EXEC_BLOCK_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.enabled");
 		}
 		break;
 	}
 	
-	return 0;
+	return result;
 }
 
 

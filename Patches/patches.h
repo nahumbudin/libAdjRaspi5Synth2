@@ -79,6 +79,8 @@ class PatchsHandler
 
 	void register_callback_get_active_instruments_names_list(func_ptr_vector_std_string_void_t ptr);
 
+	string get_jack_client_name_for_instrument(const string &instrument_name);
+
   private:
 	PatchsHandler();
 

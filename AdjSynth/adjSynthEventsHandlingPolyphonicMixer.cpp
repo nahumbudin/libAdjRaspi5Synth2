@@ -22,6 +22,7 @@
 int AdjSynth::polyphonic_mixer_event(int polmixid, int eventid, int val, _settings_params_t *params, int program)
 {
 	int res = 0;
+	int result = -1;
 	
 	if (polmixid != _POLYPHONIC_MIXER_EVENT)
 	{
@@ -35,7 +36,9 @@ int AdjSynth::polyphonic_mixer_event(int polmixid, int eventid, int val, _settin
 			"adjsynth.poly_mixer.level",
 			val,
 			_EXEC_CALLBACK,
-			program);	
+			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.poly_mixer.level");
 	}
 	else if ((eventid >= _MIXER_CHAN_1_PAN) && (eventid <= _MIXER_CHAN_16_PAN))
 	{
@@ -44,7 +47,9 @@ int AdjSynth::polyphonic_mixer_event(int polmixid, int eventid, int val, _settin
 			"adjsynth.poly_mixer.pan",
 			val,
 			_EXEC_CALLBACK,
-			program);	
+			program);
+		
+		result |= update_program_voices_parameter(program, "adjsynth.poly_mixer.pan");
 	}
 	else if ((eventid >= _MIXER_CHAN_1_SEND) && (eventid <= _MIXER_CHAN_16_SEND))
 	{
@@ -53,7 +58,9 @@ int AdjSynth::polyphonic_mixer_event(int polmixid, int eventid, int val, _settin
 			"adjsynth.poly_mixer.send",
 			val,
 			_EXEC_CALLBACK,
-			program);	
+			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.poly_mixer.send");
 	}
 	else if ((eventid >= _MIXER_CHAN_1_PAN_MOD_LFO_LEVEL) && (eventid <= _MIXER_CHAN_16_PAN_MOD_LFO_LEVEL))
 	{
@@ -62,7 +69,9 @@ int AdjSynth::polyphonic_mixer_event(int polmixid, int eventid, int val, _settin
 			"adjsynth.poly_mixer.pan_lfo_level",
 			val,
 			_EXEC_CALLBACK,
-			program);	
+			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.poly_mixer.pan_lfo_level");
 	}
 	else if ((eventid >= _MIXER_CHAN_1_PAN_MOD_LFO) && (eventid <= _MIXER_CHAN_16_PAN_MOD_LFO))
 	{
@@ -72,11 +81,13 @@ int AdjSynth::polyphonic_mixer_event(int polmixid, int eventid, int val, _settin
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.poly_mixer.pan_lfo_num");
 	}
 	else
 	{
 		return -1;
 	}
 
-	return res;
+	return result;
 }

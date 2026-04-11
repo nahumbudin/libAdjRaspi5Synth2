@@ -52,6 +52,9 @@ void process_silence_in(jack_nframes_t nun_of_frames);
 void jack_shutdown(void *arg);
 void jack_exit();
 
+void deactivate_jack_clients();
+void close_jack_clients();
+
 int set_jack_mode(int mode);
 int get_jack_mode();
 int enable_jack_auto_start();

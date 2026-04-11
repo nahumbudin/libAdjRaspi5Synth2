@@ -7,6 +7,7 @@
  *					2. Add LFO6 and ADSR6 to set_voice_params()
  *					3. Change ADR set_sec to set _sec_log in set_voice_params()
  *					4. Adding voice gain, pan and send parameters
+ *					5. Adding the option to set online a specific setting param of an active voice.
 *					
 *	@version	2-Feb--2021	1.1
 *					1. Code refactoring and notaion.
@@ -54,7 +55,7 @@ public:
 	int set_audio_block_size(int size);
 	int get_audio_block_size();
 
-	void set_voice_params(_settings_params_t *params);
+	int set_voice_params(_settings_params_t *params, _settings_params_t *common_params, const char *key_filter = "all");
 	_settings_params_t *get_voice_params();
 
 	void assign_dsp_voice(DSP_Voice *dspv = NULL);

@@ -1,12 +1,17 @@
 /**
 * @file		gui.h
 *	@author		Nahum Budin
-*	@date		6-Jul-2024
-*	@version	1.0
+*	@date		8-Apr-2026
+*	@version	1.1
+*					1. Added MIDI Mixer GUI update callbacks
 *	
 *	@brief		Provides the GUI API
 *	
 *	Based on libAdjHeartModSynth_1.h Ver 1.3 9-Jan-2021
+*	
+*	@History:
+*			version 1.0:  6-Jul-2024
+*
 */
 
 #pragma once
@@ -70,11 +75,25 @@ void mod_synth_register_midi_player_song_playing_time_update_callback(func_ptr_v
 void mod_synth_register_midi_player_song_remaining_playing_time_update_callback(func_ptr_void_int_int_t ptr);
 
 /**
+*   @brief  Activate all Midi Mixer GUI callback functions.
+*   @param  None
+*   @return void
+*/
+void mod_synth_midi_mixer_update_gui();
+
+/**
 *   @brief  Register a callback function that update the midi mixer channels volume.
 *   @param  func_ptr_void_int_int_t ptr  a pointer to the callback function ( void func(int, int) ) (chan, vol)
 *   @return void
 */
 void mod_synth_register_midi_mixer_channel_volume_update_callback(func_ptr_void_int_int_t ptr);
+
+/**
+*   @brief  Register a callback function that update the midi mixer channels sends.
+*   @param  func_ptr_void_int_int_t ptr  a pointer to the callback function ( void func(int, int) ) (chan, vol)
+*   @return void
+*/
+void mod_synth_register_midi_mixer_channel_send_update_callback(func_ptr_void_int_int_t ptr);
 
 /**
 *   @brief  Register a callback function that update the midi mixer channels pans.
@@ -83,6 +102,19 @@ void mod_synth_register_midi_mixer_channel_volume_update_callback(func_ptr_void_
 */
 void mod_synth_register_midi_mixer_channel_pan_update_callback(func_ptr_void_int_int_t ptr);
 
+/**
+*   @brief  Register a callback function that update the midi mixer channels pans modulation LFO.
+*   @param  func_ptr_void_int_int_t ptr  a pointer to the callback function ( void func(int, int) ) (chan, vol)
+*   @return void
+*/
+void mod_synth_register_midi_mixer_channel_pan_mod_lfo_update_callback(func_ptr_void_int_int_t ptr);
+
+/**
+*   @brief  Register a callback function that update the midi mixer channels pans modulation LFO level.
+*   @param  func_ptr_void_int_int_t ptr  a pointer to the callback function ( void func(int, int) ) (chan, vol)
+*   @return void
+*/
+void mod_synth_register_midi_mixer_channel_pan_mod_lfo_level_update_callback(func_ptr_void_int_int_t ptr);
 /**
 *   @brief  Register a callback function that update the midi mixer channels static volume state.
 *   @param  func_ptr_void_int_bool_t ptr  a pointer to the callback function ( void func(int, bool) ) (chan, state)

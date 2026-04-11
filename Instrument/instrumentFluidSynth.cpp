@@ -158,6 +158,10 @@ void InstrumentFluidSynth::set_reverb_room_size(int val)
 	// 0-1.0
 	int res;
 	double fsize = (float)(val) / 120.f;
+	if (fsize > 1.f)
+	{
+		fsize = 1.f;
+	}
 
 	res = fluid_synth_int_instance->set_fluid_synth_reverb_room_size_value(fsize);
 	res |= fluid_synth_int_instance->set_fluid_synth_reverb_params();
@@ -604,5 +608,49 @@ int InstrumentFluidSynth::events_handler(int moduleid, int paramid, string val, 
 	}
 	
 	return -1;
+}
+
+int InstrumentFluidSynth::set_fluid_synth_left_jack_output_connection(s_jack_connection_t connection)
+{
+	jack_out_connection_left.in_client_name = connection.in_client_name;
+	jack_out_connection_left.in_client_port_name = connection.in_client_port_name;
+	jack_out_connection_left.out_client_name = connection.out_client_name;
+	jack_out_connection_left.out_client_port_name = connection.out_client_port_name;
+	
+	return 0;
+}
+
+int InstrumentFluidSynth::set_fluid_synth_right_jack_output_connection(s_jack_connection_t connection)
+{
+	jack_out_connection_right.in_client_name = connection.in_client_name;
+	jack_out_connection_right.in_client_port_name = connection.in_client_port_name;
+	jack_out_connection_right.out_client_name = connection.out_client_name;
+	jack_out_connection_right.out_client_port_name = connection.out_client_port_name;
+	
+	return 0;
+}
+
+s_jack_connection_t InstrumentFluidSynth::get_fluid_synth_left_jack_output_connection()
+{
+	s_jack_connection_t connection;
+	
+	connection.in_client_name = jack_out_connection_left.in_client_name; //"system";
+	connection.in_client_port_name = jack_out_connection_left.in_client_port_name; //"playback_1";
+	connection.out_client_name = jack_out_connection_left.out_client_name; //"Adj-Fluid-Synth";
+	connection.out_client_port_name = jack_out_connection_left.out_client_port_name; //"left";
+
+	return connection;
+}
+
+s_jack_connection_t InstrumentFluidSynth::get_fluid_synth_right_jack_output_connection()
+{
+	s_jack_connection_t connection;
+	
+	connection.in_client_name = jack_out_connection_right.in_client_name; //"system";
+	connection.in_client_port_name = jack_out_connection_right.in_client_port_name; //"playback_2";
+	connection.out_client_name = jack_out_connection_right.out_client_name; //"Adj-Fluid-Synth";
+	connection.out_client_port_name = jack_out_connection_right.out_client_port_name; //"right";
+
+	return connection;
 }
 

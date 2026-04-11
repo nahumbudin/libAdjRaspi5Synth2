@@ -415,13 +415,49 @@ int AudioManager::start_audio_service(int driver, int samp_rate, int block_size)
 */
 int AudioManager::stop_audio_service()
 {
+	if (!audio_service_started)
+	{
+		return 0;
+	}
+
+	// 1. Signal all threads to stop
 	audio_service_started = false;
-	stop_audio_update_thread();
-	stop_jack_connect_thread();
+	update_thread_is_running = false;
+	jack_thread_is_running = false;
+
+	// 2. Wake up waiting threads
+	pthread_cond_broadcast(&update_thread_cv);
+
+	// 3. Deactivate JACK clients (stops callbacks immediately)
+	deactivate_jack_clients();
+
+	// 4. Disconnect ports
 	disconnect_jack_audio_ports_out();
 	disconnect_jack_audio_ports_in();
-	//stop_alsa_main_thread();TODO: ALSA AUDIO <<<<<<<<<<<<<<<<<<<<<<<<<
-	
+
+	// 5. Stop and wait for threads
+	stop_audio_update_thread();
+	stop_jack_connect_thread();
+
+	if (update_thread_id != 0)
+	{
+		pthread_join(update_thread_id, NULL);
+		update_thread_id = 0;
+	}
+
+	if (jack_thread_id != 0)
+	{
+		pthread_join(jack_thread_id, NULL);
+		jack_thread_id = 0;
+	}
+
+	// 6. Close JACK clients completely
+	close_jack_clients();
+
+	// 7. Reset flags
+	jack_out_connected = false;
+	jack_in_connected = false;
+
 	return 0;
 }
 
@@ -731,11 +767,32 @@ void* AUDMNG_update_thread(void *arg)
 	
 	while (update_thread_is_running)
 	{
-		
 		pthread_mutex_lock(&update_thread_mutex);
-		pthread_cond_wait(&update_thread_cv, &update_thread_mutex);
+
+		// Add timeout to prevent infinite blocking on shutdown
+		struct timespec timeout;
+		clock_gettime(CLOCK_REALTIME, &timeout);
+		timeout.tv_sec += 1; // 1 second timeout
+
+		int wait_result = pthread_cond_timedwait(&update_thread_cv, &update_thread_mutex, &timeout);
 		pthread_mutex_unlock(&update_thread_mutex);
-			
+
+		// Check if we should exit after waking up
+		if (!update_thread_is_running)
+		{
+			break;
+		}
+
+		// Skip processing if woken up by timeout
+		if (wait_result == ETIMEDOUT)
+		{
+			continue;
+		}
+
+		// Moved up to avoid blocking the thread on shutdown
+		// pthread_cond_wait(&update_thread_cv, &update_thread_mutex);
+		// pthread_mutex_unlock(&update_thread_mutex);
+
 		// Activate update cycle start tasks (e.g. ModSynth::update_tasks() )
 		if (AudioManager::callback_audio_update_cycle_start_tasks_ptr)
 		{

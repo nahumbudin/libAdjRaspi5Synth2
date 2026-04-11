@@ -77,7 +77,7 @@ void InstrumentAnalogSynth::controller_event_handler(uint8_t channel, uint8_t nu
 			_POLYPHONIC_MIXER_EVENT, 
 			_MIXER_CHAN_1_LEVEL + channel,
 			val,
-			AdjSynth::get_instance()->get_active_preset_params(),
+			AdjSynth::get_instance()->get_active_common_params(),
 			AdjSynth::get_instance()->get_active_sketch());
 	}
 	else if (num == _MIDI_EVENT_CHANNEL_BALANCE_BYTE_2)
@@ -88,7 +88,7 @@ void InstrumentAnalogSynth::controller_event_handler(uint8_t channel, uint8_t nu
 			_POLYPHONIC_MIXER_EVENT,
 			_MIXER_CHAN_1_PAN + channel,
 			val,
-			AdjSynth::get_instance()->get_active_preset_params(),
+			AdjSynth::get_instance()->get_active_common_params(),
 			AdjSynth::get_instance()->get_active_sketch());
 	}
 	else if (num == _MIDI_EVENT_CHANNEL_SEND_BYTE_2)
@@ -97,7 +97,7 @@ void InstrumentAnalogSynth::controller_event_handler(uint8_t channel, uint8_t nu
 			_POLYPHONIC_MIXER_EVENT,
 			_MIXER_CHAN_1_SEND + channel,
 			val,
-			AdjSynth::get_instance()->get_active_preset_params(),
+			AdjSynth::get_instance()->get_active_common_params(),
 			AdjSynth::get_instance()->get_active_sketch());
 	}
 	else if (num == _MIDI_EVENT_CHANNEL_PAN_MOD_LFO_LEVEL_BYTE_2)
@@ -106,7 +106,7 @@ void InstrumentAnalogSynth::controller_event_handler(uint8_t channel, uint8_t nu
 			_POLYPHONIC_MIXER_EVENT,
 			_MIXER_CHAN_1_PAN_MOD_LFO_LEVEL + channel,
 			val,
-			AdjSynth::get_instance()->get_active_preset_params(),
+			AdjSynth::get_instance()->get_active_common_params(),
 			AdjSynth::get_instance()->get_active_sketch());
 	}
 	else if (num == _MIDI_EVENT_CHANNEL_PAN_MOD_LFO_SELECT_BYTE_2)
@@ -115,7 +115,7 @@ void InstrumentAnalogSynth::controller_event_handler(uint8_t channel, uint8_t nu
 			_POLYPHONIC_MIXER_EVENT,
 			_MIXER_CHAN_1_PAN_MOD_LFO + channel,
 			val,
-			AdjSynth::get_instance()->get_active_preset_params(),
+			AdjSynth::get_instance()->get_active_common_params(),
 			AdjSynth::get_instance()->get_active_sketch());
 	}
 }

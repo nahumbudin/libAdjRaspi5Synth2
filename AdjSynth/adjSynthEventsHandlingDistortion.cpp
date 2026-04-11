@@ -36,6 +36,7 @@ int AdjSynth::distortion_event_int(int distid, int eventid, int val, _settings_p
 {
 	int voice;
 	float value;
+	int result = -1;
 
 	switch (eventid)
 	{
@@ -47,7 +48,9 @@ int AdjSynth::distortion_event_int(int distid, int eventid, int val, _settings_p
 				"adjsynth.distortion_1.drive",
 				val,
 				_EXEC_CALLBACK,
-				program);	
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.distortion_1.drive");
 
 		}
 		else if (distid == _DISTORTION_2_EVENT)
@@ -59,6 +62,8 @@ int AdjSynth::distortion_event_int(int distid, int eventid, int val, _settings_p
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.distortion_2.drive");
 		}
 
 		break;
@@ -72,6 +77,8 @@ int AdjSynth::distortion_event_int(int distid, int eventid, int val, _settings_p
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.distortion_1.range");
 		}
 		else if (distid == _DISTORTION_2_EVENT)
 		{
@@ -81,6 +88,8 @@ int AdjSynth::distortion_event_int(int distid, int eventid, int val, _settings_p
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.distortion_2.range");
 		}
 
 		break;
@@ -94,6 +103,8 @@ int AdjSynth::distortion_event_int(int distid, int eventid, int val, _settings_p
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.distortion_1.blend");
 		}
 		else if (distid == _DISTORTION_2_EVENT)
 		{
@@ -103,12 +114,14 @@ int AdjSynth::distortion_event_int(int distid, int eventid, int val, _settings_p
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.distortion_2.blend");
 		}
 		
 		break;
 	}
 	
-	return 0;
+	return result;
 }
 
 /**
@@ -124,6 +137,8 @@ int AdjSynth::distortion_event_int(int distid, int eventid, int val, _settings_p
 */
 int AdjSynth::distortion_event_bool(int distid, int eventid, bool val, _settings_params_t *params, int program)
 {
+	int result = -1;
+	
 	switch (eventid)
 	{
 	case _ENABLE_DISTORTION:
@@ -134,6 +149,8 @@ int AdjSynth::distortion_event_bool(int distid, int eventid, bool val, _settings
 			_EXEC_CALLBACK,
 			program);
 		
+		result = update_program_voices_parameter(program, "adjsynth.distortion.enabled");
+		
 		break;
 
 	case _DISTORTION_AUTO_GAIN:
@@ -143,9 +160,11 @@ int AdjSynth::distortion_event_bool(int distid, int eventid, bool val, _settings
 			val,
 			_EXEC_CALLBACK,
 			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.distortion.auto_gain_enabled");
 
 		break;	
 	}
 	
-	return 0;
+	return result;
 }
