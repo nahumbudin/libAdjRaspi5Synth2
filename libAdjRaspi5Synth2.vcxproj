@@ -87,7 +87,6 @@
     <ClCompile Include="AdjSynth\adjSynthPADcreator.cpp" />
     <ClCompile Include="AdjSynth\adjSynthPolyphonyManager.cpp" />
     <ClCompile Include="AdjSynth\adjSynthProgram.cpp" />
-    <ClCompile Include="AdjSynth\adjSynthPrograms.cpp" />
     <ClCompile Include="AdjSynth\adjSynthSetHammondPercussionMode.cpp" />
     <ClCompile Include="AdjSynth\adjSynthSettingsBlockCallbacksVoiceModulators.cpp" />
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksAmp.cpp" />
@@ -108,7 +107,6 @@
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksProgramPAD.cpp" />
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksProgramPolyphonicMixer.cpp" />
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksPrograoVCO.cpp" />
-    <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksReverb.cpp" />
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksVoiceAmp.cpp" />
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksVoiceDistortion.cpp" />
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksVoiceFilter.cpp" />
@@ -172,8 +170,10 @@
     <ClCompile Include="FluidSynth\fluidSynthPresets.cpp" />
     <ClCompile Include="I2C\i2cInterface.cpp" />
     <ClCompile Include="Instrument\analogEqualizerPresets.cpp" />
+    <ClCompile Include="Instrument\analogReverbrationPresets.cpp" />
     <ClCompile Include="Instrument\Instrument.cpp" />
     <ClCompile Include="Instrument\instrumentAnalogEqualizer.cpp" />
+    <ClCompile Include="Instrument\instrumentAnalogReverbration.cpp" />
     <ClCompile Include="Instrument\instrumentAnalogSynth.cpp" />
     <ClCompile Include="Instrument\instrumentConnectionsControl.cpp" />
     <ClCompile Include="Instrument\instrumentControlBoxHandler.cpp" />
@@ -237,7 +237,6 @@
     <ClInclude Include="AdjSynth\adjSynthPADcreator.h" />
     <ClInclude Include="AdjSynth\adjSynthPolyphonyManager.h" />
     <ClInclude Include="AdjSynth\adjSynthProgram.h" />
-    <ClInclude Include="AdjSynth\adjSynthPrograms.h" />
     <ClInclude Include="AdjSynth\adjSynthVoice.h" />
     <ClInclude Include="AdjSynth\synthKeyboard.h" />
     <ClInclude Include="ALSA\alsaAudioHandling.h" />
@@ -286,6 +285,7 @@
     <ClInclude Include="I2C\i2cInterface.h" />
     <ClInclude Include="Instrument\instrument.h" />
     <ClInclude Include="Instrument\instrumentAnalogEqualizer.h" />
+    <ClInclude Include="Instrument\instrumentAnalogReverbration.h" />
     <ClInclude Include="Instrument\instrumentAnalogSynth.h" />
     <ClInclude Include="Instrument\instrumentConnectionsControl.h" />
     <ClInclude Include="Instrument\instrumentControlBoxHandler.h" />
@@ -307,6 +307,7 @@
     <ClInclude Include="LibAPI\defines.h" />
     <ClInclude Include="LibAPI\fluidSynth.h" />
     <ClInclude Include="LibAPI\gui.h" />
+    <ClInclude Include="LibAPI\hammondOrgan.h" />
     <ClInclude Include="LibAPI\libAdjRaspi5SynthAPI.h" />
     <ClInclude Include="LibAPI\midi.h" />
     <ClInclude Include="LibAPI\modSynthAPI.h" />

@@ -1,12 +1,16 @@
 /**
 * @file		instrumentFluidSynth.h
 *	@author		Nahum Budin
-*	@date		24-06-2024
-*	@version	1.0	Initial release
+*	@date		11-Apr-2026
+*	@version	2.0	
+*					1. Updated settings management by each instrument.	
 *					
 *	@brief		Implements a FluidSynth SoundFont synthesizer.
 *	
 *	History:\n
+*				@version	1.1	
+*					1. "Manual" copy of settings structure (mutx added)
+*				@version	24-06-2024	1.0	Initial release
 *	
 */
 
@@ -62,35 +66,30 @@ public:
 	int select_program(int chan, unsigned int sfid,
 					    unsigned int bank, unsigned int program);
 
-	int set_default_settings_parameters(_settings_params_t *params, int prog = -1);
-
-	/**
-*   @brief  Save the active FluidSynth settings parameters as XML file
-*   @param  path settings XML file full path
-*   @return 0 if done
-*/
-	int save_fluid_synth_settings_file(string path);
+	int set_default_settings_parameters();
+	int set_instrument_settings();
 
 	/**
 *   @brief  Open settings parameters XML file and set it as the FluidSynth active settings
 *   @param  path settings XML file full path
 *   @return 0 if done
 */
+	int read_instrument_active_settings(string path, string type = "type-none");
+	
 	int open_fluid_synth_settings_file(string path);
 
 	int get_fluid_synth_channel_bank(int chan);
 
-	int collect_fluid_synth_preset_parms(_settings_params_t *params);
+	int collect_fluid_synth_settings_parms(_settings_params_t *params);
 
-	int save_fluid_synth_preset_file(string path);
+	//int save_instrument_active_settings(string path, string type = "type-none");
 
 	int open_fluid_synth_preset_file(
 		string path = "",
 		_settings_params_t *preset = NULL,
 		std::string *summary = NULL);
 
-	int collect_fluid_synth_prest_channels_data(_settings_params_t *params,
-												fluid_channel_preset_t *channels_presets);
+	int collect_fluid_synth_prest_channels_data(_settings_params_t *params, fluid_channel_preset_t *channels_presets);
 
 	int generate_fluid_synth_prest_summary(fluid_channel_preset_t *preset, string *summary);
 
@@ -101,10 +100,10 @@ public:
 
 	void set_active_preset(int preset_num);
 
-	int events_handler(int moduleid, int paramid, int val, _settings_params_t *params, int program = -1);
-	int events_handler(int moduleid, int paramid, float val, _settings_params_t *params, int program = -1);
-	int events_handler(int moduleid, int paramid, bool val, _settings_params_t *params, int program = -1);
-	int events_handler(int moduleid, int paramid, string val, _settings_params_t *params, int program = -1);
+	int api_settings_events_handler(int moduleid, int paramid, int val, _settings_params_t *params, int program = -1);
+	int api_settings_events_handler(int moduleid, int paramid, float val, _settings_params_t *params, int program = -1);
+	int api_settings_events_handler(int moduleid, int paramid, bool val, _settings_params_t *params, int program = -1);
+	int api_settings_events_handler(int moduleid, int paramid, string val, _settings_params_t *params, int program = -1);
 	
 	
 	int set_fluid_synth_left_jack_output_connection(s_jack_connection_t connection);

@@ -19,6 +19,7 @@
 #include "instrumentFluidSynth.h"
 #include "instrumentAnalogSynth.h"
 #include "instrumentHammondOrgan.h"
+#include "instrumentMidiMixer.h"
 #include "../modSynth.h"
 
 class ModSynth;
@@ -243,7 +244,9 @@ void InstrumentsManager::remove_active_instrument(en_instruments_ids_t inst)
 int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t synth)
 {
 	en_instruments_ids_t last_connected;
-	
+	int res = 0;
+	_settings_int_param_t int_param;
+	char key_string[128];
 	
 	fprintf(stderr, "Allocate MIDI channel %i to instrument %i\n", ch, synth);
 	
@@ -320,6 +323,43 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 			ModSynth::get_instance()->get_analog_synth()->
 				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 			midi_channels_allocated_synth[ch] = synth;
+			
+			// Can we set the MIDI Mixer channel settings here (Others will be set when allocating a voiceprogram]?
+			
+			sprintf(key_string, "adjsynth.mixer_channel_%i.level", ch + 1);
+			res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				key_string,
+				&int_param);
+			
+			if (res == _SETTINGS_KEY_FOUND)
+			{		
+				AdjSynth::get_instance()->polyphonic_mixer_event(
+					_POLYPHONIC_MIXER_EVENT, 
+					_MIXER_CHAN_1_LEVEL + ch,
+					int_param.value,
+					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+					AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
+			}
+			
+			sprintf(key_string, "adjsynth.mixer_channel_%i.send", ch + 1);
+			res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				key_string,
+				&int_param);
+			
+			if (res == _SETTINGS_KEY_FOUND)
+			{		
+				AdjSynth::get_instance()->polyphonic_mixer_event(
+			_POLYPHONIC_MIXER_EVENT, 
+					_MIXER_CHAN_1_SEND + ch,
+					int_param.value,
+					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+					AdjSynth::get_instance()->get_active_sketch());
+			}
+			
+			
+		
 		}
 	}
 	else if (synth == en_instruments_ids_t::adj_hammond_organ)

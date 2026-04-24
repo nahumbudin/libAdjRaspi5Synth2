@@ -12,6 +12,8 @@
 *	version 1.0		15_Nov-2019:		
 *		First version
 *		
+*	17-Apr-2026: Note - Not in use - the reverb settings are set in the InstrumentAnalogReverbration class, and not here.
+*		
 */
 
 #include "adjSynth.h"

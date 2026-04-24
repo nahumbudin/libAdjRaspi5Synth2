@@ -1,19 +1,22 @@
 /**
 * @file		instrument.h
 *	@author		Nahum Budin
-*	@date		24-09-2025
-*	@version	1.1	
-*					1. Adding a pointer to a AdjSynth object
-*					2. Splitting the settings parameters to two groups: active_preset_settings_params and active_common_settings_params,
-*					3. Splitting active_preset_settings_params to two groups: active_program_settings_params and active_common_settings_params, 
-*					   used for the AdjSynth setting params and adding a active_fluid_synth_settings_params for the FluidSynth settings params
+*	@date		11-Apr-2026
+*	@version	2.0	
+*					1. Specific instruments settings are handled by each instrument.
+*					2. No need to split to voice and common - decide per case which settings parameters are needed, and use only them.
 *					   
 *					
 *	@brief		The basic music generating object, e.g., analog-synthesizer,
 *				FluidSynth SoundFont synthesizer, organ, etc.
 *	
 *	History:\n
-*		version 1.0		24-06-2024: First version
+*				versio 1.1	  24-09-2025
+*					1. Adding a pointer to a AdjSynth object
+*					2. Splitting the settings parameters to two groups: active_preset_settings_params and active_common_settings_params,
+*					3. Splitting active_preset_settings_params to two groups: active_program_settings_params and active_common_settings_params, 
+*					   used for the AdjSynth setting params and adding a active_fluid_synth_settings_params for the FluidSynth settings params
+*				version 1.0		24-06-2024: First version
 *	
 */
 
@@ -49,9 +52,27 @@ public:
 	uint16_t get_active_midi_channels();
 	
 	virtual int init();
-
+	
+	// Settings parameters management
+	
+	// Set the default settings parameters (init the active_settings_params)
+	// (note - each instrument is assigned with a specific single program, so the default settings parameters are set for this program).
+	virtual int set_default_settings_parameters();
+	
+	// Set all the instrument parameters based on the settings parameters in the active_settings_params structure.
+	virtual int set_instrument_settings();
+	
+	// Saves the active settings parameters to an XML file.
+	int save_instrument_active_settings(string path, string type = "type-none");
+	
+	// Reads the active settings parameters from an XML file into the active_settings_params.
+	int read_instrument_settings(_settings_params_t *preset, string path, string type = "type-none");
+	
+	
 	void register_ui_update_callback(func_ptr_void_void_t ptr);
 	void activate_ui_update_callback();
+	
+	string get_instrument_name();
 
 	virtual int api_settings_events_handler(int moduleid, int paramid, int val, _settings_params_t *params, int program = -1);
 	virtual int api_settings_events_handler(int moduleid, int paramid, float val, _settings_params_t *params, int program = -1);
@@ -67,23 +88,16 @@ public:
 	virtual void sysex_handler(uint8_t *message, int len);
 	virtual void control_box_events_handler(int event_id, uint16_t event_value);
 
-	virtual int set_default_settings_parameters(_settings_params_t *params, int prog = -1);
+	
 
 	AlsaMidiSeqencerEventsHandler *alsa_midi_sequencer_events_handler;
 
 	AdjSynth *adjheart_synth;
 
-	Settings *instrument_settings;
+	// Settings managers of the instrument, used to manage the settings parameters of the instrument.
+	Settings *instrument_settings_manager;
 	
-	// Program settings parameters, used to store the current program settings parameters, 
-	// which are used when a voice is assigned to the program, and when the program is changed.
-	_settings_params_t *active_preset_settings_params;
-	
-	// Settings parameters, used to store the common resources (e.g. Equalizer, Reverbration, Keyboard) settings parameters, 
-	_settings_params_t *active_common_settings_params;
-	
-	// Settings parameters, used to store the FluidSynth settings parameters, 
-	_settings_params_t *active_fluid_synth_settings_params;
+	_settings_params_t *active_settings_params;		
 
 //	InstrumentConnectionsControl *instrument_connections_control;
 	AlsaMidiSysControl *alsa_connections;

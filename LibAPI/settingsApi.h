@@ -44,6 +44,14 @@ int mod_synth_save_adj_synth_patch_file(string path);
 *   @return 0 if done
 */
 int mod_synth_save_midi_mixer_patch_file(string path);
+
+/**
+*   @brief  Save the active Analog Reverberation parameters as XML file
+*   @param  path settings XML file full path
+*   @return 0 if done
+*/
+int mod_synth_save_analog_reverberation_patch_file(string path);
+
 /**
 *   @brief  Open settings parameters XML file and set it as the AdjSynth active patch parameters
 *   @param  path settings XML file full path

@@ -46,7 +46,7 @@ int InstrumentAnalogSynth::set_default_settings_parameters(_settings_params_t *p
 	
 	res |= adjheart_synth->set_default_settings_parameters_equalizer(global_params);
 	res |= adjheart_synth->set_default_settings_parameters_keyboard(global_params);
-	res |= adjheart_synth->set_default_settings_parameters_mixer(global_params);
+	//res |= adjheart_synth->set_default_settings_parameters_mixer(global_params); // Set in the midi mixer instrument initialization.
 	res |= adjheart_synth->set_default_settings_parameters_reverb(global_params);
 
 	jack_out_connection_left.in_client_name = "";
@@ -71,11 +71,11 @@ int InstrumentAnalogSynth::set_default_settings_parameters(_settings_params_t *p
 	{
 		int res;
 
-		return_val_if_true(instrument_settings == NULL, _SETTINGS_BAD_PARAMETERS);
+		return_val_if_true(instrument_settings_manager == NULL, _SETTINGS_BAD_PARAMETERS);
 
-		res = instrument_settings->write_settings_file(
-			active_preset_settings_params,
-			instrument_settings->get_settings_version(),
+		res = instrument_settings_manager->write_settings_file(
+			active_settings_params,
+			instrument_settings_manager->get_settings_version(),
 			"",
 			path,
 			"adj_synth_settings_params");
@@ -89,11 +89,11 @@ int InstrumentAnalogSynth::set_default_settings_parameters(_settings_params_t *p
 */
 int InstrumentAnalogSynth::open_analog_synth_settings_file(string path)
 {
-	return_val_if_true(instrument_settings == NULL, _SETTINGS_BAD_PARAMETERS);
+	return_val_if_true(instrument_settings_manager == NULL, _SETTINGS_BAD_PARAMETERS);
 
 	XML_files *xml_files = new XML_files();
 
-	int res = instrument_settings->read_settings_file(active_preset_settings_params, path, "adj_synth_settings_params");
+	int res = instrument_settings_manager->read_settings_file(active_settings_params, path, "adj_synth_settings_params");
 	
 
 	if (res == 0)

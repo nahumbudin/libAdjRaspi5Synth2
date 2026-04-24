@@ -15,6 +15,7 @@
 */
 
 #include "modSynth.h"
+#include "./Instrument/instrumentMidiMixer.h"
 #include "./LibAPI_settingsManager.h"
 
 int mod_synth_get_active_midi_mixer_setting_param(int paramid)
@@ -44,7 +45,7 @@ int mod_synth_get_active_midi_mixer_setting_param(int paramid)
 
 		sprintf(keyString, "adjsynth.mixer_channel_%i.level", paramid - _MIXER_CHAN_1_LEVEL + 1);
 		res_mixer = settings_manager->get_int_param(
-			ModSynth::get_instance()->adj_synth->get_active_settings_params(),
+			ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
 			string(keyString),
 			&int_param_mixer);
 		if (res_mixer == _SETTINGS_KEY_FOUND)
@@ -77,7 +78,7 @@ int mod_synth_get_active_midi_mixer_setting_param(int paramid)
 
 		sprintf(keyString, "adjsynth.mixer_channel_%i.pan", paramid - _MIXER_CHAN_1_PAN + 1);
 		res_mixer = settings_manager->get_int_param(
-			ModSynth::get_instance()->adj_synth->get_active_settings_params(),
+			ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
 			string(keyString),
 			&int_param_mixer);
 		if (res_mixer == _SETTINGS_KEY_FOUND)
@@ -87,6 +88,72 @@ int mod_synth_get_active_midi_mixer_setting_param(int paramid)
 		else
 		{
 			return 50;
+		}
+
+		break;
+		
+	case _MIXER_CHAN_1_PAN_MOD_LFO:	
+	case _MIXER_CHAN_2_PAN_MOD_LFO:	
+	case _MIXER_CHAN_3_PAN_MOD_LFO:	
+	case _MIXER_CHAN_4_PAN_MOD_LFO:	
+	case _MIXER_CHAN_5_PAN_MOD_LFO:	
+	case _MIXER_CHAN_6_PAN_MOD_LFO:	
+	case _MIXER_CHAN_7_PAN_MOD_LFO:	
+	case _MIXER_CHAN_8_PAN_MOD_LFO:	
+	case _MIXER_CHAN_9_PAN_MOD_LFO:	
+	case _MIXER_CHAN_10_PAN_MOD_LFO:	
+	case _MIXER_CHAN_11_PAN_MOD_LFO:	
+	case _MIXER_CHAN_12_PAN_MOD_LFO:	
+	case _MIXER_CHAN_13_PAN_MOD_LFO:	
+	case _MIXER_CHAN_14_PAN_MOD_LFO:	
+	case _MIXER_CHAN_15_PAN_MOD_LFO:	
+	case _MIXER_CHAN_16_PAN_MOD_LFO:	
+	case _MIXER_ALL_PAN_MOD_LFO:
+		sprintf(keyString, "adjsynth.mixer_channel_%i.pan_mod_lfo", paramid - _MIXER_CHAN_1_PAN_MOD_LFO + 1);
+		res_mixer = settings_manager->get_int_param(
+			ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+			string(keyString),
+			&int_param_mixer);
+		if (res_mixer == _SETTINGS_KEY_FOUND)
+		{
+			return int_param_mixer.value;
+		}
+		else
+		{
+			return _LFO_NONE;
+		}
+
+		break;
+		
+	case _MIXER_CHAN_1_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_2_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_3_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_4_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_5_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_6_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_7_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_8_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_9_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_10_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_11_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_12_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_13_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_14_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_15_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_CHAN_16_PAN_MOD_LFO_LEVEL:	
+	case _MIXER_ALL_PAN_MOD_LFO_LEVEL:
+		sprintf(keyString, "adjsynth.mixer_channel_%i.pan_mod_lfo_level", paramid - _MIXER_CHAN_1_PAN_MOD_LFO_LEVEL + 1);
+		res_mixer = settings_manager->get_int_param(
+			ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+			string(keyString),
+			&int_param_mixer);
+		if (res_mixer == _SETTINGS_KEY_FOUND)
+		{
+			return int_param_mixer.value;
+		}
+		else
+		{
+			return 0;
 		}
 
 		break;
@@ -110,7 +177,7 @@ int mod_synth_get_active_midi_mixer_setting_param(int paramid)
 
 		sprintf(keyString, "adjsynth.mixer_channel_%i.send", paramid - _MIXER_CHAN_1_SEND + 1);
 		res_mixer = settings_manager->get_int_param(
-			ModSynth::get_instance()->adj_synth->get_active_settings_params(),
+			ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
 			string(keyString),
 			&int_param_mixer);
 		if (res_mixer == _SETTINGS_KEY_FOUND)

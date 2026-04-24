@@ -20,6 +20,9 @@
 *   @brief  Set the settings Mixer parameters to their default values
 *   @param	params	a _setting_params_t parameters struct
 *   @return 0 if done
+*   
+*	Not in use: The mixer settings parameters are set in the MIDI mixer instrument initialization
+*	
 */
 int AdjSynth::set_default_settings_parameters_mixer(_settings_params_t *params)
 {

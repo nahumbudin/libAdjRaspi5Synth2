@@ -11,6 +11,11 @@
 *			version 1.0		15-Nov-2019:		
 *		First version
 *		
+*	13-4-2026: Note: This file is not in use. 
+*	The MIDI mixer events are handled in the MIDI mixer instrument object. 
+*	Keeping this file for future use if needed.
+*	
+*		
 */
 
 #include "adjSynth.h"
@@ -26,6 +31,8 @@
 *				LEVEL, SEND: 0-100;\n
 *				PAN: 0-100; 0 -> Left   50 -> Mid   100- -> Right\n*
 *   @return 0
+*   
+*	13-Apr-2026 Note: This function is not in use. The MIDI mixer events are handled in the MIDI mixer instrument object.
 */
 int AdjSynth::midi_mixer_event(int mixid, int eventid, int val, _settings_params_t *params)
 {

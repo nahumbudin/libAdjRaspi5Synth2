@@ -15,6 +15,7 @@
 
 #include "modSynthPatch.h"
 #include "./Instrument/instrumentFluidSynth.h"
+#include "./Instrument/instrumentMidiMixer.h"
 
 #include "modSynth.h"
 
@@ -117,21 +118,44 @@ int ModSynthPatches::set_synth_settings(mod_synth_preset_t *preset)
 		
 		if (valid_setting)
 		{		
-			ModSynth::get_instance()->adj_synth->midi_mixer_event(
-					_MIDI_MIXER_1_EVENT,
-				_MIXER_CHAN_1_LEVEL + chan, 
+			//ModSynth::get_instance()->adj_synth->midi_mixer_event(
+			//		_MIDI_MIXER_1_EVENT,
+			//	_MIXER_CHAN_1_LEVEL + chan, 
+			//	preset->chennels_presets[chan].mixer_presets.channel_level,
+			//	ModSynth::get_instance()->adj_synth->get_active_common_params());
+			
+			ModSynth::get_instance()->get_midi_mixer()->api_settings_events_handler(
+				_MIDI_MIXER_1_EVENT,
+				_MIXER_CHAN_1_LEVEL + chan,
 				preset->chennels_presets[chan].mixer_presets.channel_level,
-				ModSynth::get_instance()->adj_synth->get_active_common_params());
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				0); // no program.
+			
 
-			ModSynth::get_instance()->adj_synth->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+			//ModSynth::get_instance()->adj_synth->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+			//	_MIXER_CHAN_1_PAN + chan,
+			//	preset->chennels_presets[chan].mixer_presets.channel_pan,
+			//	ModSynth::get_instance()->adj_synth->get_active_common_params());
+			
+			ModSynth::get_instance()->get_midi_mixer()->api_settings_events_handler(
+				_MIDI_MIXER_1_EVENT,
 				_MIXER_CHAN_1_PAN + chan,
 				preset->chennels_presets[chan].mixer_presets.channel_pan,
-				ModSynth::get_instance()->adj_synth->get_active_common_params());
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				0); // no program.
+			
 
-			ModSynth::get_instance()->adj_synth->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+			//ModSynth::get_instance()->adj_synth->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+			//	_MIXER_CHAN_1_SEND + chan,
+			//	preset->chennels_presets[chan].mixer_presets.channel_send,
+			//	ModSynth::get_instance()->adj_synth->get_active_common_params());
+			
+			ModSynth::get_instance()->get_midi_mixer()->api_settings_events_handler(
+				_MIDI_MIXER_1_EVENT,
 				_MIXER_CHAN_1_SEND + chan,
 				preset->chennels_presets[chan].mixer_presets.channel_send,
-				ModSynth::get_instance()->adj_synth->get_active_common_params());
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				0); // no program.
 		}	
 				
 	}

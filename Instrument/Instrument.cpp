@@ -1,19 +1,27 @@
 /**
 * @file		instrument.cpp
 *	@author		Nahum Budin
-*	@date		24-09-2025
-*	@version	1.1	
-*					1. Adding a pointer to a AdjSynth object
+*	@date		11-Apr-2026
+*	@version	2.0	
+*					1. Specific instruments settings are handled by each instrument.
+*					2. 
+*					   
 *					
 *	@brief		The basic music generating object, e.g., analog-synthesizer,
 *				FluidSynth SoundFont synthesizer, organ, etc.
 *	
 *	History:\n
-*		version 1.0		24-06-2024: First version
+*				versio 1.1	  24-09-2025
+*					1. Adding a pointer to a AdjSynth object
+*					2. Splitting the settings parameters to two groups: active_preset_settings_params and active_common_settings_params,
+*					3. Splitting active_preset_settings_params to two groups: active_program_settings_params and active_common_settings_params, 
+*					   used for the AdjSynth setting params and adding a active_fluid_synth_settings_params for the FluidSynth settings params
+*				version 1.0		24-06-2024: First version
 *	
 */
 
 #include "instrument.h"
+#include "../utils/xmlFiles.h"
 #include "../MIDI/midiStream.h"
 
 /* Holds the BT input client name. */
@@ -109,12 +117,71 @@ int Instrument::init()
 		alsa_midi_sequencer_events_handler->set_instrument(this);
 	}
 
-	active_preset_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
-	active_common_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
+	//active_preset_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
+	//active_common_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
+	
+	active_settings_params = new _settings_params_t(); 
 
-	instrument_settings = new Settings(active_preset_settings_params); // TODO: presets or active_settings_param?
+	//instrument_settings = new Settings(active_preset_settings_params); // TODO: presets or active_settings_param?
+	instrument_settings_manager = new Settings(active_settings_params);
 
 	return 0;
+}
+
+/**
+*   @brief  Save the active instrument preset parameters as XML file
+*   @param  path preset XML file path. The file name is derived from the instrument name and the path, 
+*			for example: /home/user/presets/Adj-Synth-Settings.xml
+*	@type	type is used to identify the settings type in the XML file, for example "midi-mixer-settings", "adj-synth-settings", etc.
+*   @return 0 if done
+*   */
+int Instrument::save_instrument_active_settings(string path, string type)
+{
+	return_val_if_true(path == "", _SETTINGS_BAD_PARAMETERS);
+	
+	int res = 0;
+	string settings_file_full_path;
+	
+	settings_file_full_path = path + "/" + instrument_name + "-settings.html";
+
+	res = instrument_settings_manager->write_settings_file(
+		active_settings_params,
+		instrument_settings_manager->get_settings_version(),
+		instrument_name + "-settings",
+		path,
+		type);
+	
+	return res;
+}
+
+/**
+*   @brief  Read instrument settings parameters from an XML file
+*   @param  path preset XML file path. The file name is derived from the instrument name and the path, 
+*			for example: /home/user/presets/Adj-Synth-Settings.xml
+*	@type	type is used to identify the settings type in the XML file, for example "midi-mixer-settings", "adj-synth-settings", etc.
+*   @return 0 if done
+*   */
+int Instrument::read_instrument_settings(_settings_params_t *preset, string path, string type)
+{
+	return_val_if_true(path == "", _SETTINGS_BAD_PARAMETERS);
+	
+	int res = 0;
+	string settings_file_full_path;
+	
+	settings_file_full_path = path + "/" + instrument_name + "-settings";
+
+	res = instrument_settings_manager->read_settings_file(
+		preset,
+		settings_file_full_path,
+		type, 
+		0); // no channel
+
+	return res;
+}
+
+string Instrument::get_instrument_name()
+{
+	return instrument_name;
 }
 
 void Instrument::register_ui_update_callback(func_ptr_void_void_t ptr)
@@ -173,6 +240,7 @@ void Instrument::channel_pressure_handler(uint8_t channel, uint8_t val)
 
 void Instrument::controller_event_handler(uint8_t channel, uint8_t num, uint8_t val)
 {
+	
 }
 
 void Instrument::pitch_bend_handler(uint8_t channel, int pitch)
@@ -188,10 +256,15 @@ void Instrument::control_box_events_handler(int event_id, uint16_t event_value)
 	
 }
 
-int Instrument::set_default_settings_parameters(_settings_params_t *params, int prog)
+int Instrument::set_default_settings_parameters()
 {
 
 	return 0;
+}
+
+int Instrument::set_instrument_settings()
+{
+	
 }
 
 /**

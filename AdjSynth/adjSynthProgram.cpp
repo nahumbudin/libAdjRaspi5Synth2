@@ -1,122 +1,97 @@
 /**
-*	@file		adjSynthProgram.cpp
+*	@file		adjSynthPrograms.cpp
 *	@author		Nahum Budin
-*	@date		23-Sep-2025
-*	@version	1.3 
-*					1. Code refactoring and notaion.
-*					2. Rename Patch to Preset (Patch is to be used for full setup settings)
-*					3. Intinitialize max num of voices in constructor
-*					
-*	History:\n	
-*		
-*		version	1.2		5-Oct-2024	Code refactoring and notaion.
-*		version	1.1	4-Feb-2021	Code refactoring and notaion.
-*		version	1.0	15-Nov-2019 
+*	@date		28-Sep-2025
+*	@version	1.0
+*	
+*	The adjSynth Program implements a preset voice settings, in a similar way of a MIDI program.
+*	In this way, the adjSynth voices may be dynamically allocated and set with various "sounds" presets.
+*	
+*	Unlike in the previous version (adjSynthProgram), in this version concept, a program is just a set
+*	of preset parameters that is used to setup a general purpose voice object with the program preset
+*	parameters.
+*	
+*	The adjSynth programs collection is a MIDI bank that provides 19 programs (see hereafter), but unlike
+*	common MIDI banks, each program does not represent a fix "sound" preset, and may be dynamiclly
+*	loaded with any valid preset.
 *
-*	@brief		Handle AdjSynth MIDI programs
-*				A MIDI program is a adjSyntg preset (voice).
+*	In this version, there are 19 programs (0-18):
+*		0-15	MIDI-mapping mode programs used each for a MIDI channel 1-16
+*				Settings are loaded with presets and cannot be addited
+*		16		Sketch 1 - settings can be changed online
+*		17		Sketch 2 - settings can be changed online
+*		18		Sketch 3 - settings can be changed online
+*		
+*	Programs 16-18 are allocated to sketchs - a mode that provides an online dynamic setting
+*	capabilities of the program preset parameters. The user can dynamiclly select the active
+*	sketch out of the 3.
+*	
+*	The MIDI Mapper can allocate any available MIDI channel (1-16) to the active sketch program.
+*
+*
 */
 
-#include <sys/time.h>
-#include <stdlib.h>
-
-//#include "modSynth.h"
-#include "../Settings/settings.h"
-#include "adjSynth.h"
-#include "adjSynthVoice.h"
+//#include "adjSynthPrograms.h"
 #include "adjSynthProgram.h"
-#include "synthKeyboard.h"
-#include "../utils/utils.h"
 
-extern pthread_mutex_t voice_busy_mutex;
-
-int SynthProgram::prog_numbers = 0; // Static program number counter
-
-/**
-*   @brief  Condtructor - creates an instance of a SynthProgram object
-*   @param	samp_rate		sample-rate
-*   @param	block_size		audio block-size
-*   @param  voices			number of voices
-*   @param	first_v_index	1st voice index
-*   @param wt_size			wavetable size (must be a power of 2
-*   @param  aud_mng			pointer to an AudioManager object
-*   @return none
-*/
-SynthProgram::SynthProgram(
-	int samp_rate,
-	int block_size,
-	int voices,
-	int first_v_index,
+AdjSynthPrograms::AdjSynthPrograms(
+	int prog_num,
 	int wt_size,
-	AudioManager *aud_mng)
+	_settings_params_t *preset_params,
+	AudioPolyMixer *audio_poly_mixer)
 {
-	int v_num, res, i;
-	/* Temp name */
-	char name[64] = "Preset1";
-	uint32_t preset_version;
-
-	// Allocate a sequntial ID - this is a static variable.
-	prog_num = prog_numbers++;
-	
-	audio_manager = aud_mng;
-
-	set_sample_rate(samp_rate);
-	set_audio_block_size(block_size);
-
-	portamento_enabled = false;
-	portamento_time = 0.0f;
-	first_voice_index = first_v_index;
-
-	char start_preset_name_x[128];
-	//	sprintf(startPatchName_x, "%s%s", Synthesizer::getInstance()->synthPatchParams_x->getPatchPath(), "StartPatch");  // .xml is added inside call.
-	
-	// Verify that the wavetable size is a power of 2
-	if ((wt_size & (wt_size - 1)) != 0)
+	if ((prog_num >= 0) && (prog_num < _SYNTH_MAX_NUM_OF_PROGRAMS))
 	{
-		// Not a power of 2
-		printf("Error: wavetable length must be a power of 2");
-		sleep(3);
+		program_num = prog_num;
+	}
+	else
+	{
+		printf("fatal error - Program Constructor - illegal program number!");
 		exit(1);
 	}
-	
-	//if (set_patch_settings_default_params_callback_ptr)
-	//{
-	//	set_patch_settings_default_params_callback_ptr(&active_patch_params, prog_num);
-	//}
 
-	// Set the voice with the default preset parameters values
-	AdjSynth::get_instance()->set_default_preset_parameters(&active_preset_params, prog_num);
-	
-	active_preset_params.name = "default_preset";
-	active_preset_params.settings_type = _ADJ_SYNTH_PRESET_PARAMS;
-	settings_manager = new Settings(&active_preset_params);
-	active_preset_params.version = settings_manager->get_settings_version();
+	if (preset_params != nullptr)
+	{
+		active_preset_params = preset_params;
+		program_settings_manager = new Settings(active_preset_params);
+	}
+	else
+	{
+		printf("fatal error - Program Constructor - no settings params!");
+		exit(1);
+	}
+
+	if (audio_poly_mixer != NULL)
+	{
+		parent_audio_poly_mixer = audio_poly_mixer;
+	}
+	else
+	{
+		printf("fatal error - Program Constructor - no audio poly mixer!");
+		exit(1);
+	}
 
 	program_wavetable = new Wavetable();
 	program_wavetable->size = wt_size;
-	program_wavetable->samples = (float*)malloc(wt_size * sizeof(float));
-	
+	program_wavetable->samples = (float *)malloc(wt_size * sizeof(float));
+
 	synth_pad_creator = new SynthPADcreator(program_wavetable, program_wavetable->size);
 	program_wavetable->base_freq =
 		synth_pad_creator->set_base_frequency(program_wavetable, _PAD_DEFAULT_BASE_NOTE);
+	synth_pad_creator->generate_wavetable(program_wavetable);
 
 	mso_wtab = new DSP_MorphingSinusOscWTAB();
 	mso_wtab->calc_segments_lengths(&mso_wtab->base_segment_lengths, &mso_wtab->base_segment_positions);
 	mso_wtab->calc_wtab(mso_wtab->base_waveform_tab, &mso_wtab->base_segment_lengths, &mso_wtab->base_segment_positions);
 	mso_wtab->calc_segments_lengths(&mso_wtab->morphed_segment_lengths, &mso_wtab->morphed_segment_positions);
-	mso_wtab->calc_wtab(mso_wtab->morphed_waveform_tab, &mso_wtab->morphed_segment_lengths, &mso_wtab->morphed_segment_positions);	
+	mso_wtab->calc_wtab(mso_wtab->morphed_waveform_tab, &mso_wtab->morphed_segment_lengths, &mso_wtab->morphed_segment_positions);
 
-	// synthVoice instances are dynamiclly created in set_num_of_voices(int nov) hereafter
-	for (i = 0; i < _SYNTH_MAX_NUM_OF_VOICES; i++)
+	for (int v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
 	{
-		synth_voices[i] = NULL;
+		assigned_voices[v] = _VOICE_NOT_ASSIGNED;
 	}
-
-	num_of_voices = _SYNTH_MAX_NUM_OF_VOICES;
-	set_num_of_voices(voices); // This will also create the synthVoice objects
 }
-
-SynthProgram::~SynthProgram()
+AdjSynthPrograms::~AdjSynthPrograms()
 {
 	delete[] program_wavetable->samples;
 	delete program_wavetable;
@@ -125,385 +100,500 @@ SynthProgram::~SynthProgram()
 	delete[] mso_wtab->morphed_waveform_tab;
 }
 
-/**
-*	@brief	Register a callback function to set the program preset default params
-*	@param	ptr  a pointer to a function void foo(_setting_params_t *params, int prog_num)					
-*	@return void
-*/
-void SynthProgram::register_set_preset_settings_default_params_callback_ptr(func_ptr_int_settings_parms_ptr_int_t ptr)
+/* Get the program number */
+int AdjSynthPrograms::get_program_num()
 {
-	set_preset_settings_default_params_callback_ptr = ptr;
+	return program_num;
 }
 
-/**
-*	@brief	Activates a callback function to set the program preset default params
-*	@param	params		a pointer to a setting_params_t preset settings
-*	@parm	prog		program number
-*	@return set operation results
-*/
-int SynthProgram::activate_set_preset_settings_default_params_callback(_settings_params_t* params, int prog)
+/* Get the active preset parameters */
+_settings_params_t *AdjSynthPrograms::get_active_program_preset_params()
 {
-	if (set_preset_settings_default_params_callback_ptr)
+	return active_preset_params;
+}
+
+/* Set the active preset parameters */
+int AdjSynthPrograms::set_active_program_preset_params_no_update(_settings_params_t *preset_params)
+{
+	if (preset_params == nullptr)
 	{
-		return set_preset_settings_default_params_callback_ptr(params, prog);
+		return -1;
+	}
+	
+	active_preset_params = preset_params;
+	return 0;
+}
+
+/* Set the active preset parameters and update all the currentlly assigned voices */
+void AdjSynthPrograms::set_program_preset_params(_settings_params_t *preset_params)
+{
+	int v;
+
+	if (preset_params == nullptr)
+	{
+		return;
+	}
+	
+	active_preset_params = preset_params;
+	// Update all assigned voices with the new preset parameters
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		SynthVoice *voice = AdjSynth::get_instance()->synth_voice[v];
+			
+		if (voice)
+		{
+			voice->set_voice_params(active_preset_params,
+				ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
+		}
+	}
+}
+
+/* Assign a voice with the program preset parameters */
+int AdjSynthPrograms::assign_voice_with_preset_program_params(SynthVoice *voice, int voice_num)
+{
+	static bool first_time_done = false;
+	
+	if (voice == nullptr)
+	{
+		return -1;
+	}
+	
+	if ((voice_num < 0) || (voice_num >= _SYNTH_MAX_NUM_OF_VOICES))
+	{
+		return -2;
+	}
+
+	voice->set_allocated_program(program_num);
+
+	// Set the voice with the program preset parameters values
+	voice->set_voice_params(active_preset_params, 
+		ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
+	
+	// Set the MSO wavetable
+	voice->dsp_voice->mso_1->set_wavetable(mso_wtab);
+	// Set the PAD wavetable
+	voice->set_pad_wave_table(program_wavetable);
+
+	// Add the voice to the assigned voices list
+	assigned_voices[voice_num] = _VOICE_ASSIGNED;
+
+	return 0;
+}
+
+/* Deallocate a voice */
+int AdjSynthPrograms::	deallocate_voice_from_program(int voice_num)
+{
+	int res = -2; // voice not found
+	int v;
+
+	if ((voice_num < 0) || (voice_num >= _SYNTH_MAX_NUM_OF_VOICES))
+	{
+		return -1;
+	}
+
+	if (assigned_voices[voice_num] == _VOICE_ASSIGNED)
+	{
+		// Remove assigned_voice;
+		assigned_voices[voice_num] = _VOICE_NOT_ASSIGNED;
+		res = 0;
+	}
+
+	// Clean up all residual notes that were waiting for not active state
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if ((assigned_voices[voice_num] == _VOICE_ASSIGNED) &&
+			!AdjSynth::get_instance()->synth_voice[voice_num]->audio_voice->is_voice_wait_for_not_active() &&
+			!AdjSynth::get_instance()->synth_voice[voice_num]->audio_voice->is_voice_active())
+		{
+			assigned_voices[v] = _VOICE_NOT_ASSIGNED;
+		}
+	}
+
+	return res;
+}
+
+/* Get the voice number that plays a given note (assuming only one exists! TODO: */
+int AdjSynthPrograms::get_voice_num_playing_note(int note)
+{
+	SynthVoice *voice;
+	int res = -1;
+	int v;
+
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+			voice = AdjSynth::get_instance()->synth_voice[v];
+
+			if (voice)
+			{
+				if (voice->audio_voice->get_note() == note)
+				{
+					res = v;
+				}
+				else if (!AdjSynth::get_instance()->synth_voice[v]->audio_voice->is_voice_wait_for_not_active() &&
+						 !AdjSynth::get_instance()->synth_voice[v]->audio_voice->is_voice_active())
+				{
+					// Clean up all residual notes that were waiting for not active state
+					assigned_voices[v] = _VOICE_NOT_ASSIGNED;
+				}
+			}
+		}
+	}
+
+	return res;
+}
+
+/* Refresh all program assigned voices with a new preset params */
+int AdjSynthPrograms::refresh_all_program_voices_with_preset_params(_settings_params_t *preset_params)
+{
+	int v;
+	SynthVoice *voice;
+
+	active_preset_params = preset_params;
+	// Update all assigned voices with the new preset parameters
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+			voice = AdjSynth::get_instance()->synth_voice[v];
+			if (voice)
+			{
+				voice->set_voice_params(active_preset_params, 
+					ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
+			}
+		}
 	}
 	
 	return 0;
 }
 
-/**
-*	@brief	Register a callback function to set voice busy indication (gui)
-*	@param	ptr  a pointer to a function void foo(int voice_num)					
-*	@return void
-*/
-void SynthProgram::register_mark_voice_bussy_callback_ptr(func_ptr_void_int_t ptr)
-{
-	mark_voice_bussy_callback_ptr = ptr;
-}
-
-/**
-*	@brief	Sets the sample-rate
-*	@param	sample  rate: _SAMPLE_RATE_44 (44100Hz) or _SAMPLE_RATE_48 (48000Hz)
-*					if non of the above, sample rate is set to _DEFAULT_SAMPLE_RATE (44100).
-*					Also sets WTAB funfemental and maxfrequencies based on sample rate.
-*					
-*	@return set sample-rate
-*/
-int SynthProgram::set_sample_rate(int samp_rate)
-{
-	if (!is_valid_sample_rate(samp_rate))
-	{
-		sample_rate = _DEFAULT_SAMPLE_RATE;
-	}
-	else
-	{
-		sample_rate = samp_rate;
-	}
-	
-	return sample_rate;
-}
-
-/**
-*	@brief	Returns the set sample-rate
-*	@param	none
-*	@return set sample-rate
-*/	
-int SynthProgram::get_sample_rate() { return sample_rate; }
-
-/**
-*   @brief  sets the audio block size 
-*   @param  int size: _AUDIO_BLOCK_SIZE_256, _AUDIO_BLOCK_SIZE_512, _AUDIO_BLOCK_SIZE_1024
-*   @return 0 OK; -1 param out of range
-*/
-int SynthProgram::set_audio_block_size(int size)
-{
-	int res = 0;
-	
-	if (is_valid_audio_block_size(size))
-	{
-		audio_block_size = size;				
-		res = audio_block_size;
-	}
-	else
-	{
-		res = -1;
-	}
-	
-	return res;
-}
-	
-/**
-*   @brief  retruns the audio block size  
-*   @param  none
-*   @return buffer size
-*/	
-int SynthProgram::get_audio_block_size() 
-{ 
-	return audio_block_size; 
-}
-
-/**
-*   @brief  Set the program preset params
-*   @param  vparams a pointer to a _setting_params_t struct holding the patch params
-*   @return void
-*/
-void SynthProgram::set_program_preset_params(_settings_params_t *params)
+/* Read program preset file 
+ * @param params settings parameters structure
+ * @param path full path of the file
+ * @param type describes the settings paramaters, for example, "fluid_synth_settings"
+ * @param channel	set param of midi channel
+ * @return #_SETTINGS_OK if read sucessfully, #_SETTINGS_FAILED otherwise
+ */
+int AdjSynthPrograms::read_program_preset_file(string path, string type)
 {
 	settings_res_t res;
-	_settings_str_param_t str_param;
+
+	res = program_settings_manager->read_settings_file(active_preset_params ,path, type);
+
+	return res;
+}
+
+/* Set all the program voices polly mixer gain1 level */
+int AdjSynthPrograms::set_program_voices_poly_mixer_gain_1_level_int(int level)
+{
+	int v;
+
+	if ((level < 0) || (level > 100))
+	{
+		return -1;
+	}
 	
-	// Go over all string parameters
-	for (std::map<std::string,
-		_settings_str_param_t>::iterator param = params->string_parameters_map.begin();
-		param != params->string_parameters_map.end(); ++param)
+	// Set the program voices output gain1 level
+	program_voices_output_gain1 = (float)level / 100.0f;
+	
+	// Update all assigned voices with the new gain level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
 	{
-		settings_manager->set_string_param_value(&active_preset_params,
-			param->first,
-			param->second.value,
-			_EXEC_CALLBACK | _EXEC_BLOCK_CALLBACK,
-			prog_num);
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_gain1_level(v, program_voices_output_gain1);
+		}
 	}
-
-	res = settings_manager->get_string_param(params, "name", &str_param);
-	if (res == _SETTINGS_KEY_FOUND)
-	{
-		active_preset_params.name = str_param.value;
-	}
-
-	// Go over all integer parameters
-	for (std::map<std::string,
-		_settings_int_param_t>::iterator param = params->int_parameters_map.begin();
-		param != params->int_parameters_map.end(); ++param)
-	{
-		settings_manager->set_int_param_value(&active_preset_params,
-			param->first,
-			param->second.value,
-			_EXEC_CALLBACK | _EXEC_BLOCK_CALLBACK,
-			prog_num);
-	}
-
-	// Go over all float parameters
-	for (std::map<std::string,
-		_settings_float_param_t>::iterator param = params->float_parameters_map.begin();
-		param != params->float_parameters_map.end(); ++param)
-	{
-		settings_manager->set_float_param_value(&active_preset_params,
-			param->first,
-			param->second.value,
-			_EXEC_CALLBACK | _EXEC_BLOCK_CALLBACK,
-			prog_num);
-	}
-
-	// Go over all boolean parameters
-	for (std::map<std::string,
-		_settings_bool_param_t>::iterator param = params->bool_parameters_map.begin();
-		param != params->bool_parameters_map.end(); ++param)
-	{
-		settings_manager->set_bool_param_value(&active_preset_params,
-			param->first,
-			param->second.value,
-			_EXEC_CALLBACK | _EXEC_BLOCK_CALLBACK,
-			prog_num);
-	}
-
-	synth_pad_creator->generate_wavetable(program_wavetable);
-
-	mso_wtab->calc_segments_lengths(&mso_wtab->morphed_segment_lengths, &mso_wtab->morphed_segment_positions);
-	mso_wtab->calc_wtab(mso_wtab->morphed_waveform_tab, &mso_wtab->morphed_segment_lengths, &mso_wtab->morphed_segment_positions);
+	
+	return 0;
 }
 
-/**
-*   @brief  Return a free program voice resource.
-*   @param  none
-*   @return a pointer to a free program voice resource.
-*/
-SynthVoice *SynthProgram::get_free_voice()
+int AdjSynthPrograms::set_program_voices_poly_mixer_gain_1_level_float(float level)
 {
-	int voice = 0;
-	struct timeval timestamp;
-	uint64_t mintime = UINT64_MAX;
-	int minvoice = -1, mincore = -1;
-	bool reused = false;
+	int v;
 
-	if (mod_synth_get_cpu_utilization() > 90)
-	{	
-		// DSP urilization is too high
+	if ((level < 0.0f) || (level > 1.0f))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output gain1 level
+	program_voices_output_gain1 = level;
+	
+	// Update all assigned voices with the new gain level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_gain1_level(v, program_voices_output_gain1);
+		}
+	}
+
+	return 0;
+}
+
+/* Set all the program voices polly mixer gain2 level */
+int AdjSynthPrograms::set_program_voices_poly_mixer_gain_2_level_int(int level)
+{
+	int v;
+
+	if ((level < 0) || (level > 100))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output gain2 level
+	program_voices_output_gain2 = (float)level / 100.0f;
+	
+	// Update all assigned voices with the new gain level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_gain2_level(v, program_voices_output_gain2);
+		}
+	}
+
+	return 0;
+}
+int AdjSynthPrograms::set_program_voices_poly_mixer_gain_2_level_float(float level)
+{
+	int v;
+	
+	if ((level < 0.0f) || (level > 1.0f))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output gain2 level
+	program_voices_output_gain2 = level;
+	
+	// Update all assigned voices with the new gain level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_gain2_level(v, program_voices_output_gain2);
+		}
+	}
+	return 0;
+}
+
+/* Set all the program voices polly mixer pan1 level */
+int AdjSynthPrograms::set_program_voices_poly_mixer_pan_1_int(int pan)
+{
+	int v;
+	
+	if ((pan < -100) || (pan > 100))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output pan1 level
+	program_voices_output_pan1 = (float)pan / 100.0f;
+	
+	// Update all assigned voices with the new pan level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_pan1(v, program_voices_output_pan1);
+		}
+	}
+
+	return 0;
+}
+int AdjSynthPrograms::set_program_voices_poly_mixer_pan_1_float(float pan)
+{
+	int v;
+
+	if ((pan < -1.0f) || (pan > 1.0f))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output pan1 level
+	program_voices_output_pan1 = pan;
+	
+	// Update all assigned voices with the new pan level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_pan1(v, program_voices_output_pan1);
+		}
+	}
+	return 0;
+}
+
+/* Set all the program voices polly mixer pan2 level */
+int AdjSynthPrograms::set_program_voices_poly_mixer_pan_2_int(int pan)
+{
+	int v;
+
+	if ((pan < -100) || (pan > 100))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output pan2 level
+	program_voices_output_pan2 = (float)pan / 100.0f;
+	
+	// Update all assigned voices with the new pan level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_pan2(v, program_voices_output_pan2);
+		}
+	}
+	return 0;
+}
+int AdjSynthPrograms::set_program_voices_poly_mixer_pan_2_float(int pan)
+{
+	int v;
+	
+	if ((pan < -1.0f) || (pan > 1.0f))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output pan2 level
+	program_voices_output_pan2 = pan;
+	
+	// Update all assigned voices with the new pan level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_pan2(v, program_voices_output_pan2);
+		}
+	}
+	return 0;
+}
+
+/* Set all the program voices polly mixer send1 level */
+int AdjSynthPrograms::set_program_voices_poly_mixer_send_1_int(int send)
+{
+	int v;
+
+	if ((send < 0) || (send > 100))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output send1 level
+	program_voices_output_send1 = (float)send / 100.0f;
+	
+	// Update all assigned voices with the new send level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_send1_level(v, program_voices_output_send1);
+		}
+	}
+	
+	return 0;
+}
+int AdjSynthPrograms::set_program_voices_poly_mixer_send_1_float(float send)
+{
+	int v;
+
+	if ((send < 0.0f) || (send > 1.0f))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output send1 level
+	program_voices_output_send1 = send;
+	
+	// Update all assigned voices with the new send level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_send1_level(v, program_voices_output_send1);
+		}
+	}
+	
+	return 0;
+}
+
+/* Set all the program voices polly mixer send2 level */
+int AdjSynthPrograms::set_program_voices_poly_mixer_send_2_int(int send)
+{
+	int v;
+	
+	if ((send < 0) || (send > 100))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output send2 level
+	program_voices_output_send2 = (float)send / 100.0f;
+	
+	// Update all assigned voices with the new send level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_send2_level(v, program_voices_output_send2);
+		}
+	}
+	
+	return 0;
+}
+int AdjSynthPrograms::set_program_voices_poly_mixer_send_2_float(float send)
+{
+	int v;
+	
+	if ((send < 0.0f) || (send > 1.0f))
+	{
+		return -1;
+	}
+	
+	// Set the program voices output send2 level
+	program_voices_output_send2 = send;
+	
+	// Update all assigned voices with the new send level
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+//			parent_audio_poly_mixer->set_voice_send2_level(v, program_voices_output_send2);
+		}
+	}
+	return 0;
+}
+
+/* Get a voice object. Rtuens NULL if the voice is not assigned to the program. */
+SynthVoice *AdjSynthPrograms::get_voice(int voice_num)
+{
+	SynthVoice *voice = NULL;
+	int v;
+
+	if ((voice_num < 0) || (voice_num >= _SYNTH_MAX_NUM_OF_VOICES))
+	{
 		return NULL;
 	}
 
-	if (portamento_enabled)
+	// Check if the voice is assigned to this program
+	for (v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
 	{
-		synth_voices[_SYNTH_VOICE_1]->audio_voice->set_active();
-		synth_voices[_SYNTH_VOICE_1]->audio_voice->reset_wait_for_not_active();
-		if (mark_voice_bussy_callback_ptr)
+		// Clean up all residual notes that were waiting for not active state
+		if (!AdjSynth::get_instance()->synth_voice[v]->audio_voice->is_voice_wait_for_not_active() &&
+			!AdjSynth::get_instance()->synth_voice[v]->audio_voice->is_voice_active())
 		{
-			mark_voice_bussy_callback_ptr(first_voice_index);
+			assigned_voices[v] = _VOICE_NOT_ASSIGNED;
 		}
-		//		return synthVoices[firstVoiceIndex];
-		return synth_voices[0];
-	}
 
-	// Look for a free voice
-	voice = 0;
-	while ((voice < num_of_voices) && synth_voices[voice]->dsp_voice->is_in_use())
-	{
-		voice++;
-	}
-
-	if (voice < num_of_voices)
-	{
-		synth_voices[voice]->dsp_voice->in_use();
-		return synth_voices[voice];
-	}
-	else
-	{
-		return NULL;
-	}
-}
-
-/**
-*   @brief  Free in-use program voice resource.
-*   @param  voice	voice resource number
-*   @return void
-*/
-void SynthProgram::free_voice(int voice)
-{
-	if ((voice >= 0) && (voice < num_of_voices))
-	{
-		synth_voices[voice]->dsp_voice->not_in_use();
-		printf("program: %i free voice: %i\n", prog_num, voice);
-	}
-		
-}
-
-/**
-*   @brief  Set the number of voices.
-*			Create additional new voices if required.
-*   @param  nov	number of voice resources to create.
-*   @return void
-*/
-void SynthProgram::set_num_of_voices(int nov)
-{	
-	int i;	
-
-	if ((nov > 0) && (nov <= _SYNTH_MAX_NUM_OF_VOICES))
-	{
-		num_of_voices = nov;
-		// Increase num of voices per demand.
-		for (i = 0; i < num_of_voices; i++)
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
 		{
-			if (synth_voices[i] == NULL)
-			{
-				synth_voices[i] = new SynthVoice(
-					i,
-					prog_num,
-					sample_rate,
-					audio_block_size,
-					&active_preset_params, 
-					mso_wtab,
-					program_wavetable,
-					audio_manager);
-				synth_voices[i]->set_voice_params(&active_preset_params,
-					ModSynth::get_instance()->adj_synth->get_active_common_params(), "all");
-			}
-		}
-	}	
-}
-
-/**
-*   @brief  Return the number of voices.
-*   @param  none
-*   @return the number of voices
-*/
-int SynthProgram::get_num_of_voices() { return num_of_voices; }
-
-/**
-*   @brief  Set the portamento time in sec (float).
-*   @param  porta	the portamento time in sec (0 to PORTAMENTO_MAX_TIME_SEC)
-*   @return void
-*/
-void SynthProgram::set_portamento_time(float porta)
-{
-	portamento_time = porta;
-
-	if (portamento_time < 0.0f)
-	{
-		portamento_time = 0.0f;
-	}
-	else if (portamento_time > _PORTAMENTO_MAX_TIME_SEC)
-	{
-		portamento_time = _PORTAMENTO_MAX_TIME_SEC;
-	}
-
-	porata_div = 1.0f - (float)((float)audio_block_size / (portamento_time + 0.004f) / (float)sample_rate);
-}
-
-/**
-*   @brief  Set the portamento time in sec imn logaritmic scale (int).
-*   @param  porta	the portamento time index (0 to 100)
-*   @return void
-*/
-void SynthProgram::set_portamento_time(int porta)
-{
-	set_portamento_time(Utils::calc_log_scale_100_float(0.0f, _PORTAMENTO_MAX_TIME_SEC, 10.0, porta));
-}
-
-/**
-*   @brief  Return the portamento time in sec (float).
-*   @param  none
-*   @return the portamento time in sec (float).
-*/
-float SynthProgram::get_portamento_level() { return portamento_time; }
-
-/**
-*   @brief  Enable Portamento.
-*   @param  none
-*   @return void
-*/
-void SynthProgram::enable_portamento() { portamento_enabled = true; }
-
-/**
-*   @brief  Disable Portamento.
-*   @param  none
-*   @return void
-*/
-void SynthProgram::disable_portamento() { portamento_enabled = false; }
-
-/**
-*   @brief  Return Portamento state.
-*   @param  none
-*   @return true if Portaqmento is enabled
-*/
-bool SynthProgram::portamento_is_enabled() { return portamento_enabled; }
-
-/**
-*   @brief  Return playde note frequency.
-*			If Portamento is active, return the current note frequency
-*   @param  none
-*   @return playde note frequency.
-*/
-float SynthProgram::get_note_frequency()
-{
-	if (portamento_enabled)
-	{	
-		return actual_freq;
-	}
-	else
-	{	
-		return note_freq;
-	}
-}
-
-/**
-*   @brief  Update playde note frequency based on Portamento settings and Note-on ellapsed time.
-*   @param  none
-*   @return void
-*/
-void SynthProgram::update_actual_frequency()
-{
-	if (note_diff > 0)
-	{
-		// Glide up
-		actual_freq /= porata_div;
-		if (actual_freq > note_freq)
-		{
-			actual_freq = note_freq;
-			note_diff = 0;
+			voice = AdjSynth::get_instance()->synth_voice[voice_num];
 		}
 	}
-	else if (note_diff < 0)
-	{
-		// Glide down
-		actual_freq *= porata_div;
-		if (actual_freq < note_freq)
-		{
-			actual_freq = note_freq;
-			note_diff = 0;
-		}
-	}
-	else
-	{
-		// Same note - no glide
-		actual_freq = note_freq;
-	}
+
+	return voice;
 }

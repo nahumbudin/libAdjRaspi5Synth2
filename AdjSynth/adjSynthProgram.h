@@ -1,132 +1,156 @@
 /**
-*	@file		adjSynthProgram.h
+*	@file		adjSynthPrograms.h
 *	@author		Nahum Budin
-*	@date		4-Oct-2024
-*	@version	1.3 
-*					1. Code refactoring and notaion.
-*					2. Rename Patch to Preset (Patch is to be used for full setup settings).
-*					
-*	@version	1.1	4-Feb-2021
-*					1. Code refactoring and notaion.
-*					2. Adding sample-rate and audio block-size handling
-*				1.0	15-Nov-2019 
-*
-*	@brief		Handle AdjSynth MIDI programs
+*	@date		28-Sep-2025
+*	@version	1.0
 *	
-*				The adjSynth Program implements a preset voice settings, in a similar way of a MIDI program.
-*				In this way, the adjSynth voices may be dynamically allocated and set with various "sounds".
+*	The adjSynth Program implements a preset voice settings, in a similar way of a MIDI program.
+*	In this way, the adjSynth voices may be dynamically allocated and set with various "sounds" presets.
+*
+*	However, unlike a common MIDI implementation, the adjSynth programs are directly linked to a MIDI channel.
+*	This means that each MIDI channel (1-16) is mapped to a specific program (0-15), unlike the common MIDI,
+*	where a program change message may change the program assigned to a MIDI channel.
+*	
+*	Thus, to change the sound preset of a MIDI channel/program, the user must change the program preset parameters.
+*	
+*	Unlike in the previous version (adjSynthProgram), in this version concept, a program is just a set
+*	of preset parameters that is used to setup each allocated voice object with the program preset parameters,
+*	when it is allocated following a NOTE-ON command on a specific MIDI channel.
+*	In this way, there is no need for a predefined set of voices per program, and any voice can be allocated to any program.
+*	
+*	In this version, there are 19 programs (0-18):
+*		0-15	MIDI-mapping mode programs used each for a MIDI channel 1-16
+*				Settings are loaded with presets and cannot be edited.
 *				
-*				In this version, there are 19 programs (0-18):
-*					0-15	MIDI-mapping mode programs used each for a MIDI channel 1-16
-*							Settings are loaded with presets and cannot be addited
-*					16		Sketch 1 - settings can be changed online
-*					17		Sketch 2 - settings can be changed online
-*					18		Sketch 3 - settings can be changed online
-*					
-*				
-*					
+*	To create new sound presets for programs 0-15, the user should use the sketch programs (16-18) to create and edit online new presets,
+*	and then save the created presets to files. The user may then load the created preset files.
+*	
+*		16		Sketch 1 - settings can be changed online
+*		17		Sketch 2 - settings can be changed online
+*		18		Sketch 3 - settings can be changed online
+*
 */
 
 #pragma once
 
-#include <stdint.h>
+#include <vector>
+#include <memory>
 
 #include "../Settings/settings.h"
 #include "adjSynthVoice.h"
-#include "adjSynthPADcreator.h"
-#include "../Audio/audioManager.h"
-#include "../DSP/dspMorphedSineOsc.h"
-#include "../LibAPI/types.h"
+#include "../Audio/audioPolyMixer.h"
 
+#define	_VOICE_NOT_ASSIGNED		0
+#define	_VOICE_ASSIGNED			1
+
+class AudioPolyMixer;
 class SynthVoice;
 
-class SynthProgram
+class AdjSynthPrograms
 {
-public:
-
-	SynthProgram(
-		int samp_rate = _DEFAULT_SAMPLE_RATE,
-		int block_size = _DEFAULT_BLOCK_SIZE,
-		int voices = 2,
-		int first_v_index = 0,
+  public:
+	AdjSynthPrograms(
+		int prog_num = -1,
 		int wt_size = _PAD_DEFAULT_WAVETABLE_SIZE,
-		AudioManager *aud_mng = NULL);
+		_settings_params_t *preset_params = nullptr,
+		AudioPolyMixer *audio_poly_mixer = NULL);
+	~AdjSynthPrograms();
+	
+	/* Get the program number */
+	int get_program_num();
 
-	~SynthProgram();
-	
-	void register_set_preset_settings_default_params_callback_ptr(func_ptr_int_settings_parms_ptr_int_t ptr);
-	int activate_set_preset_settings_default_params_callback(_settings_params_t* params, int prog);
-	
-	
-	void register_mark_voice_bussy_callback_ptr(func_ptr_void_int_t ptr);
-	
-	int set_sample_rate(int samp_rate);
-	int get_sample_rate();
-	
-	int set_audio_block_size(int size);
-	int get_audio_block_size();
-
-	void set_num_of_voices(int nov);
-	int get_num_of_voices();
-
+	/* Get the active preset parameters */
+	_settings_params_t *get_active_program_preset_params();
+	/* Set the active preset parameters without updating all the currentlly assigned voices*/
+	int set_active_program_preset_params_no_update(_settings_params_t *preset_params);
+	/* Set the active preset parameters and update all the currentlly assigned voices*/
 	void set_program_preset_params(_settings_params_t *preset_params);
+	
+	/* Assign a voice with the program preset parameters */
+	int assign_voice_with_preset_program_params(SynthVoice *voice, int voice_num);
+	
+	/* Deallocate a voice */
+	int deallocate_voice_from_program(int voice_num);
+	
+	/* Get the voice number that plays a given not. */
+	int get_voice_num_playing_note(int note);
 
-	void set_portamento_time(float porta);
-	void set_portamento_time(int porta);
-	float get_portamento_level();
+	/* Refresh all program assigned voices with a new preset params */
+	int refresh_all_program_voices_with_preset_params(_settings_params_t *preset_params);
 
-	void enable_portamento();
-	void disable_portamento();
-	bool portamento_is_enabled();
+	/* Read program preset file */
+	int read_program_preset_file(string path = "", string type = "");
 
-	float get_note_frequency();
-	void update_actual_frequency();
+	/* Set all the program voices polly mixer gain1 level */
+	int set_program_voices_poly_mixer_gain_1_level_int(int level);
+	int set_program_voices_poly_mixer_gain_1_level_float(float level);
 
-	SynthVoice *get_free_voice();
-	void free_voice(int voice);
+	/* Set all the program voices polly mixer gain2 level */
+	int set_program_voices_poly_mixer_gain_2_level_int(int level);
+	int set_program_voices_poly_mixer_gain_2_level_float(float level);
+	
+	/* Set all the program voices polly mixer pan1 level */
+	int set_program_voices_poly_mixer_pan_1_int(int pan);
+	int set_program_voices_poly_mixer_pan_1_float(float pan);
+	
+	/* Set all the program voices polly mixer pan2 level */
+	int set_program_voices_poly_mixer_pan_2_int(int pan);
+	int set_program_voices_poly_mixer_pan_2_float(int pan);
 
-	SynthVoice *synth_voices[_SYNTH_MAX_NUM_OF_VOICES] = { NULL };
+	/* Set all the program voices polly mixer send1 level */
+	int set_program_voices_poly_mixer_send_1_int(int send);
+	int set_program_voices_poly_mixer_send_1_float(float send);
 
-	Settings *settings_manager = NULL; 
-	_settings_params_t active_preset_params, prev_active_preset_params_x;  
+	/* Set all the program voices polly mixer send2 level */
+	int set_program_voices_poly_mixer_send_2_int(int send);
+	int set_program_voices_poly_mixer_send_2_float(float send);
+	
+	/* Get a voice object. */
+	SynthVoice *get_voice(int voice_num);
 
+	/* Used by the MSO a wave table */
 	DSP_MorphingSinusOscWTAB *mso_wtab = NULL;
 
-	// synthPAD wavetable
+	/* synthPAD wavetable handling */
 	SynthPADcreator *synth_pad_creator = NULL;
 	Wavetable *program_wavetable = NULL;
+
+	/* Holds the program preset parameters */
+	_settings_params_t *active_preset_params;
+
+	Settings *program_settings_manager = NULL;
+	
+	/* Holds the indexes of the assigned voices. */
+	//std::vector<std::unique_ptr<int>> assigned_voices_vector;
+	int assigned_voices[_SYNTH_MAX_NUM_OF_VOICES];
 	
 
-private:
+  private:
+	/* Mange the program settings */
 	
-	AudioManager *audio_manager = NULL;
-	int prog_num;
-	// Global program number identifier allocator
-	static int prog_numbers;
-	// Maximum number of polyphonic voices assigned to this program
-	int num_of_voices;
-	// Indicates 1st voice index out of all synthesizer voices. 
-	// e.g. firstVoiceIndex = 10 and numOfVoices = 12 => program voices: 10 to 21.
-	int first_voice_index;
 
-	bool portamento_enabled;
-	// Portamento gliding time
-	float portamento_time;
-	// Portamento frequency glide factor (1-iRrefreshRate/portaTime/iSAMPLE_RATE) */
-	float porata_div = 1.0f;
-	// Holds previous note num 
-	int prev_note_ind;
-	// Indicates if this Note is higher (1) or lower (-1) than the previous note 
-	int note_diff;
-	//  Note frequency 
-	float note_freq = 440.0f;
-	// Actual frequency when deviating (e.g. portamento glide) 
-	float actual_freq = 440.0f;
+	/* Holds the program number. */
+	int program_num;
+	
+	/* Holds the indexes of the assigned voices. */
+	//std::vector<std::unique_ptr<int>> assigned_voices_vector;
+	//int assigned_voices[_SYNTH_MAX_NUM_OF_VOICES];
 
-	struct timeval start_time;
-	
-	int sample_rate, audio_block_size;
-	
-	func_ptr_int_settings_parms_ptr_int_t set_preset_settings_default_params_callback_ptr = NULL;
-	func_ptr_void_int_t mark_voice_bussy_callback_ptr = NULL;
+	/* Holds the program voices polly mixer gain1 level */
+	float program_voices_output_gain1;
+	/* Holds the program voices polly mixer gain2 level */
+	float program_voices_output_gain2;
+	/* Holds the program voices polly mixer pan1 level */
+	float program_voices_output_pan1;
+	/* Holds the program voices polly mixer pan2 level */
+	float program_voices_output_pan2;
+	/* Holds the program voices polly mixer send1 level */
+	float program_voices_output_send1;
+	/* Holds the program voices polly mixer send2 level */
+	float program_voices_output_send2;
+
+	/* Holds the paresnt AdjSynth audio poly mixer instance */
+	AudioPolyMixer	*parent_audio_poly_mixer;
 };
+
+

@@ -4,6 +4,7 @@
 *	@date		22-Sep-2025
 *	@version	1.1
 *					1. Code refactoring rename modules to instruments
+*					2. Implementation: init connections before opening instruments as some instruments initialization are utilizing MIDI messages
 *	
 *	@brief		Modular synthersizer patches handling.
 *
@@ -22,6 +23,7 @@
 #include "../Instrument/instrumentFluidSynth.h"
 #include "../Instrument/instrumentAnalogSynth.h"
 #include "../Instrument/instrumentMidiMixer.h"
+#include "../Instrument/instrumentAnalogReverbration.h"
 #include "../utils/utils.h"
 #include "../LibAPI/connections.h"
 #include "../LibAPI/defines.h"
@@ -622,7 +624,7 @@ int PatchsHandler::create_active_instruments_settings_files(vector<string> inst_
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_REVERB_STR_KEY)
 		{
-			// TODO:
+			mod_synth_save_analog_reverberation_patch_file(settings_file_path);
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_DISTORTION_STR_KEY)
 		{
@@ -669,91 +671,8 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 	vector<string> midi_input_connections;
 	string midi_in_connection;
 	int client_num;
-
-	for (int m = 0; m < active_instruments.size(); m++)
-	{
-		// Open the instruments pannels.
-		ModSynth::get_instance()->instruments_manager->open_instrument_pannel_name(active_instruments.at(m));
-		// Handle settings files
-		if (settings_files.at(m) != "")
-		{
-			settings_file_path = filesystem::path(file_path).parent_path().c_str();
-			settings_file_path += "/" + active_instruments.at(m) + "-settings.xml";
-
-			if (active_instruments.at(m) == _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY)
-			{
-				ModSynth::get_instance()->get_fluid_synth()->open_fluid_synth_preset_file(
-					settings_file_path,
-					&ModSynth::get_instance()->get_fluid_synth()->presets[0],
-					ModSynth::get_instance()->get_fluid_synth()->presets_summary_str);
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
-			{
-				ModSynth::get_instance()->get_analog_synth()->instrument_settings->read_settings_file(
-					ModSynth::get_instance()->get_analog_synth()->active_preset_settings_params,
-					settings_file_path,
-					_ADJ_SYNTH_PRESET_PARAMS, _SKETCH_PROGRAM_1); // TODO: fix sketch number
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_PADSYNTH_SYNTH_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_MIXER_STR_KEY)
-			{
-				ModSynth::get_instance()->get_midi_mixer()->open_midi_mixer_presets_file(
-					settings_file_path,
-					ModSynth::get_instance()->get_midi_mixer()->active_preset_settings_params,
-					&ModSynth::get_instance()->get_midi_mixer()->presets_summary_str[0]);
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_MAPPER_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_REVERB_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_DISTORTION_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_GRAPHIC_EQUALIZER_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_CONTROL_BOX_HANDLER_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_EXT_MIDI_INT_CONTROL_STR_KEY)
-			{
-				
-			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_KEYBOARD_CONTROL_STR_KEY)
-			{
-				//ModSynth::get_instance()->get_keyboard_control()->open_adj_synth_patch_file(settings_file_path);
-			}
-		}
-	}
 	
-	/* Set connections after all modules are oppened */
+	/* Set connections BEFORE or AFTER ? all modules are oppened as some instruments initialization are utilizing MIDI messages */
 	
 	mod_synth_refresh_alsa_clients_data();
 	mod_synth_refresh_jack_clients_data();
@@ -798,6 +717,108 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 					jack_connection.out_client_name,
 					jack_connection.out_client_port_name,
 					true); // Conect
+			}
+		}
+	}
+
+	for (int m = 0; m < active_instruments.size(); m++)
+	{
+		// Open the instruments pannels.
+		ModSynth::get_instance()->instruments_manager->open_instrument_pannel_name(active_instruments.at(m));
+		// Handle settings files
+		if (settings_files.at(m) != "")
+		{
+			settings_file_path = filesystem::path(file_path).parent_path().c_str();
+			settings_file_path += "/" + active_instruments.at(m) + "-settings.xml";
+
+			if (active_instruments.at(m) == _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY)
+			{
+				ModSynth::get_instance()->get_fluid_synth()->open_fluid_synth_preset_file(
+					settings_file_path,
+					ModSynth::get_instance()->get_fluid_synth()->active_settings_params,
+					ModSynth::get_instance()->get_fluid_synth()->presets_summary_str);
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
+			{
+				ModSynth::get_instance()->get_analog_synth()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_analog_synth()->active_settings_params,
+					settings_file_path,
+					_ADJ_SYNTH_PRESET_PARAMS, _SKETCH_PROGRAM_1); // TODO: fix sketch number
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_PADSYNTH_SYNTH_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_MIXER_STR_KEY)
+			{
+				//ModSynth::get_instance()->get_midi_mixer()->open_midi_mixer_presets_file(
+				//	settings_file_path,
+				//	ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				//	&ModSynth::get_instance()->get_midi_mixer()->presets_summary_str[0]);
+				
+				ModSynth::get_instance()->get_midi_mixer()->read_instrument_settings(
+					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+					settings_file_path,
+					"midi-mixer-preset");				
+				
+				// Set the midi instrument params
+				ModSynth::get_instance()->get_midi_mixer()->set_instrument_settings(ModSynth::get_instance()->get_midi_mixer()->active_settings_params); 
+	
+				ModSynth::get_instance()->get_midi_mixer()->update_midi_mixer_gui();
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_MAPPER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_REVERB_STR_KEY)
+			{
+				ModSynth::get_instance()->get_analog_reverberation()->read_instrument_settings(
+					ModSynth::get_instance()->get_analog_reverberation()->active_settings_params,
+					settings_file_path,
+					"analog-reverb-preset");
+				
+				//ModSynth::get_instance()->get_analog_reverberation()->set_instrument_settings(
+				//	ModSynth::get_instance()->get_analog_reverberation()->active_settings_params);
+				
+				ModSynth::get_instance()->get_analog_reverberation()->update_analog_reverberation_gui();
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_DISTORTION_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_GRAPHIC_EQUALIZER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_CONTROL_BOX_HANDLER_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_EXT_MIDI_INT_CONTROL_STR_KEY)
+			{
+				
+			}
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_KEYBOARD_CONTROL_STR_KEY)
+			{
+				//ModSynth::get_instance()->get_keyboard_control()->open_adj_synth_patch_file(settings_file_path);
 			}
 		}
 	}
