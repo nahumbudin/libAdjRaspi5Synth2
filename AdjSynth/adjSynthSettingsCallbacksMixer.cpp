@@ -12,6 +12,8 @@
 *	version 1.0		15_Nov-2019:		
 *		First version
 *		
+*	14-Apr-2026: Note - the mixer settings are currently not used, and the callbacks are not called.
+*		
 */
 
 #include "adjSynth.h"

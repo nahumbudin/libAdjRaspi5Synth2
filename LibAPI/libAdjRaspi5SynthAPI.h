@@ -1,11 +1,14 @@
 /**
 * @file			libAdjRaspi5synthAPI.h
 *	@author		Nahum Budin
-*	@date		8-May-2024
-*	@version	1.0
+*	@date		21-Apr-2026
+*	@version	1.1
+*					1. Added Hammond Organ API.
 *
 *
 *	History:\n
+*	
+*			ver 1.0  8-May-2024 Initial
 *
 *	
 *
@@ -35,3 +38,5 @@
 #include "patch.h"
 #include "synthesizer.h"
 #include "utils.h"
+#include "hammondOrgan.h"
+

@@ -36,7 +36,7 @@
 #include "adjSynthPolyphony.h"
 
 #include "adjSynthProgram.h"
-#include "adjSynthPrograms.h"
+//#include "adjSynthPrograms.h"
 
 #include "adjSynthPolyphonyManager.h"
 //#include "adjSynthPolyphonyManagerThreads.h"
@@ -108,6 +108,9 @@ public:
 	_settings_params_t *get_active_settings_params();
 	//_setting_params_t *get_active_general_settings_params();
 	
+	int set_program_preset_params_ptr(int program_num, _settings_params_t *params);
+	_settings_params_t *get_program_preset_params_ptr(int program_num);
+	
 	int update_program_voices_parameter(int program_num, const char* param_key);
 	
 	int get_num_of_voices();
@@ -141,7 +144,10 @@ public:
 	//int set_default_settings_parameters(_settings_params_t *params);
 	int set_default_settings_parameters_equalizer(_settings_params_t *params);
 	int set_default_settings_parameters_reverb(_settings_params_t *params);
+	
+	// Not in use: The mixer settings parameters are set in the MIDI mixer instrument initialization
 	int set_default_settings_parameters_mixer(_settings_params_t *params);
+	
 	int set_default_settings_parameters_keyboard(_settings_params_t *params);
 
 	//int set_default_general_settings_parameters(_setting_params_t *params);
@@ -185,8 +191,8 @@ public:
 	void set_global_lfo_5_frequency(float freq);
 	void set_global_lfo_6_frequency(float freq);
 
-	void  midi_play_note_on(uint8_t channel, uint8_t byte2, uint8_t byte3, int voc = 0);
-	void  midi_play_note_off(uint8_t channel, uint8_t byte2, uint8_t byte3, int voc = 0);
+	void  midi_play_note_on(uint8_t channel, uint8_t byte2, uint8_t byte3, int voc = 0, int prog = _PROGRAM_16);
+	void  midi_play_note_off(uint8_t channel, uint8_t byte2, uint8_t byte3, int voc = 0, int prog = _PROGRAM_16);
 	
 	// UI callbacks intiations
 	void set_num_of_poly_disp_callback(int numv);
@@ -282,6 +288,10 @@ public:
 
 	/* Holds the AdjSynth preset parameters - Set per program (VCOs, PAD, MSO, KPS, Filter, Dist, PolyMixer) */
 	_settings_params_t active_adj_synth_preset_params;
+	
+	/* Holds the preset parameters of each Program */
+	_settings_params_t *active_program_preset_params_ptr[_SYNTH_MAX_NUM_OF_PROGRAMS];
+	
 	
 	/* Holds the AdjSettings Common Preset parameters (Reverb, Equalizer, KBD) */
 	_settings_params_t active_adj_synth_common_preset_params;

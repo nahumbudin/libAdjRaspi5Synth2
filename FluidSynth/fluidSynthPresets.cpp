@@ -24,7 +24,8 @@
 
 class InstrumentFluidSynth;
 
-int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *params)
+// Collects all current FluidSynth settings parameters and values to be saved in the settings structure.
+int InstrumentFluidSynth::collect_fluid_synth_settings_parms(_settings_params_t *params)
 {
 
 	int res = 0;
@@ -42,7 +43,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 	
 	for (int i = 0; i < 16; i++)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 			params,
 			"fluid.synth.ch" + std::to_string(i + 1) + ".midi_program",
 			get_fluid_synth_interface()->get_fluid_synth_channel_program(i),
@@ -56,7 +57,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 			_SET_VALUE | _SET_TYPE,
 			-1); // FluidSynth has no Mod Synth Programs
 
-		res |= instrument_settings->set_string_param(
+		res |= instrument_settings_manager->set_string_param(
 			params,
 			"fluid.synth.ch" + std::to_string(i + 1) + ".midi_program_name",
 			get_fluid_synth_interface()->get_fluid_synth_channel_preset_name(i),
@@ -68,7 +69,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 			_SET_VALUE | _SET_TYPE,
 			-1);
 
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 			params,
 			"fluid.synth.ch" + std::to_string(i + 1) + ".midi_bank",
 			get_fluid_synth_interface()->get_fluid_synth_channel_bank(i),
@@ -82,7 +83,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 			_SET_VALUE | _SET_TYPE,
 			-1);
 
-		res |= instrument_settings->set_string_param(
+		res |= instrument_settings_manager->set_string_param(
 			params,
 			"fluid.synth.ch" + std::to_string(i + 1) + ".midi_sound_font",
 			get_fluid_synth_interface()->get_fluid_synth_channel_preset_soundfont_name(i),
@@ -94,7 +95,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 			_SET_VALUE | _SET_TYPE,
 			-1);
 
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 			params,
 			"fluid.synth.ch" + std::to_string(i + 1) + ".midi_sound_font_id",
 			get_fluid_synth_interface()->get_fluid_synth_channel_sfont_id(i),
@@ -109,7 +110,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 			-1);
 	}
 
-	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.volume", &float_param);
+	result = instrument_settings_manager->get_float_param(active_settings_params, "fluid.synth.volume", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -119,7 +120,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		float_val = 0.f;
 	}
 
-	res |= instrument_settings->set_float_param(
+	res |= instrument_settings_manager->set_float_param(
 		params,
 		"fluid.synth.volume",
 		float_val,
@@ -133,7 +134,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_bool_param(active_preset_settings_params, "fluid.synth.reverb.active", &bool_param);
+	result = instrument_settings_manager->get_bool_param(active_settings_params, "fluid.synth.reverb.active", &bool_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		bool_val = bool_param.value;
@@ -143,7 +144,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		bool_val = false;
 	}
 
-	res |= instrument_settings->set_bool_param(
+	res |= instrument_settings_manager->set_bool_param(
 		params,
 		"fluid.synth.reverb.active",
 		bool_val,
@@ -155,7 +156,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.reverb.room-size", &float_param);
+	result = instrument_settings_manager->get_float_param(active_settings_params, "fluid.synth.reverb.room-size", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -165,7 +166,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		float_val = 0;
 	}
 
-	res |= instrument_settings->set_float_param(
+	res |= instrument_settings_manager->set_float_param(
 		params,
 		"fluid.synth.reverb.room-size",
 		float_val,
@@ -179,7 +180,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.reverb.damp", &float_param);
+	result = instrument_settings_manager->get_float_param(active_settings_params, "fluid.synth.reverb.damp", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -189,7 +190,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		float_val = 0;
 	}
 
-	res |= instrument_settings->set_float_param(
+	res |= instrument_settings_manager->set_float_param(
 		params,
 		"fluid.synth.reverb.damp",
 		float_val,
@@ -203,7 +204,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.reverb.width", &float_param);
+	result = instrument_settings_manager->get_float_param(active_settings_params, "fluid.synth.reverb.width", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -213,7 +214,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		float_val = 0;
 	}
 
-	res |= instrument_settings->set_float_param(
+	res |= instrument_settings_manager->set_float_param(
 		params,
 		"fluid.synth.reverb.width",
 		float_val,
@@ -227,7 +228,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.reverb.level", &float_param);
+	result = instrument_settings_manager->get_float_param(active_settings_params, "fluid.synth.reverb.level", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -237,7 +238,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		float_val = 0;
 	}
 
-	res |= instrument_settings->set_float_param(
+	res |= instrument_settings_manager->set_float_param(
 		params,
 		"fluid.synth.reverb.level",
 		float_val,
@@ -251,7 +252,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_bool_param(active_preset_settings_params, "fluid.synth.chorus.active", &bool_param);
+	result = instrument_settings_manager->get_bool_param(active_settings_params, "fluid.synth.chorus.active", &bool_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		bool_val = bool_param.value;
@@ -261,7 +262,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		bool_val = false;
 	}
 
-	res |= instrument_settings->set_bool_param(
+	res |= instrument_settings_manager->set_bool_param(
 		params,
 		"fluid.synth.chorus.enabled",
 		bool_val,
@@ -273,7 +274,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_int_param(active_preset_settings_params, "fluid.synth.chorus.nr", &int_param);
+	result = instrument_settings_manager->get_int_param(active_settings_params, "fluid.synth.chorus.nr", &int_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		int_val = int_param.value;
@@ -283,7 +284,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		int_val = 0;
 	}
 
-	res |= instrument_settings->set_int_param(
+	res |= instrument_settings_manager->set_int_param(
 		params,
 		"fluid_synth.chorus.nr",
 		int_val,
@@ -297,7 +298,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.chorus.level", &float_param);
+	result = instrument_settings_manager->get_float_param(active_settings_params, "fluid.synth.chorus.level", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -307,7 +308,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		float_val = 0;
 	}
 
-	res |= instrument_settings->set_float_param(
+	res |= instrument_settings_manager->set_float_param(
 		params,
 		"fluid.synth.chorus.level",
 		float_val,
@@ -321,7 +322,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.chorus.speed", &float_param);
+	result = instrument_settings_manager->get_float_param(active_settings_params, "fluid.synth.chorus.speed", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -331,7 +332,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		float_val = 0;
 	}
 
-	res |= instrument_settings->set_float_param(
+	res |= instrument_settings_manager->set_float_param(
 		params,
 		"fluid.synth.chorus.speed",
 		float_val,
@@ -345,7 +346,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_float_param(active_preset_settings_params, "fluid.synth.chorus.depth", &float_param);
+	result = instrument_settings_manager->get_float_param(active_settings_params, "fluid.synth.chorus.depth", &float_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		float_val = float_param.value;
@@ -355,7 +356,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		float_val = 0;
 	}
 
-	res |= instrument_settings->set_float_param(
+	res |= instrument_settings_manager->set_float_param(
 		params,
 		"fluid.synth.chorus.depth",
 		float_val,
@@ -369,7 +370,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		_SET_VALUE | _SET_TYPE,
 		-1);
 
-	result = instrument_settings->get_int_param(active_preset_settings_params, "fluid.synth.chorus.waveform", &int_param);
+	result = instrument_settings_manager->get_int_param(active_settings_params, "fluid.synth.chorus.waveform", &int_param);
 	if (result == _SETTINGS_KEY_FOUND)
 	{
 		int_val = int_param.value;
@@ -379,7 +380,7 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 		int_val = 0;
 	}
 
-	res |= instrument_settings->set_int_param(
+	res |= instrument_settings_manager->set_int_param(
 		params,
 		"fluid.synth.chorus.waveform",
 		int_val,
@@ -401,34 +402,37 @@ int InstrumentFluidSynth::collect_fluid_synth_preset_parms(_settings_params_t *p
 *   @param  path settings XML file full path
 *   @return 0 if done
 */
-int InstrumentFluidSynth::save_fluid_synth_preset_file(string path)
-{
-	_settings_params_t preset_temp;
-	
-	return_val_if_true(path == "", _SETTINGS_BAD_PARAMETERS);
 
-	XML_files *xml_files = new XML_files();
+// Use save_instrument_active_settings() .
 
-	int res = 0;
-
-	res = collect_fluid_synth_preset_parms(&preset_temp);
-	if (res != 0)
-	{
-		return -1;
-	}
-
-	preset_temp.name = xml_files->get_xml_file_name(path);
-	preset_temp.settings_type = "fluid-synth-preset";
-
-	res = instrument_settings->write_settings_file(
-		&preset_temp,
-		instrument_settings->get_settings_version(),
-		xml_files->get_xml_file_name(path),
-		path,
-		"fluid-synth-preset");
-
-	return res;
-}
+//int InstrumentFluidSynth::save_fluid_synth_preset_file(string path)
+//{
+//	_settings_params_t preset_temp;
+//	
+//	return_val_if_true(path == "", _SETTINGS_BAD_PARAMETERS);
+//
+//	XML_files *xml_files = new XML_files();
+//
+//	int res = 0;
+//
+//	res = collect_fluid_synth_settings_parms(&preset_temp);
+//	if (res != 0)
+//	{
+//		return -1;
+//	}
+//
+//	preset_temp.name = xml_files->get_xml_file_name(path);
+//	preset_temp.settings_type = "fluid-synth-preset";
+//
+//	res = instrument_settings_manager->write_settings_file(
+//		&preset_temp,
+//		instrument_settings_manager->get_settings_version(),
+//		xml_files->get_xml_file_name(path),
+//		path,
+//		"fluid-synth-preset");
+//
+//	return res;
+//}
 
 /**
 *   @brief  Open a preset parameters XML file and set it as the FluidSynth active preset parameters
@@ -443,24 +447,380 @@ int InstrumentFluidSynth::open_fluid_synth_preset_file(
 	std::string *summary)
 {
 	int res = -1;
+	int result = 0;
+	std::string sfont_name;
+	string preset_name;
+	string preset_prefix;
+
+	_settings_int_param_t int_param;
+	_settings_float_param_t float_param;
+	_settings_bool_param_t bool_param;
+	_settings_str_param_t string_param;
 
 	return_val_if_true(preset == NULL, _SETTINGS_BAD_PARAMETERS);
 	return_val_if_true(path == "", _SETTINGS_BAD_PARAMETERS);
 
-	res = instrument_settings->read_settings_file(
-		preset,
-		path,
-		"fluid-synth-preset");
+	//res = instrument_settings_manager->read_settings_file(
+	//	preset,
+	//	path,
+	//	"fluid-synth-preset");
+	
+	res = read_instrument_settings(preset, path, "fluid-synth-preset");
 
 	if (res == _SETTINGS_OK)
 	{
 		if (preset != NULL)
 		{
-			collect_fluid_synth_prest_channels_data(preset, &channels_presets[active_preset][0]);
-			load_fluid_synth_preset_soundfonts(&channels_presets[active_preset][0]);
-			set_fluid_synth_settings(active_preset_settings_params, &channels_presets[active_preset][0]);
-			generate_fluid_synth_prest_summary(&channels_presets[active_preset][0], summary);
+			// Copying the read settings parameters is not propper as it may be corrupted or not complete, 
+			// so we set the relevant parameters to the read values and leave the rest of the parameters as they are
+			// instrument_settings_manager->settings_params_deep_copy(active_settings_params, preset); // dest src
+
+			result = instrument_settings_manager->get_float_param(
+				preset,
+				"fluid.synth.reverb.room-size",
+				&float_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_float_param(
+					active_settings_params,
+					"fluid.synth.reverb.room-size",
+					float_param.value,
+					0,
+					0,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+
+			result = instrument_settings_manager->get_float_param(
+				preset,
+				"fluid.synth.reverb.damp",
+				&float_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_float_param(
+					active_settings_params,
+					"fluid.synth.reverb.damp",
+					float_param.value,
+					0,
+					0,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+
+			result = instrument_settings_manager->get_float_param(
+				preset,
+				"fluid.synth.reverb.width",
+				&float_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_float_param(
+					active_settings_params,
+					"fluid.synth.reverb.width",
+					float_param.value,
+					0,
+					0,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+
+			result = instrument_settings_manager->get_float_param(
+				preset,
+				"fluid.synth.reverb.level",
+				&float_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_float_param(
+					active_settings_params,
+					"fluid.synth.reverb.level",
+					float_param.value,
+					0,
+					0,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+
+			result = instrument_settings_manager->get_bool_param(
+				preset,
+				"fluid.synth.reverb.active",
+				&bool_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_bool_param(
+					active_settings_params,
+					"fluid.synth.reverb.active",
+					bool_param.value,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+
+			result = instrument_settings_manager->get_bool_param(
+				preset,
+				"fluid.synth.chorus.active",
+				&bool_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_bool_param(
+					active_settings_params,
+					"fluid.synth.chorus.active",
+					bool_param.value,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
 			
+
+			result = instrument_settings_manager->get_int_param(
+				preset,
+				"fluid.synth.chorus.nr",
+				&int_param);
+			
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_int_param_value(
+					active_settings_params,
+					"fluid.synth.chorus.nr",
+					int_param.value);
+			}
+
+			result = instrument_settings_manager->get_float_param(
+				preset,
+				"fluid.synth.chorus.level",
+				&float_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_float_param(
+					active_settings_params,
+					"fluid.synth.chorus.level",
+					float_param.value,
+					0,
+					0,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+
+			result = instrument_settings_manager->get_float_param(
+				preset,
+				"fluid.synth.chorus.speed",
+				&float_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_float_param(
+					active_settings_params,
+					"fluid.synth.chorus.speed",
+					float_param.value,
+					0,
+					0,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+
+			result = instrument_settings_manager->get_float_param(
+				preset,
+				"fluid.synth.chorus.depth",
+				&float_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_float_param(
+					active_settings_params,
+					"fluid.synth.chorus.depth",
+					float_param.value,
+					0,
+					0,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+
+			result = instrument_settings_manager->get_int_param(
+				preset,
+				"fluid.synth.chorus.waveform",
+				&int_param);
+
+			if (result == _SETTINGS_KEY_FOUND)
+			{
+				res |= instrument_settings_manager->set_int_param(
+					active_settings_params,
+					"fluid.synth.chorus.waveform",
+					int_param.value,
+					0,
+					0,
+					"fluid-synth-preset",
+					NULL,
+					-1,
+					-1,
+					NULL,
+					_SET_VALUE | _SET_TYPE,
+					-1);
+			}
+			
+			for (int ch = 0; ch < 16; ch++)
+			{
+				preset_prefix = "fluid.synth.ch" + std::to_string(ch + 1) + ".midi_";
+
+				result = instrument_settings_manager->get_int_param(
+					preset,
+					preset_prefix + "program",
+					&int_param);
+				
+				if (result == _SETTINGS_KEY_FOUND)
+				{
+					res |= instrument_settings_manager->set_int_param(
+						active_settings_params,
+						preset_prefix + "program",
+						int_param.value,
+						127,
+						0,
+						"fluid-synth-preset",
+						NULL,
+						-1,
+						-1,
+						NULL,
+						_SET_VALUE | _SET_TYPE,
+						-1);
+				}
+
+				result = instrument_settings_manager->get_int_param(
+					preset,
+					preset_prefix + "bank",
+					&int_param);
+				
+				if (result == _SETTINGS_KEY_FOUND)
+				{
+					res |= instrument_settings_manager->set_int_param(
+						active_settings_params,
+						preset_prefix + "bank",
+						int_param.value,
+						128,
+						0,
+						"fluid-synth-preset",
+						NULL,
+						-1,
+						-1,
+						NULL,
+						_SET_VALUE | _SET_TYPE,
+						-1);
+				}
+
+				result = instrument_settings_manager->get_int_param(
+					preset,
+					preset_prefix + "sound_font_id",
+					&int_param);
+				
+				if (result == _SETTINGS_KEY_FOUND)
+				{	
+					res |= instrument_settings_manager->set_int_param(
+						active_settings_params,
+						preset_prefix + "sound_font_id",
+						int_param.value,
+						127,
+						0,
+						"fluid-synth-preset",
+						NULL,
+						-1,
+						-1,
+						NULL,
+						_SET_VALUE | _SET_TYPE,
+						-1);
+				}
+
+				result = instrument_settings_manager->get_string_param(
+					preset,
+					preset_prefix + "program_name",
+					&string_param);
+				
+				if (result == _SETTINGS_KEY_FOUND)
+				{				
+					res |= instrument_settings_manager->set_string_param(
+						active_settings_params,
+						preset_prefix + "program_name",
+						string_param.value,
+						"fluid-synth-preset",
+						NULL,
+						-1,
+						-1,
+						NULL,
+						_SET_VALUE | _SET_TYPE,
+						-1);
+				}
+				
+				result = instrument_settings_manager->get_string_param(
+					preset,
+					preset_prefix + "sound_font",
+					&string_param);
+				
+				if (result == _SETTINGS_KEY_FOUND)
+				{
+					res |= instrument_settings_manager->set_string_param(
+						active_settings_params,
+						preset_prefix + "sound_font",
+						string_param.value,
+						"fluid-synth-preset",
+						NULL,
+						-1,
+						-1,
+						NULL,
+						_SET_VALUE | _SET_TYPE,
+						-1);
+				}
+			}
+			
+			collect_fluid_synth_prest_channels_data(active_settings_params, &channels_presets[active_preset][0]);
+			
+			load_fluid_synth_preset_soundfonts(&channels_presets[active_preset][0]);
+			set_fluid_synth_settings(active_settings_params, &channels_presets[active_preset][0]);
+			generate_fluid_synth_prest_summary(&channels_presets[active_preset][0], summary);
 		}
 	}
 
@@ -591,11 +951,11 @@ int InstrumentFluidSynth::set_fluid_synth_settings(_settings_params_t *preset,
 
 	if (res == 0)
 	{
-		instrument_settings->get_float_param(preset, "fluid.synth.volume", &float_param);
+		instrument_settings_manager->get_float_param(preset, "fluid.synth.volume", &float_param);
 		set_volume((int)(float_param.value * 200));
 
 		
-		instrument_settings->get_bool_param(preset, "fluid.synth.reverb.active", &bool_param);
+		instrument_settings_manager->get_bool_param(preset, "fluid.synth.reverb.active", &bool_param);
 		if (bool_param.value)
 		{
 			enable_reverb();
@@ -605,19 +965,19 @@ int InstrumentFluidSynth::set_fluid_synth_settings(_settings_params_t *preset,
 			disable_reverb();
 		}
 
-		instrument_settings->get_float_param(preset, "fluid.synth.reverb.room-size", &float_param);
+		instrument_settings_manager->get_float_param(preset, "fluid.synth.reverb.room-size", &float_param);
 		set_reverb_room_size((int)(float_param.value * 120));
 
-		instrument_settings->get_float_param(preset, "fluid.synth.reverb.damp", &float_param);
+		instrument_settings_manager->get_float_param(preset, "fluid.synth.reverb.damp", &float_param);
 		set_reverb_damp((int)(float_param.value * 100));
 
-		instrument_settings->get_float_param(preset, "fluid.synth.reverb.width", &float_param);
+		instrument_settings_manager->get_float_param(preset, "fluid.synth.reverb.width", &float_param);
 		set_reverb_width((int)(float_param.value * 100));
 
-		instrument_settings->get_float_param(preset, "fluid.synth.reverb.level", &float_param);
+		instrument_settings_manager->get_float_param(preset, "fluid.synth.reverb.level", &float_param);
 		set_reverb_level((int)(float_param.value * 100));
 
-		instrument_settings->get_bool_param(preset, "fluid.synth.chorus.active", &bool_param);
+		instrument_settings_manager->get_bool_param(preset, "fluid.synth.chorus.active", &bool_param);
 		if (bool_param.value)
 		{
 			enable_chorus();
@@ -627,19 +987,19 @@ int InstrumentFluidSynth::set_fluid_synth_settings(_settings_params_t *preset,
 			disable_chorus();
 		}
 
-		instrument_settings->get_int_param(preset, "fluid.synth.chorus.nr", &int_param);
+		instrument_settings_manager->get_int_param(preset, "fluid.synth.chorus.nr", &int_param);
 		set_chorus_number((int)(int_param.value * 10));
 
-		instrument_settings->get_float_param(preset, "fluid.synth.chorus.level", &float_param);
+		instrument_settings_manager->get_float_param(preset, "fluid.synth.chorus.level", &float_param);
 		set_chorus_level((int)(float_param.value * 100));
 
-		instrument_settings->get_float_param(preset, "fluid.synth.chorus.speed", &float_param);
+		instrument_settings_manager->get_float_param(preset, "fluid.synth.chorus.speed", &float_param);
 		set_chorus_speed((int)(float_param.value * 100));
 
-		instrument_settings->get_float_param(preset, "fluid.synth.chorus.depth", &float_param);
+		instrument_settings_manager->get_float_param(preset, "fluid.synth.chorus.depth", &float_param);
 		set_chorus_depth((int)(float_param.value * 10));
 
-		instrument_settings->get_int_param(preset, "fluid.synth.chorus.waveform", &int_param);
+		instrument_settings_manager->get_int_param(preset, "fluid.synth.chorus.waveform", &int_param);
 		set_chorus_waveform(int_param.value);		
 	}
 

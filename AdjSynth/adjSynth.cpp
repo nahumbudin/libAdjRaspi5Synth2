@@ -1,8 +1,19 @@
 /**
  *	@file		adjSynth.h
  *	@author		Nahum Budin
- *	@date		23-Sep-2025
- *	@version	1.4
+ *	@date		22-Apr-2026
+ *	@version	1.3
+ *					1. Adding program param to not on and note off calls.
+
+*					
+*	@brief		A collection of 4 synthesizers: Additive, Karplus String, PAD and Morphed Sine Oscilator (MSO)
+*					
+*	@brief		A collection of 4 synthesizers: Additive, Noise, Karplus String, PAD and Morphed Sine Oscilator (MSO)
+*				Note - the FluidSynth is not handeled by this object. 
+*	
+*	History:\n
+*	
+*	@version	1.4 23-Sep-2025
  *					1. Code refactoring and notaion.
  *					2. Bugs fix.
  *					3. Redfining the Programs concept Programs.h
@@ -15,14 +26,6 @@
  *					10. Adding Panic action
  *					11. Refactoring lfo_delays[] -> global array in adjSynth.
  *					12. Adding global LFOs for modulation.
-*					
-*	@brief		A collection of 4 synthesizers: Additive, Karplus String, PAD and Morphed Sine Oscilator (MSO)
-*					
-*	@brief		A collection of 4 synthesizers: Additive, Noise, Karplus String, PAD and Morphed Sine Oscilator (MSO)
-*				Note - the FluidSynth is not handeled by this object. 
-*	
-*	History:\n
-*	
 *	version 1.3		4-Oct-2024	Code refactoring and notaion.*	
 *	version 1.2		4-Feb--2021:
 *			1. Code refactoring and notaion.
@@ -141,6 +144,11 @@ AdjSynth::AdjSynth()
 	
 	/* Holds the total CPU utilization in %. */
 	cpu_utilization = 0;
+	
+	for (int i = 0; i < _SYNTH_MAX_NUM_OF_PROGRAMS; i++)
+	{
+		active_program_preset_params_ptr[i] = NULL;
+	}
 	
 	/* Specific settings of the Hammond Organ instrument. */ // TODO: why here?
 	hammond_percussion_on = false;
@@ -1298,6 +1306,39 @@ _settings_params_t *AdjSynth::get_active_settings_params()
 }
 
 /**
+*   @brief  set a pointer to the active settings params struct associated with a program
+*   @param  program_num     the program number (only sketches1)
+*   @param  params          a pointer to a _setting_params_t params structure holding settings params
+*   @return 0 if successful, -1 if specific key not found, -2 illegal program number
+*/
+int AdjSynth::set_program_preset_params_ptr(int program_num, _settings_params_t *params)
+{
+	if ((program_num < 0) || (program_num > _HAMMOND_ORGAN_PROGRAM_20) || (params == NULL))
+	{
+		return -1;
+	}
+	
+	active_program_preset_params_ptr[program_num] = params;
+	
+	return 0;
+}
+
+/**
+ **  @brief  retruns a pointer to the active preset params struct associated with a program
+ **  @param  program_num     the program number (only sketches1)
+ **  @return a pointer to the active preset params struct if successful, NULL if illegal program
+ **  */
+_settings_params_t *AdjSynth::get_program_preset_params_ptr(int program_num)
+{
+	if ((program_num < 0) || (program_num > _HAMMOND_ORGAN_PROGRAM_20))
+	{
+		return NULL;
+	}
+	
+	return active_program_preset_params_ptr[program_num];
+}
+
+/**
 *   @brief  Set a program voices paramters using the setting parameters
 *   @param  program_num     the program number (only sketches1)
 *   @param  key_filter "all" to update all parameters, or specific key to update only one
@@ -1307,25 +1348,24 @@ int AdjSynth::update_program_voices_parameter(int program_num, const char* param
 {
 	int result = -2;
 	
-	if ((program_num < _PROGRAM_16) || (program_num > _PROGRAM_18))
-	{
-		return result;
-	}
-	
-	_settings_params_t* program_params = synth_program[program_num]->get_active_program_preset_params();
-	
-	for (int v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
-	{
-		if (synth_voice[v]->get_allocated_program() == program_num)
+	if (((program_num >= _PROGRAM_16) && (program_num <= _PROGRAM_18)) || // Analog synth sketches
+		(program_num == _HAMMOND_ORGAN_PROGRAM_20)) // Or Hammond organ.
+	{	
+		_settings_params_t* program_params = synth_program[program_num]->get_active_program_preset_params();
+			
+		for (int v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
 		{
-			pthread_mutex_lock(&update_mutex[v]);
-            
-			// Update single parameter or all
-			result = synth_voice[v]->set_voice_params(program_params, 
-				ModSynth::get_instance()->adj_synth->get_active_common_params(), 
-				param_key);
-            
-			pthread_mutex_unlock(&update_mutex[v]);
+			if (synth_voice[v]->get_allocated_program() == program_num)
+			{
+				pthread_mutex_lock(&update_mutex[v]);
+			        
+				// Update single parameter or all
+				result = synth_voice[v]->set_voice_params(program_params, 
+					ModSynth::get_instance()->adj_synth->get_active_common_params(), 
+					param_key);
+			        
+				pthread_mutex_unlock(&update_mutex[v]);
+			}
 		}
 	}
 	
@@ -1384,7 +1424,7 @@ int AdjSynth::set_default_global_parameters(_settings_params_t *params)
 	res = set_default_settings_parameters_equalizer(params);
 	res |= set_default_settings_parameters_reverb(params);
 	res |= set_default_settings_parameters_keyboard(params);
-	res |= set_default_settings_parameters_mixer(params);
+	//res |= set_default_settings_parameters_mixer(params); // Done as part of initializing the mixer instrument.
 
 	//	// TODO: GLobal part of modsynth
 	//	res |= set_default_settings_parameters_mixer(params);
@@ -1452,11 +1492,12 @@ void AdjSynth::update_ui_callback()
 *	@param	byte2	note midi num
 *	@param	byte3	note velocity (if set to 0, note off will be executed).
 *	@param	voc		voice (NA).
+*	@param	prog	program.
 *   @return void
 */
-void  AdjSynth::midi_play_note_on(uint8_t channel, uint8_t byte2, uint8_t byte3, int voc)
+void  AdjSynth::midi_play_note_on(uint8_t channel, uint8_t byte2, uint8_t byte3, int voc, int prog)
 {
-	int voice, core, scaledMagnitude, prog = 0;
+	int voice, core, scaledMagnitude, program = prog;
 	bool reused = false;
 	SynthVoice *prog_voice = NULL;
 
@@ -1468,13 +1509,17 @@ void  AdjSynth::midi_play_note_on(uint8_t channel, uint8_t byte2, uint8_t byte3,
 		return;
 	}
 	
-	if (midi_mapping_mode == _MIDI_MAPPING_MODE_MAPPING) // TODO:
+	if (prog == _PROGRAM_16 || prog == _PROGRAM_17 || prog == _PROGRAM_18) // Sketches 1-3
 	{
-		prog = channel;
-	}
-	else
-	{
-		prog = active_sketch;
+		// This is the default value, which means that the note on was activated by the analog synth instrument.
+		if (midi_mapping_mode == _MIDI_MAPPING_MODE_MAPPING) // TODO:
+		{
+			prog = channel; // Reconsider - channel and program are not related.
+		}
+		else
+		{
+			prog = active_sketch;
+		}
 	}
 
 	if (kbd1->portamento_is_enabled()) // TODO mobe portamento to programs?
@@ -1740,17 +1785,21 @@ _voice_is_on:
 *	@param	voc		voice (NA).
 *   @return void
 */
-void  AdjSynth::midi_play_note_off(uint8_t channel, uint8_t byte2, uint8_t byte3, int voc)
+void  AdjSynth::midi_play_note_off(uint8_t channel, uint8_t byte2, uint8_t byte3, int voc, int prog)
 {
-	int voice = -1, program = 0;
+	int voice = -1, program = prog;
 
-	if (midi_mapping_mode == _MIDI_MAPPING_MODE_MAPPING)
+	if (prog == _PROGRAM_16 || prog == _PROGRAM_17 || prog == _PROGRAM_18) // Sketches 1-3
 	{
-		program = channel;
-	}
-	else
-	{
-		program = active_sketch;
+		// This is the default value, which means that the note on was activated by the analog synth instrument.
+		if (midi_mapping_mode == _MIDI_MAPPING_MODE_MAPPING) // TODO:
+		{
+			prog = channel; // Reconsider - channel and program are not related.
+		}
+		else
+		{
+			prog = active_sketch;
+		}
 	}
 
 	pthread_mutex_lock(&voice_manage_mutex);

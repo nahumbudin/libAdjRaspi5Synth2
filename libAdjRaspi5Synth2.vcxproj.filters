@@ -318,9 +318,6 @@
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksMixer.cpp">
       <Filter>Source files\Synthesizer\AdjSynth\Settings Block Callbacks</Filter>
     </ClCompile>
-    <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksReverb.cpp">
-      <Filter>Source files\Synthesizer\AdjSynth\Settings Block Callbacks</Filter>
-    </ClCompile>
     <ClCompile Include="AdjSynth\adjSynthSettingsCallbacksVoiceAmp.cpp">
       <Filter>Source files\Synthesizer\AdjSynth\Settings Block Callbacks</Filter>
     </ClCompile>
@@ -403,12 +400,6 @@
       <Filter>Source files\Synthesizer\AdjSynth</Filter>
     </ClCompile>
     <ClCompile Include="AdjSynth\adjSynthPolyphonyManager.cpp">
-      <Filter>Source files\Synthesizer\AdjSynth</Filter>
-    </ClCompile>
-    <ClCompile Include="AdjSynth\adjSynthProgram.cpp">
-      <Filter>Source files\Synthesizer\AdjSynth</Filter>
-    </ClCompile>
-    <ClCompile Include="AdjSynth\adjSynthPrograms.cpp">
       <Filter>Source files\Synthesizer\AdjSynth</Filter>
     </ClCompile>
     <ClCompile Include="AdjSynth\adjSynthSetHammondPercussionMode.cpp">
@@ -738,6 +729,15 @@
     <ClCompile Include="Instrument\analogEqualizerPresets.cpp">
       <Filter>Source files\Insrtument\Analog Equalizer</Filter>
     </ClCompile>
+    <ClCompile Include="Instrument\analogReverbrationPresets.cpp">
+      <Filter>Source files\Insrtument\Analog Reverbration</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrument\instrumentAnalogReverbration.cpp">
+      <Filter>Source files\Insrtument\Analog Reverbration</Filter>
+    </ClCompile>
+    <ClCompile Include="AdjSynth\adjSynthProgram.cpp">
+      <Filter>Source files\Synthesizer\AdjSynth</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdjSynth\synthKeyboard.h">
@@ -1016,12 +1016,6 @@
     <ClInclude Include="AdjSynth\adjSynthPolyphonyManager.h">
       <Filter>Header files\Synthesizer\AdjSynth</Filter>
     </ClInclude>
-    <ClInclude Include="AdjSynth\adjSynthProgram.h">
-      <Filter>Header files\Synthesizer\AdjSynth</Filter>
-    </ClInclude>
-    <ClInclude Include="AdjSynth\adjSynthPrograms.h">
-      <Filter>Header files\Synthesizer\AdjSynth</Filter>
-    </ClInclude>
     <ClInclude Include="AdjSynth\adjSynthVoice.h">
       <Filter>Header files\Synthesizer\AdjSynth</Filter>
     </ClInclude>
@@ -1069,6 +1063,15 @@
     </ClInclude>
     <ClInclude Include="Instrument\instrumentAnalogEqualizer.h">
       <Filter>Header files\Instrument\Analog Equalizer</Filter>
+    </ClInclude>
+    <ClInclude Include="Instrument\instrumentAnalogReverbration.h">
+      <Filter>Header files\Instrument\Analog Reverbration</Filter>
+    </ClInclude>
+    <ClInclude Include="LibAPI\hammondOrgan.h">
+      <Filter>Header files\LibApi</Filter>
+    </ClInclude>
+    <ClInclude Include="AdjSynth\adjSynthProgram.h">
+      <Filter>Header files\Synthesizer\AdjSynth</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

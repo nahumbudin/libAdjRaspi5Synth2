@@ -45,9 +45,9 @@ int InstrumentAnalogEqualizer::save_analog_equalizer_presets_file(string path)
 	preset_temp.name = xml_files->get_xml_file_name(path);
 	preset_temp.settings_type = "analog-equalizer-preset";
 
-	res = instrument_settings->write_settings_file(
+	res = instrument_settings_manager->write_settings_file(
 		&preset_temp,
-		instrument_settings->get_settings_version(),
+		instrument_settings_manager->get_settings_version(),
 		xml_files->get_xml_file_name(path),
 		path,
 		"analog-equalizer-preset");
@@ -72,7 +72,7 @@ int InstrumentAnalogEqualizer::open_analog_equalizer_presets_file(
 	return_val_if_true(preset == NULL, _SETTINGS_BAD_PARAMETERS);
 	return_val_if_true(path == "", _SETTINGS_BAD_PARAMETERS);
 
-	res = instrument_settings->read_settings_file(
+	res = instrument_settings_manager->read_settings_file(
 		preset,
 		path,
 		"analog-equalizer-preset");
@@ -81,7 +81,7 @@ int InstrumentAnalogEqualizer::open_analog_equalizer_presets_file(
 	{
 		if (preset != NULL)
 		{
-			set_analog_equalizer_settings(active_preset_settings_params, 
+			set_analog_equalizer_settings(active_settings_params, 
 				ModSynth::get_instance()->adj_synth->get_active_common_params());
 			// generate_analog_equalizer_prest_summary(&presets[active_preset], summary[active_preset);
 			
@@ -106,14 +106,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 
 	return_val_if_true(preset == NULL, _SETTINGS_BAD_PARAMETERS);
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_31_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_31_level",
 			int_param.value,
@@ -128,14 +128,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_62_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_62_level",
 			int_param.value,
@@ -150,14 +150,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_125_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_125_level",
 			int_param.value,
@@ -172,14 +172,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_250_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_250_level",
 			int_param.value,
@@ -194,14 +194,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_500_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_500_level",
 			int_param.value,
@@ -216,14 +216,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_1k_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_1k_level",
 			int_param.value,
@@ -238,14 +238,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_2k_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_2k_level",
 			int_param.value,
@@ -260,14 +260,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_4k_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_4k_level",
 			int_param.value,
@@ -282,14 +282,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_8k_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_8k_level",
 			int_param.value,
@@ -304,14 +304,14 @@ int InstrumentAnalogEqualizer::set_analog_equalizer_settings(_settings_params_t 
 			-1); // no program (common resource)
 	}
 	
-	res |= instrument_settings->get_int_param(
+	res |= instrument_settings_manager->get_int_param(
 			preset,
 		"adjsynth.equilizer.band_16k_level",
 		&int_param);
 	
 	if (res == _SETTINGS_KEY_FOUND)
 	{
-		res |= instrument_settings->set_int_param(
+		res |= instrument_settings_manager->set_int_param(
 		global_preset,
 			"adjsynth.equilizer.band_16k_level",
 			int_param.value,

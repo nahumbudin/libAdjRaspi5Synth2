@@ -42,6 +42,7 @@
 #include "./Instrument/instrumentMidiPlayer.h"
 #include "./Instrument/instrumentMidiMapper.h"
 #include "./Instrument/instrumentMidiMixer.h"
+#include "./Instrument/instrumentAnalogReverbration.h"
 
 #include "./Instrument/instrumentControlBoxHandler.h"
 
@@ -162,28 +163,42 @@ ModSynth::ModSynth()
 	// TODO: create instances only when oppened ?.
 	
 	// Midi Mixer Instrument
-	midi_mixer_instrument = new InstrumentMidiMixer();
+	//midi_mixer_instrument = new InstrumentMidiMixer();
 
 	// A FLuidSynth instument
 	fluid_synth = new InstrumentFluidSynth();
 	// Add it to list of instruments
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY, 
 										fluid_synth);
+
+	// Init the Adj synthesizers
+	init();
+	
+	
 	// An Hammond Organ Instrument (TODO: define the Analog Synth based innstruments concept)
-	hammond_organ = new InstrumentHammondOrgan();
+	hammond_organ = new InstrumentHammondOrgan(adj_synth);
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY, 
 										hammond_organ);
+	adj_synth->set_program_preset_params_ptr(_HAMMOND_ORGAN_PROGRAM_20, hammond_organ->active_settings_params);
 	
 	// An Analog Synth Instrument (implements all the non-sampled based synthesis methods, 
 	// including additive, subtractive, Karplus-Strong, PADsynth, etc.)
 	analog_synth = new InstrumentAnalogSynth(this->adj_synth);
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY,
 										analog_synth);
+	adj_synth->set_program_preset_params_ptr(_PROGRAM_16, adj_synth->synth_program[_SKETCH_PROGRAM_1]->active_preset_params);
+	adj_synth->set_program_preset_params_ptr(_PROGRAM_17, adj_synth->synth_program[_SKETCH_PROGRAM_2]->active_preset_params);
+	adj_synth->set_program_preset_params_ptr(_PROGRAM_18, adj_synth->synth_program[_SKETCH_PROGRAM_3]->active_preset_params);
 	
 	// Midi Mixer Instrument
 	midi_mixer_instrument = new InstrumentMidiMixer();
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_MIDI_MIXER_STR_KEY, 
 										midi_mixer_instrument);
+	
+	// Analog Reverberation Instrument
+	analog_reverberation_instrument = new InstrumentAnalogReverbration();
+	instruments_manager->add_instrument(_INSTRUMENT_NAME_REVERB_STR_KEY, 
+		analog_reverberation_instrument);
 
 	// A MIDI Mapper Instrument. Maps MIDI cahnnel events to assigned synthesizers (FluidSynth, Analog Synth, Hammond Organ, etc.).
 	midi_mapper = new InstrumentMidiMapper(alsa_midi_system_control,
@@ -338,7 +353,7 @@ ModSynth::ModSynth()
 	//set_sample_rate(_DEFAULT_SAMPLE_RATE);
 	
 	// Init the Adj synthesizers
-	init();
+	// init();  Moved up
 	
 	// Register the callback that indicates that a new updat cycle has started.
 	adj_synth->audio_manager->register_callback_audio_update_cycle_start_tasks
@@ -600,6 +615,16 @@ InstrumentHammondOrgan *ModSynth::get_hammond_organ()
 InstrumentMidiMixer *ModSynth::get_midi_mixer()
 {
 	return midi_mixer_instrument;
+}
+
+/**
+*   @brief  retruns a pointer to the AnalogReverbration instrument object
+*   @param  none
+*   @return a pointer to the AnalogReverbration instrument object
+*/
+InstrumentAnalogReverbration *ModSynth::get_analog_reverberation()
+{
+	return analog_reverberation_instrument;
 }
 
 /**

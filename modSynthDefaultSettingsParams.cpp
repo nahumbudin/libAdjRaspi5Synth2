@@ -28,7 +28,7 @@ int ModSynth::set_adj_synth_default_settings(_settings_params_t *params)
 	
 	return_val_if_true(params == NULL, _SETTINGS_BAD_PARAMETERS);
 
-	res = AdjSynth::get_instance()->set_default_settings_parameters_mixer(params);
+	// res = AdjSynth::get_instance()->set_default_settings_parameters_mixer(params); // Set in the midi mixer instrument initialization.
 	res |= AdjSynth::get_instance()->set_default_settings_parameters_keyboard(params);
 	res |= AdjSynth::get_instance()->set_default_settings_parameters_reverb(params);
 	res |= AdjSynth::get_instance()->set_default_settings_parameters_equalizer(params);

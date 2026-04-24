@@ -1,16 +1,18 @@
 /**
  * @file		settings.h
  *	@author		Nahum Budin
- *	@date		23-Sep-2025
- *	@version	1.2
- *					1. Refactoring.
- *					2. Comments
- *					3. Adding a mutex to each settings structure to be used instead
- *						of the global mutex.
+ *	@date		22-Apr-2026
+*	@version	1.3
+*					1. Adding a function to set the type string of all the paremeters in a param struct.
 *	
 *	@brief		Instruments and common settings.
 *
 *	History: see h file\n
+*		version	1.2 23-Sep-2025
+*					1. Refactoring.
+*					2. Comments
+*					3. Adding a mutex to each settings structure to be used instead
+*						of the global mutex.
 *		ver. 1.1  28-Jun-2024
 *					1. A parent class to each individual instrument son.
 *					2. File handling is common and is managed by the modSynth settings object.
@@ -40,7 +42,7 @@
 //std::mutex Settings::settings_manage_mutex;
 
 /* Settings version */
-uint32_t Settings::settings_version = 250923; // 2025-09-23
+uint32_t Settings::settings_version = 260418; // 2026-04-18
 
 /**
  * @brief Creates a settings class object instance
@@ -90,8 +92,41 @@ _settings_params_t *Settings::get_active_settings_parameters()
 void Settings::settings_params_deep_copy(_settings_params_t *destination_params,
 										 _settings_params_t *source_params)
 {
-	destination_params = (_settings_params_t *)malloc(sizeof(*source_params));
-	memcpy(destination_params, source_params, sizeof(*source_params));
+	// Validate parameters
+	if (destination_params == NULL || source_params == NULL)
+	{
+		return;
+	}
+
+	// Clear destination maps before copying
+	destination_params->string_parameters_map.clear();
+	destination_params->int_parameters_map.clear();
+	destination_params->float_parameters_map.clear();
+	destination_params->bool_parameters_map.clear();
+
+	// Copy string parameters map
+	for (const auto& pair : source_params->string_parameters_map)
+	{
+		destination_params->string_parameters_map[pair.first] = pair.second;
+	}
+
+	// Copy int parameters map
+	for (const auto& pair : source_params->int_parameters_map)
+	{
+		destination_params->int_parameters_map[pair.first] = pair.second;
+	}
+
+	// Copy float parameters map
+	for (const auto& pair : source_params->float_parameters_map)
+	{
+		destination_params->float_parameters_map[pair.first] = pair.second;
+	}
+
+	// Copy bool parameters map
+	for (const auto& pair : source_params->bool_parameters_map)
+	{
+		destination_params->bool_parameters_map[pair.first] = pair.second;
+	}
 }
 
 /**
@@ -103,6 +138,53 @@ void Settings::settings_params_deep_copy(_settings_params_t *destination_params,
 uint32_t Settings::get_settings_version()
 {
 	return settings_version;
+}
+
+/**
+*	@brief	Set the type string for all parameters in a settings structure.
+*			Iterates through all parameter maps (string, int, float, bool) and
+*			sets their type field to the specified type string.
+*
+*	@param	settings		pointer to _settings_params_t structure
+*	@param	type_string		the type string to set for all parameters
+*							(e.g., _FLUID_SETTINGS_PARAMS, _ADJ_SYNTH_PRESET_PARAMS)
+*	@return void
+*/
+void Settings::set_all_params_type(_settings_params_t *settings, string type_string)
+{
+	// Validate parameters
+	if (settings == NULL)
+	{
+		return;
+	}
+
+	ModSynth::settings_handler_mutex.lock();
+
+	// Set type for all string parameters
+	for (auto& pair : settings->string_parameters_map)
+	{
+		settings->string_parameters_map[pair.first].type = type_string;
+	}
+
+	// Set type for all int parameters
+	for (auto& pair : settings->int_parameters_map)
+	{
+		settings->int_parameters_map[pair.first].type = type_string;
+	}
+
+	// Set type for all float parameters
+	for (auto& pair : settings->float_parameters_map)
+	{
+		settings->float_parameters_map[pair.first].type = type_string;
+	}
+
+	// Set type for all bool parameters
+	for (auto& pair : settings->bool_parameters_map)
+	{
+		settings->bool_parameters_map[pair.first].type = type_string;
+	}
+
+	ModSynth::settings_handler_mutex.unlock();
 }
 
 /**
@@ -529,7 +611,9 @@ settings_res_t Settings::set_string_param(_settings_params_t *settings,
 		(_settings->string_parameters_map[name].setup_callback != NULL))
 	{
 		// Call update callback
-		_settings->string_parameters_map[name].setup_callback(value, program);
+		_settings->string_parameters_map[name].setup_callback(
+			_settings->string_parameters_map[name].value,
+			program);
 	}
 
 	if ((_CHECK_MASK(set_mask, _EXEC_BLOCK_CALLBACK)) &&
@@ -543,7 +627,10 @@ settings_res_t Settings::set_string_param(_settings_params_t *settings,
 			for (int i = _settings->string_parameters_map[name].block_start_index;
 				 i <= _settings->string_parameters_map[name].block_stop_index; i++)
 			{
-				_settings->string_parameters_map[name].block_setup_callback(value, i, program);
+				_settings->string_parameters_map[name].block_setup_callback(
+					_settings->string_parameters_map[name].value,
+					i,
+					program);
 			}
 		}
 	}
@@ -826,7 +913,9 @@ settings_res_t Settings::set_int_param(_settings_params_t *settings, string name
 		(_settings->int_parameters_map[name].setup_callback != NULL))
 	{
 		// Call update callback
-		_settings->int_parameters_map[name].setup_callback(value, program);
+		_settings->int_parameters_map[name].setup_callback(
+			_settings->int_parameters_map[name].value,
+			program);
 	}
 
 	if ((_CHECK_MASK(set_mask, _EXEC_BLOCK_CALLBACK)) &&
@@ -840,7 +929,10 @@ settings_res_t Settings::set_int_param(_settings_params_t *settings, string name
 			for (int i = _settings->int_parameters_map[name].block_start_index;
 				 i <= _settings->int_parameters_map[name].block_stop_index; i++)
 			{
-				_settings->int_parameters_map[name].block_setup_callback(value, i, program);
+				_settings->int_parameters_map[name].block_setup_callback(
+					_settings->int_parameters_map[name].value,
+					i,
+					program);
 			}
 		}
 	}
@@ -1125,7 +1217,9 @@ settings_res_t Settings::set_float_param(_settings_params_t *settings, string na
 		(_settings->float_parameters_map[name].setup_callback != NULL))
 	{
 		// Call update callback
-		_settings->float_parameters_map[name].setup_callback(value, program);
+		_settings->float_parameters_map[name].setup_callback
+			(_settings->float_parameters_map[name].value, 
+			program);
 	}
 
 	if ((_CHECK_MASK(set_mask, _EXEC_BLOCK_CALLBACK)) &&
@@ -1139,7 +1233,10 @@ settings_res_t Settings::set_float_param(_settings_params_t *settings, string na
 			for (int i = _settings->float_parameters_map[name].block_start_index;
 				 i <= _settings->float_parameters_map[name].block_stop_index; i++)
 			{
-				_settings->float_parameters_map[name].block_setup_callback(value, i, program);
+				_settings->float_parameters_map[name].block_setup_callback(
+					_settings->float_parameters_map[name].value,
+					i,
+					program);
 			}
 		}
 	}
@@ -1351,7 +1448,9 @@ settings_res_t Settings::set_bool_param(_settings_params_t *settings, string nam
 		(_settings->bool_parameters_map[name].setup_callback != NULL))
 	{
 		// Call update callback
-		_settings->bool_parameters_map[name].setup_callback(value, program);
+		_settings->bool_parameters_map[name].setup_callback(
+			_settings->bool_parameters_map[name].value,
+			program);
 	}
 
 	if ((_CHECK_MASK(set_mask, _EXEC_BLOCK_CALLBACK)) &&
@@ -1365,7 +1464,10 @@ settings_res_t Settings::set_bool_param(_settings_params_t *settings, string nam
 			for (int i = _settings->bool_parameters_map[name].block_start_index;
 				 i <= _settings->bool_parameters_map[name].block_stop_index; i++)
 			{
-				_settings->bool_parameters_map[name].block_setup_callback(value, i, program);
+				_settings->bool_parameters_map[name].block_setup_callback(
+					_settings->bool_parameters_map[name].value,
+					i,
+					program);
 			}
 		}
 	}

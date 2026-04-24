@@ -66,6 +66,7 @@ class InstrumentMidiPlayer;
 class InstrumentMidiMapper;
 class InstrumentControlBoxEventsHandler;
 class InstrumentMidiMixer;
+class InstrumentAnalogReverbration;
 
 class AdjSynth;
 
@@ -109,6 +110,7 @@ public:
 	InstrumentMidiPlayer *get_midi_player();
 	InstrumentMidiMapper *get_midi_mapper();
 	InstrumentMidiMixer *get_midi_mixer();
+	InstrumentAnalogReverbration *get_analog_reverberation();
 	
 	int set_adj_synth_default_settings(_settings_params_t *params);
 	int set_default_general_settings_parameters(_settings_params_t *params);
@@ -201,6 +203,8 @@ public:
 	MidiExtInterface *midi_ext_interface;
 	
 	InstrumentMidiMixer *midi_mixer_instrument;
+	
+	InstrumentAnalogReverbration *analog_reverberation_instrument;
 	
 	InstrumentFluidSynth *fluid_synth;
 	InstrumentHammondOrgan *hammond_organ;

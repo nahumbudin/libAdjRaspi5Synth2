@@ -1,14 +1,15 @@
 /**
- * @file			oscilator.h
+ * @file			synthesizer.h
  *	@author		Nahum Budin
  *	@date		24-Mar-2026
  *	@version	1.2
  *					1. Adding reverb mode presets defines.
+ *					2. Adding Hammond Organ drawbar settings ID.
  *
  *	History:\n
  *		version 1.0		13-Sep-2024: First version
  *
- *	@brief		Provides the Oscilators related API
+ *	@brief		Provides the Synthesizer related API
  *
  *	@History:
  *				Version 1.1		24-Sep-2025
@@ -219,10 +220,12 @@ Error - must be no more than 64
 #define _PROGRAM_17					17
 #define _PROGRAM_18					18
 	
-#define _SYNTH_MAX_NUM_OF_PROGRAMS		_PROGRAM_18 + 1
-#if (_SYNTH_MAX_NUM_OF_PROGRAMS > _PROGRAM_18 + 1)
+#define _HAMMOND_ORGAN_PROGRAM_20	20
+	
+#define _SYNTH_MAX_NUM_OF_PROGRAMS		_HAMMOND_ORGAN_PROGRAM_20 + 1
+#if (_SYNTH_MAX_NUM_OF_PROGRAMS > _HAMMOND_ORGAN_PROGRAM_20 + 1)
 	Error -
-	must be no more than PROGRAM_18 + 1
+	must be no more than _HAMMOND_ORGAN_PROGRAM_20 + 1
 #endif
 		
 #define _SYNTH_NUM_OF_PROGRAMS						_SYNTH_MAX_NUM_OF_PROGRAMS
@@ -307,6 +310,8 @@ Error - must be no more than 64
 #define _AUDIO_EVENT_1								90
 	
 #define _POLYPHONIC_MIXER_EVENT						95
+	
+#define _HAMMOND_ORGAN_EVENT						100
 
 #define _OSC_PARAM_WAVEFORM							110		
 	
@@ -445,6 +450,42 @@ Error - must be no more than 64
 #define _MIXER_CHAN_15_PAN							544
 #define _MIXER_CHAN_16_PAN							545
 #define _MIXER_ALL_PAN								546
+	
+#define _MIXER_CHAN_1_PAN_MOD_LFO					530 + 20000
+#define _MIXER_CHAN_2_PAN_MOD_LFO					531 + 20000
+#define _MIXER_CHAN_3_PAN_MOD_LFO					532 + 20000
+#define _MIXER_CHAN_4_PAN_MOD_LFO					533 + 20000
+#define _MIXER_CHAN_5_PAN_MOD_LFO					534 + 20000
+#define _MIXER_CHAN_6_PAN_MOD_LFO					535 + 20000
+#define _MIXER_CHAN_7_PAN_MOD_LFO					536 + 20000
+#define _MIXER_CHAN_8_PAN_MOD_LFO					537 + 20000
+#define _MIXER_CHAN_9_PAN_MOD_LFO					538 + 20000
+#define _MIXER_CHAN_10_PAN_MOD_LFO					539 + 20000
+#define _MIXER_CHAN_11_PAN_MOD_LFO					540 + 20000
+#define _MIXER_CHAN_12_PAN_MOD_LFO					541 + 20000
+#define _MIXER_CHAN_13_PAN_MOD_LFO					542 + 20000
+#define _MIXER_CHAN_14_PAN_MOD_LFO					543 + 20000
+#define _MIXER_CHAN_15_PAN_MOD_LFO					544 + 20000
+#define _MIXER_CHAN_16_PAN_MOD_LFO					545 + 20000
+#define _MIXER_ALL_PAN_MOD_LFO						546 + 20000
+	
+#define _MIXER_CHAN_1_PAN_MOD_LFO_LEVEL				530 + 21000
+#define _MIXER_CHAN_2_PAN_MOD_LFO_LEVEL				531 + 21000
+#define _MIXER_CHAN_3_PAN_MOD_LFO_LEVEL				532 + 21000
+#define _MIXER_CHAN_4_PAN_MOD_LFO_LEVEL				533 + 21000
+#define _MIXER_CHAN_5_PAN_MOD_LFO_LEVEL				534 + 21000
+#define _MIXER_CHAN_6_PAN_MOD_LFO_LEVEL				535 + 21000
+#define _MIXER_CHAN_7_PAN_MOD_LFO_LEVEL				536 + 21000
+#define _MIXER_CHAN_8_PAN_MOD_LFO_LEVEL				537 + 21000
+#define _MIXER_CHAN_9_PAN_MOD_LFO_LEVEL				538 + 21000
+#define _MIXER_CHAN_10_PAN_MOD_LFO_LEVEL			539 + 21000
+#define _MIXER_CHAN_11_PAN_MOD_LFO_LEVEL			540 + 21000
+#define _MIXER_CHAN_12_PAN_MOD_LFO_LEVEL			541 + 21000
+#define _MIXER_CHAN_13_PAN_MOD_LFO_LEVEL			542 + 21000
+#define _MIXER_CHAN_14_PAN_MOD_LFO_LEVEL			543 + 21000
+#define _MIXER_CHAN_15_PAN_MOD_LFO_LEVEL			544 + 21000
+#define _MIXER_CHAN_16_PAN_MOD_LFO_LEVEL			545 + 21000
+#define _MIXER_ALL_PAN_MOD_LFO_LEVEL				546 + 21000
 	
 #define _MIXER_CHAN_1_SEND							550
 #define _MIXER_CHAN_2_SEND							551

@@ -1,15 +1,16 @@
 /**
 * @file		instrumentFluidSynth.cpp
 *	@author		Nahum Budin
-*	@date		7-Oct-2025
-*	@version	1.1	
-*					1. "Manua" copy of settings structure (mutx added)
+*	@date		11-Apr-2026
+*	@version	2.0	
+*					1. Updated settings management by each instrument.	
 *					
 *	@brief		Implements a FluidSynth SoundFont synthesizer.
 *	
 *	History:\n
-*	
-*		version 1.0	24-June-2024	Initial
+*				@version	1.1	
+*					1. "Manual" copy of settings structure (mutx added)
+*				@version	24-06-2024	1.0	Initial release
 *	
 */
 
@@ -43,17 +44,17 @@ InstrumentFluidSynth::InstrumentFluidSynth()
 		presets[p].settings_type = "fluid-synth-preset";
 		presets[p].name = "Preset " + to_string(p + 1);
 
-		presets[p].version = active_preset_settings_params->version;
+		presets[p].version = active_settings_params->version;
 
-		presets[p].bool_parameters_map = active_preset_settings_params->bool_parameters_map;
-		presets[p].float_parameters_map = active_preset_settings_params->float_parameters_map;
-		presets[p].int_parameters_map = active_preset_settings_params->int_parameters_map;
-		presets[p].string_parameters_map = active_preset_settings_params->string_parameters_map;
+		presets[p].bool_parameters_map = active_settings_params->bool_parameters_map;
+		presets[p].float_parameters_map = active_settings_params->float_parameters_map;
+		presets[p].int_parameters_map = active_settings_params->int_parameters_map;
+		presets[p].string_parameters_map = active_settings_params->string_parameters_map;
 	}
 
 	active_preset = 0;
 
-	active_preset_settings_params = &presets[0];
+	//active_settings_params = &presets[0]; TODO: handle presets bette.
 	
 	res++; // for debug 
 }
@@ -346,22 +347,22 @@ int InstrumentFluidSynth::set_fluid_synth_program_select(int chan, unsigned int 
 	std::string preset_name;
 	std::string sfont_name;
 
-	res = instrument_settings->set_int_param_value(
-		active_preset_settings_params,
+	res = instrument_settings_manager->set_int_param_value(
+		active_settings_params,
 		preset_prefix + "program",
 		program,
 		_SET_VALUE,
 		-1);
 
-	res |= instrument_settings->set_int_param_value(
-		active_preset_settings_params,
+	res |= instrument_settings_manager->set_int_param_value(
+		active_settings_params,
 		preset_prefix + "bank",
 		bank,
 		_SET_VALUE,
 		-1);
 
-	res |= instrument_settings->set_int_param_value(
-		active_preset_settings_params,
+	res |= instrument_settings_manager->set_int_param_value(
+		active_settings_params,
 		preset_prefix + "sound_font_id",
 		sfid,
 		_SET_VALUE,
@@ -372,15 +373,15 @@ int InstrumentFluidSynth::set_fluid_synth_program_select(int chan, unsigned int 
 	preset_name = fluid_synth_int_instance->get_fluid_synth_channel_preset_name(chan);
 	sfont_name = fluid_synth_int_instance->get_fluid_synth_channel_preset_soundfont_name(chan);
 
-	res |= instrument_settings->set_string_param_value(
-		active_preset_settings_params,
+	res |= instrument_settings_manager->set_string_param_value(
+		active_settings_params,
 		preset_prefix + "program_name",
 		preset_name,
 		_SET_VALUE,
 		-1);
 
-	res |= instrument_settings->set_string_param_value(
-		active_preset_settings_params,
+	res |= instrument_settings_manager->set_string_param_value(
+		active_settings_params,
 		preset_prefix + "sound_font",
 		sfont_name,
 		_SET_VALUE,
@@ -430,30 +431,16 @@ int InstrumentFluidSynth::select_program(int chan,
 	return 0;
 }
 
-int InstrumentFluidSynth::set_default_settings_parameters(_settings_params_t *params, int prog)
+int InstrumentFluidSynth::set_default_settings_parameters()
 {
-
+	// Performed by the FluidSynthInterface constructor when initializing the FluidSynth synthesizer and settings
 	return 0;
 }
 
-/**
-*   @brief  Save the active FluidSynth settings parameters as XML file
-*   @param  path settings XML file full path
-*   @return 0 if done
-*/
-int InstrumentFluidSynth::save_fluid_synth_settings_file(string path)
+int InstrumentFluidSynth::set_instrument_settings()
 {
-	int res;
-
-	return_val_if_true(instrument_settings == NULL, _SETTINGS_BAD_PARAMETERS);
-
-	res = instrument_settings->write_settings_file(
-		active_preset_settings_params,
-		instrument_settings->get_settings_version(),
-		"",
-		path,
-		"active_preset_settings_params");
-	return res;
+	
+	return 0;
 }
 
 /**
@@ -463,18 +450,22 @@ int InstrumentFluidSynth::save_fluid_synth_settings_file(string path)
 */
 int InstrumentFluidSynth::open_fluid_synth_settings_file(string path)
 {
-	return_val_if_true(instrument_settings == NULL, _SETTINGS_BAD_PARAMETERS);
+	return_val_if_true(instrument_settings_manager == NULL, _SETTINGS_BAD_PARAMETERS);
 
-	XML_files *xml_files = new XML_files();
-
-	int res = instrument_settings->read_settings_file(active_preset_settings_params, path, "fluid_synth_settings");
-	fluid_synth_int_instance->set_fluid_synth_chorus_params();
-	fluid_synth_int_instance->set_fluid_synth_reverb_params();
+	int res;
+	
+	//XML_files *xml_files = new XML_files();
+	//
+	//int res = instrument_settings_manager->read_settings_file(active_settings_params, path, "fluid_synth_settings");
+	//fluid_synth_int_instance->set_fluid_synth_chorus_params();
+	//fluid_synth_int_instance->set_fluid_synth_reverb_params();
+	
+	res = read_instrument_settings(active_settings_params, path, "fluid-synth-settings");
 	
 	if (res == 0)
 	{
 		activate_ui_update_callback();
-		activate_ui_update_preset_text_callback(xml_files->remove_file_extention(xml_files->get_xml_file_name(path)));
+		activate_ui_update_preset_text_callback(get_instrument_name() + "-settings.html");
 	}
 
 	return 0;
@@ -484,12 +475,12 @@ void InstrumentFluidSynth::set_active_preset(int preset_num)
 {
 	active_preset = preset_num;
 
-	active_preset_settings_params = &presets[active_preset];
+	active_settings_params = &presets[active_preset];
 
 	collect_fluid_synth_prest_channels_data(
 		&presets[active_preset], &channels_presets[active_preset][0]);
 
-	set_fluid_synth_settings(active_preset_settings_params, 
+	set_fluid_synth_settings(active_settings_params, 
 							 &channels_presets[active_preset][0]);
 }
 
@@ -498,7 +489,7 @@ int InstrumentFluidSynth::get_fluid_synth_channel_bank(int chan)
 	return fluid_synth_int_instance->get_fluid_synth_channel_bank(chan);
 }
 
-int InstrumentFluidSynth::events_handler(int moduleid, int paramid, int val, _settings_params_t *params, int program)
+int InstrumentFluidSynth::api_settings_events_handler(int moduleid, int paramid, int val, _settings_params_t *params, int program)
 {
 	if (moduleid == _FLUID_SYNTH_1_EVENT)
 	{
@@ -553,7 +544,7 @@ int InstrumentFluidSynth::events_handler(int moduleid, int paramid, int val, _se
 	return -1;
 }
 
-int InstrumentFluidSynth::events_handler(int moduleid, int paramid, float val, _settings_params_t *params, int program)
+int InstrumentFluidSynth::api_settings_events_handler(int moduleid, int paramid, float val, _settings_params_t *params, int program)
 {
 	if (moduleid == _FLUID_SYNTH_1_EVENT)
 	{
@@ -563,7 +554,7 @@ int InstrumentFluidSynth::events_handler(int moduleid, int paramid, float val, _
 	return -1;
 }
 
-int InstrumentFluidSynth::events_handler(int moduleid, int paramid, bool val, _settings_params_t *params, int program)
+int InstrumentFluidSynth::api_settings_events_handler(int moduleid, int paramid, bool val, _settings_params_t *params, int program)
 {
 	if (moduleid == _FLUID_SYNTH_1_EVENT)
 	{
@@ -600,7 +591,7 @@ int InstrumentFluidSynth::events_handler(int moduleid, int paramid, bool val, _s
 	return -1;
 }
 
-int InstrumentFluidSynth::events_handler(int moduleid, int paramid, string val, _settings_params_t *params, int program)
+int InstrumentFluidSynth::api_settings_events_handler(int moduleid, int paramid, string val, _settings_params_t *params, int program)
 {
 	if (moduleid == _FLUID_SYNTH_1_EVENT)
 	{

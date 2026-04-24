@@ -12,6 +12,7 @@
  *					6. Added MIDI Player Backward and Forward control and auto loop back playing control.
  *					7. Added MIDI Player playback volume and speed control
  *					8. Added MIDI Mixer GUI update callbacks
+ *					9. Added Hannond Organ interface
 *
 *	History:
 *			Ver1.0  8-May-2024 Initial
@@ -54,7 +55,9 @@
 #include "./Instrument/instrumentMidiPlayer.h"
 #include "./Instrument/instrumentMidiMapper.h"
 #include "./Instrument/instrumentMidiMixer.h"
+#include "./Instrument/instrumentAnalogReverbration.h"
 #include "./Instrument/instrumentAnalogSynth.h"
+#include "./Instrument/instrumentHammondOrgan.h"
 
 #include "./utils/xmlFiles.h"
 
@@ -764,20 +767,32 @@ int mod_synth_pad_event_bool(int padid, int eventid, bool val)
 
 int mod_synth_reverb_event_int(int revid, int eventid, int val)
 {
-	return AdjSynth::get_instance()->reverb_event_int(
+	//return AdjSynth::get_instance()->reverb_event_int(
+	//	revid,
+	//	eventid,
+	//	val,
+	//	AdjSynth::get_instance()->get_active_common_params());
+	
+	return ModSynth::get_instance()->get_analog_reverberation()->api_settings_events_handler(
 		revid,
 		eventid,
 		val,
-		AdjSynth::get_instance()->get_active_common_params());
+		ModSynth::get_instance()->get_analog_reverberation()->active_settings_params);
 }
 
 int mod_synth_reverb_event_bool(int revid, int eventid, bool val)
 {
-	return AdjSynth::get_instance()->reverb_event_bool(
+	//return AdjSynth::get_instance()->reverb_event_bool(
+	//	revid,
+	//	eventid,
+	//	val,
+	//	AdjSynth::get_instance()->get_active_common_params());
+	
+	return ModSynth::get_instance()->get_analog_reverberation()->api_settings_events_handler(
 		revid,
 		eventid,
 		val,
-		AdjSynth::get_instance()->get_active_common_params());
+		ModSynth::get_instance()->get_analog_reverberation()->active_settings_params);
 }
 
 int mod_synth_vco_event_int(int vcoid, int eventid, int val)
@@ -1024,141 +1039,141 @@ void mod_synth_register_callback_update_ui(func_ptr_void_void_t ptr)
 void mod_synth_set_fluid_synth_volume(int vol)
 {
 	//mod_synthesizer->get_fluid_synth()->set_volume(vol);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_VOLUME,
 		vol,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_reverb_room_size(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_reverb_room_size(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_REVERB_ROOM_SIZE,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_reverb_damp(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_reverb_damp(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_REVERB_DAMP,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_reverb_width(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_reverb_width(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_REVERB_WIDTH,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_reverb_level(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_reverb_level(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_REVERB_LEVEL,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_chorus_number(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_chorus_number(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_CHORUS_NUMBER,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_chorus_level(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_chorus_level(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_CHORUS_LEVEL,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_chorus_speed(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_chorus_speed(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_CHORUS_SPEED,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_chorus_depth(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_chorus_depth(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_CHORUS_DEPTH,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_chorus_waveform(int val)
 {
 	//mod_synthesizer->get_fluid_synth()->set_chorus_waveform(val);
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_CHORUS_WAVEFORM,
 		val,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_enable_reverb()
 {
 	//mod_synthesizer->get_fluid_synth()->enable_reverb();
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_REVERB_ENABLE,
 		true,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_disable_reverb()
 {
 	//mod_synthesizer->get_fluid_synth()->disable_reverb();
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_REVERB_ENABLE,
 		false,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_enable_chorus()
 {
 	//mod_synthesizer->get_fluid_synth()->enable_chorus();
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_CHORUS_ENABLE,
 		true,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 void mod_synth_set_fluid_synth_disable_chorus()
 {
 	//mod_synthesizer->get_fluid_synth()->disable_chorus();
-	mod_synthesizer->get_fluid_synth()->events_handler(
+	mod_synthesizer->get_fluid_synth()->api_settings_events_handler(
 		_FLUID_SYNTH_1_EVENT,
 		_FLUID_SYNTH_CHORUS_ENABLE,
 		false,
-		mod_synthesizer->get_fluid_synth()->instrument_settings->get_active_settings_parameters());
+		mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_active_settings_parameters());
 }
 
 int mod_synth_get_active_fluid_synth_volume()
@@ -1167,8 +1182,8 @@ int mod_synth_get_active_fluid_synth_volume()
 
 	_settings_float_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_float_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.volume", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1185,8 +1200,8 @@ int mod_synth_get_active_fluid_synth_reverb_room_size()
 
 	_settings_float_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_float_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.reverb.room-size", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1201,8 +1216,8 @@ int mod_synth_get_active_fluid_synth_reverb_damp()
 	fluid_res_t res = 0;
 	_settings_float_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_float_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.reverb.damp", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1217,8 +1232,8 @@ int mod_synth_get_active_fluid_synth_reverb_width()
 	fluid_res_t res = 0;
 	_settings_float_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_float_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.reverb.width", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1233,8 +1248,8 @@ int mod_synth_get_active_fluid_synth_reverb_level()
 	fluid_res_t res = 0;
 	_settings_float_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_float_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.reverb.level", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1249,8 +1264,8 @@ int mod_synth_get_active_fluid_synth_chorus_number()
 	fluid_res_t res = 0;
 	_settings_int_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_int_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_int_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.chorus.nr", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1265,8 +1280,8 @@ int mod_synth_get_active_fluid_synth_chorus_level()
 	fluid_res_t res = 0;
 	_settings_float_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_float_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.chorus.level", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1281,8 +1296,8 @@ int mod_synth_get_active_fluid_synth_chorus_speed()
 	fluid_res_t res = 0;
 	_settings_float_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_float_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.chorus.speed", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1297,8 +1312,8 @@ int mod_synth_get_active_fluid_synth_chorus_depth()
 	fluid_res_t res = 0;
 	_settings_float_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_float_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_float_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.chorus.depth", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1313,8 +1328,8 @@ int mod_synth_get_active_fluid_synth_chorus_waveform()
 	fluid_res_t res = 0;
 	_settings_int_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_int_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_int_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.chorus.waveform", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1329,8 +1344,8 @@ bool mod_synth_get_active_fluid_synth_reverb_activation_state()
 	fluid_res_t res = 0;
 	_settings_bool_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_bool_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_bool_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.reverb.active", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1345,8 +1360,8 @@ bool mod_synth_get_active_fluid_synth_chorus_activation_state()
 	fluid_res_t res = 0;
 	_settings_bool_param_t param;
 
-	res = mod_synthesizer->get_fluid_synth()->instrument_settings->get_bool_param(
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params, 
+	res = mod_synthesizer->get_fluid_synth()->instrument_settings_manager->get_bool_param(
+		mod_synthesizer->get_fluid_synth()->active_settings_params, 
 		"fluid.synth.chorus.active", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
@@ -1386,12 +1401,12 @@ int mod_synth_set_fluid_synth_program_select(int chan,
 
 int mod_synth_collect_fluid_synth_preset_parms(_settings_params_t *params)
 {
-	return mod_synthesizer->get_fluid_synth()->collect_fluid_synth_preset_parms(params);
+	return mod_synthesizer->get_fluid_synth()->collect_fluid_synth_settings_parms(params);
 }
 
 int mod_synth_save_fluid_synth_preset_file(string path)
 {
-	return mod_synthesizer->get_fluid_synth()->save_fluid_synth_preset_file(path);
+	return mod_synthesizer->get_fluid_synth()->save_instrument_active_settings(path, "fluid-synth-preset");
 }
 
 int mod_synth_open_fluid_synth_preset_file(string path, int preset_num){
@@ -1400,7 +1415,7 @@ int mod_synth_open_fluid_synth_preset_file(string path, int preset_num){
 
 	mod_synthesizer->get_fluid_synth()->open_fluid_synth_preset_file(
 		path,
-		mod_synthesizer->get_fluid_synth()->active_preset_settings_params,
+		mod_synthesizer->get_fluid_synth()->active_settings_params,
 		&mod_synthesizer->get_fluid_synth()->presets_summary_str[preset_num]);
 
 	mod_synthesizer->get_fluid_synth()->generate_fluid_synth_prest_summary(
@@ -1447,12 +1462,280 @@ std::string mod_synth_get_fluid_synth_channel_preset_soundfont_name(int chan)
 
 int mod_synth_save_fluid_synth_settings_file(string path)
 {
-	return mod_synthesizer->get_fluid_synth()->save_fluid_synth_settings_file(path);
+	return mod_synthesizer->get_fluid_synth()->save_instrument_active_settings(path, "fluid-synth-preset");
 }
 
 int mod_synth_open_fluid_synth_settings_file(string path)
 {
 	return mod_synthesizer->get_fluid_synth()->open_fluid_synth_settings_file(path);
+}
+
+int mod_synth_set_hammond_organ_param_value(int mod_id, int param_id, int value)
+{ 
+	if (mod_id != _HAMMOND_ORGAN_EVENT)
+	{
+		return -1;
+	}
+	
+	switch (param_id)
+	{
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_1:
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_2:
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_3:
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_4:
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_5:
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_6:
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_7:
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_8:
+		case _HAMMOND_ORGAN_DRAWBAR_LEVEL_9:
+		
+		if (value < _HAMMOND_ORGAN_DRAWBAR_LEVEL_MIN || value > _HAMMOND_ORGAN_DRAWBAR_LEVEL_MAX)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			param_id,  
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+		case _HAMMOND_ORGAN_DETUNE_OCTAVE:
+		
+		if (value < _OSC_DETUNE_MIN_OCTAVE || value > _OSC_DETUNE_MAX_OCTAVE)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_DETUNE_OCTAVE,
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+		case _HAMMOND_ORGAN_DETUNE_SEMITONES:
+		
+		if (value < _OSC_DETUNE_MIN_SEMITONES || value > _OSC_DETUNE_MAX_SEMITONES)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_DETUNE_SEMITONES,
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+		case _HAMMOND_ORGAN_DETUNE_CENTS:
+		
+		if (value < _OSC_DETUNE_MIN_CENTS || value > _OSC_DETUNE_MAX_CENTS)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_DETUNE_CENTS,
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+	case _HAMMOND_ORGAN_SQUARE_WAVE_ENABLE:
+		
+		bool en;
+		
+		if (value == 1)
+		{
+			en = true;
+		}
+		else
+		{
+			en = false;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_SQUARE_WAVE_ENABLE,
+			en,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+	case _HAMMOND_ORGAN_PERCUSSION_MODE:
+		
+		if (value < _HAMMOND_ORGAN_PERCUSION_MODE_OFF || value > _HAMMOND_ORGAN_PERCUSION_MODE_3RD_NORM_FAST)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_PERCUSSION_MODE,
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+	case _HAMMOND_ORGAN_LESLIE_SPEED:
+		
+		if (value < 0 || value > 100)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_LESLIE_SPEED,
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+	case _HAMMOND_ORGAN_LESLIE_LEVEL:
+		
+		if (value < 0 || value > 100)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_LESLIE_LEVEL,
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+	case _HAMMOND_ORGAN_SEND_FILTER_1:
+		
+		if (value < 0 || value > 100)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_SEND_FILTER_1,
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+	case _HAMMOND_ORGAN_SEND_FILTER_2:
+		
+		if (value < 0 || value > 100)
+		{
+			return -1;
+		}
+		
+		ModSynth::get_instance()->get_hammond_organ()->events_handler(
+			_HAMMOND_ORGAN_EVENT,
+			_HAMMOND_ORGAN_SEND_FILTER_2,
+			value,
+			ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		break;
+		
+	default:
+		return -1;
+		
+	}
+	
+	return 0;	
+}
+int mod_synth_get_hammond_organ_param_value(int mod_id, int param_id)
+{
+	if (mod_id != _HAMMOND_ORGAN_EVENT)
+	{
+		return -1;
+	}
+	
+	bool en;
+	
+	switch (param_id)
+	{
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_1:
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_2:
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_3:
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_4:
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_5:
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_6:
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_7:
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_8:
+	case _HAMMOND_ORGAN_DRAWBAR_LEVEL_9:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_drawbar_level(param_id - _HAMMOND_ORGAN_DRAWBAR_LEVEL_1 + 1); // 1-9 for 9 drawbars
+		
+	case _HAMMOND_ORGAN_DETUNE_OCTAVE:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_octave_detune();
+		
+	case _HAMMOND_ORGAN_DETUNE_SEMITONES:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_semitones_detune();
+		
+	case _HAMMOND_ORGAN_DETUNE_CENTS:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_cents_detune();
+		
+	case _HAMMOND_ORGAN_SQUARE_WAVE_ENABLE:
+		
+		en = ModSynth::get_instance()->get_hammond_organ()->get_square_wave_enable();
+		
+		if (en)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+		
+		break;
+		
+	case _HAMMOND_ORGAN_PERCUSSION_MODE:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_percussion_mode();
+		
+	case _HAMMOND_ORGAN_LESLIE_SPEED:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_leslie_speed();
+		
+	case _HAMMOND_ORGAN_LESLIE_LEVEL:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_leslie_level();
+		
+	case _HAMMOND_ORGAN_SEND_FILTER_1:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_send_filter_1();
+		
+	case _HAMMOND_ORGAN_SEND_FILTER_2:
+		
+		return ModSynth::get_instance()->get_hammond_organ()->get_send_filter_2();
+		
+	default:
+		return -1;
+		
+	}
+	
+	return 0;
 }
 
 int mod_synth_save_adj_synth_patch_file(string path)
@@ -1467,7 +1750,12 @@ int mod_synth_open_adj_synth_patch_file(std::string path, int channel)
 
 int mod_synth_save_midi_mixer_patch_file(string path)
 {
-	return mod_synthesizer->get_midi_mixer()->save_midi_mixer_presets_file(path);
+	return mod_synthesizer->get_midi_mixer()->save_instrument_active_settings(path, "midi-mixer-preset");
+}
+
+int mod_synth_save_analog_reverberation_patch_file(string path)
+{
+	return mod_synthesizer->get_analog_reverberation()->save_instrument_active_settings(path, "analog-reverb-preset");
 }
 
 
@@ -1696,10 +1984,16 @@ void mod_synth_midi_mixer_set_channel_volume(int chan, int vol)
 	}
 	
 	// Update the MIDI mixer settup parrameters
-	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//	_MIXER_CHAN_1_LEVEL + chan,
+	//	vol,
+	//	ModSynth::get_instance()->adj_synth->get_active_common_params());
+	
+	ModSynth::get_instance()->get_midi_mixer()->api_settings_events_handler(
+		_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_LEVEL + chan,
 		vol,
-		ModSynth::get_instance()->adj_synth->get_active_common_params());
+		ModSynth::get_instance()->get_midi_mixer()->active_settings_params, 0); // no program.
 
 	mod_synthesizer->midi_mapper->set_midi_channel_volume(chan, vol);
 }
@@ -1712,10 +2006,17 @@ void mod_synth_midi_mixer_set_channel_pan(int chan, int pan)
 	}
 	
 	// Update the MIDI mixer settup parrameters
-	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//	_MIXER_CHAN_1_PAN + chan,
+	//	pan,
+	//	ModSynth::get_instance()->adj_synth->get_active_common_params());
+	
+	ModSynth::get_instance()->get_midi_mixer()->api_settings_events_handler(
+		_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_PAN + chan,
 		pan,
-		ModSynth::get_instance()->adj_synth->get_active_common_params());
+		ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+		0); // no program.
 
 	mod_synthesizer->midi_mapper->set_midi_channel_pan(chan, pan);
 }
@@ -1725,10 +2026,17 @@ void mod_synth_midi_mixer_set_channel_pan_mod_level(int chan, int lvl)
 	en_instruments_ids_t chan_allocated_instrument = mod_synth_get_allocated_midi_channel_synth(chan);
 	
 	// Update the MIDI mixer settup parrameters
-	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//	_MIXER_CHAN_1_PAN_MOD_LFO_LEVEL + chan,
+	//	lvl,
+	//	ModSynth::get_instance()->adj_synth->get_active_common_params());
+	
+	ModSynth::get_instance()->get_midi_mixer()->api_settings_events_handler(
+		_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_PAN_MOD_LFO_LEVEL + chan,
 		lvl,
-		ModSynth::get_instance()->adj_synth->get_active_common_params());
+		ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+		0); // no program.
 	
 	switch (chan_allocated_instrument)
 	{
@@ -1750,10 +2058,17 @@ void mod_synth_midi_mixer_set_channel_pan_mod_lfo(int chan, int lfo)
 	en_instruments_ids_t chan_allocated_instrument = mod_synth_get_allocated_midi_channel_synth(chan);
 	
 	// Update the MIDI mixer settup parrameters
-	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//	_MIXER_CHAN_1_PAN_MOD_LFO + chan,
+	//	lfo,
+	//	ModSynth::get_instance()->adj_synth->get_active_common_params());
+	
+	ModSynth::get_instance()->get_midi_mixer()->api_settings_events_handler(
+		_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_PAN_MOD_LFO + chan,
 		lfo,
-		ModSynth::get_instance()->adj_synth->get_active_common_params());
+		ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+		0); // no program.
 	
 	switch (chan_allocated_instrument)
 	{
@@ -1776,10 +2091,17 @@ void mod_synth_midi_mixer_set_channel_send_level(int chan, int snd)
 	en_instruments_ids_t chan_allocated_instrument = mod_synth_get_allocated_midi_channel_synth(chan);
 	
 	// Update the MIDI mixer settup parrameters
-	AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//AdjSynth::get_instance()->midi_mixer_event(_MIDI_MIXER_1_EVENT,
+	//	_MIXER_CHAN_1_SEND + chan,
+	//	snd,
+	//	ModSynth::get_instance()->adj_synth->get_active_common_params());
+	
+	ModSynth::get_instance()->get_midi_mixer()->api_settings_events_handler(
+		_MIDI_MIXER_1_EVENT,
 		_MIXER_CHAN_1_SEND + chan,
 		snd,
-		ModSynth::get_instance()->adj_synth->get_active_common_params());
+		ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+		0); // no program.
 	
 	switch (chan_allocated_instrument)
 	{

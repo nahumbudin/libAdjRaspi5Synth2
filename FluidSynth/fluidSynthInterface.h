@@ -1,15 +1,17 @@
 /**
 * @file		fluidSynthInterface.h
 *	@author		Nahum Budin
-*	@date		30-6-2024
-*	@version	2.0
-*					1. Update to FluidSynth Ver 2.35
-*					2. Code refactoring
+*	@date		12-Apr-2026
+*	@version	2.1
+*					1. Refactoring to use the new settings management by each instrument.
 *
 *	@brief		FluidSynth handling.
 *	
 *	@History
-*		Ver 1.0 9-Oct-2019
+*				@version	2.0
+*					1. Update to FluidSynth Ver 2.35
+*					2. Code refactoring
+*				Ver 1.0 9-Oct-2019
 */
 
 #pragma once
@@ -141,7 +143,7 @@ class FluidSynthInterface
 	FluidSynthInterface(InstrumentFluidSynth *fluid_inst);
 
 	static FluidSynthInterface *fluid_synth_int_instance;
-	_settings_params_t **active_settings_params;
+	_settings_params_t **active_settings_params; // will poin to the instrument settings manager active settings params
 
 	InstrumentFluidSynth *parent_instrument;
 

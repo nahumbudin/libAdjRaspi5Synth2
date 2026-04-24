@@ -1,16 +1,17 @@
 /**
 * @file		fluidSynthInterface.h
 *	@author		Nahum Budin
-*	@date		30-6-2024
-*	@version	2.0
-*					1. Update to FluidSynth Ver 2.35
-*					2. Code refactoring
-*					3. Replacing depricated calls
+*	@date		12-Apr-2026
+*	@version	2.1
+*					1. Refactoring to use the new settings management by each instrument.
 *
 *	@brief		FluidSynth handling.
 *	
 *	@History
-*		Ver 1.0 9-Oct-2019
+*				@version	2.0
+*					1. Update to FluidSynth Ver 2.35
+*					2. Code refactoring
+*				Ver 1.0 9-Oct-2019
 */
 
 #include <stdlib.h>
@@ -31,7 +32,7 @@ FluidSynthInterface *FluidSynthInterface::fluid_synth_int_instance = NULL;
 FluidSynthInterface::FluidSynthInterface(InstrumentFluidSynth *fluid_instrument)
 {
 	parent_instrument = fluid_instrument;
-	active_settings_params = &parent_instrument->active_preset_settings_params;
+	active_settings_params = &parent_instrument->active_settings_params;
 }
 
 /**
@@ -188,12 +189,12 @@ fluid_res_t FluidSynthInterface::init_default_settings()
 		{
 			preset_prefix = "fluid.synth.ch" + std::to_string(ch + 1) + ".midi_";
 
-			res |= parent_instrument->instrument_settings->set_int_param(
+			res |= parent_instrument->instrument_settings_manager->set_int_param(
 				*active_settings_params,
 				preset_prefix + "program",
 				preset_num,
 				127, 0,
-				"fluid-synth-param",
+				"fluid-synth-preset",
 				NULL,
 				-1,
 				-1,
@@ -201,12 +202,12 @@ fluid_res_t FluidSynthInterface::init_default_settings()
 				_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE,
 				-1);
 
-			res |= parent_instrument->instrument_settings->set_int_param(
+			res |= parent_instrument->instrument_settings_manager->set_int_param(
 				*active_settings_params,
 				preset_prefix + "bank",
 				bank_num,
 				128, 0,
-				"fluid-synth-param",
+				"fluid-synth-preset",
 				NULL,
 				-1,
 				-1,
@@ -214,12 +215,12 @@ fluid_res_t FluidSynthInterface::init_default_settings()
 				_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE,
 				-1);
 
-			res |= parent_instrument->instrument_settings->set_int_param(
+			res |= parent_instrument->instrument_settings_manager->set_int_param(
 				*active_settings_params,
 				preset_prefix + "sound_font_id",
 				sfont_id,
 				127, 0,
-				"fluid-synth-param",
+				"fluid-synth-preset",
 				NULL,
 				-1,
 				-1,
@@ -227,11 +228,11 @@ fluid_res_t FluidSynthInterface::init_default_settings()
 				_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE,
 				-1);
 
-			res |= parent_instrument->instrument_settings->set_string_param(
+			res |= parent_instrument->instrument_settings_manager->set_string_param(
 				*active_settings_params,
 				preset_prefix + "program_name",
 				preset_name,
-				"fluid-synth-param",
+				"fluid-synth-preset",
 				NULL,
 				-1,
 				-1,
@@ -239,11 +240,11 @@ fluid_res_t FluidSynthInterface::init_default_settings()
 				_SET_VALUE | _SET_TYPE,
 				-1);
 
-			res |= parent_instrument->instrument_settings->set_string_param(
+			res |= parent_instrument->instrument_settings_manager->set_string_param(
 				*active_settings_params,
 				preset_prefix + "sound_font",
 				sfont_name,
-				"fluid-synth-param",
+				"fluid-synth-preset",
 				NULL,
 				-1,
 				-1,
@@ -251,6 +252,12 @@ fluid_res_t FluidSynthInterface::init_default_settings()
 				_SET_VALUE | _SET_TYPE,
 				-1);
 		}
+		
+		(*active_settings_params)->settings_type = "fluid-synth-preset";
+
+		(*active_settings_params)->version = parent_instrument->instrument_settings_manager->get_settings_version();
+		
+		
 	}
 
 	return res;
@@ -343,9 +350,10 @@ fluid_res_t FluidSynthInterface::fluid_synth_channel_pressure_event(int chan, in
 fluid_res_t FluidSynthInterface::set_fluid_synth_audio_driver(string driver)
 {
 #ifdef _USED_FOR_LINUX_RASPBERRY_PI
-	return parent_instrument->instrument_settings->set_string_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_string_param(*active_settings_params,
 											 "fluid.audio.driver",
-											 "jack", "fluid-synth-param",
+											  "jack",
+											 "fluid-synth-preset",
 											 &set_fluid_synth_audio_driver_callback,
 											 0, 0, NULL,
 											 _SET_VALUE | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -364,9 +372,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_audio_driver(string driver)
  */
 fluid_res_t FluidSynthInterface::set_fluid_synth_audio_jack_id(string id)
 {
-	return parent_instrument->instrument_settings->set_string_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_string_param(*active_settings_params,
 																	"fluid.audio.jack.id",
-																	id, "fluid-synth-param",
+																	id, "fluid-synth-preset",
 											 &set_fluid_synth_audio_jack_id_callback,
 											 0, 0, NULL,
 											 _SET_VALUE | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -380,9 +388,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_audio_jack_id(string id)
  */
 fluid_res_t FluidSynthInterface::set_fluid_synth_audio_jack_autoconnect(bool auto_connect)
 {
-	return parent_instrument->instrument_settings->set_bool_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_bool_param(*active_settings_params,
 																  "fluid.audio.jack.autoconnect",
-																  auto_connect, "fluid-synth-param",
+																  auto_connect, "fluid-synth-preset",
 										   &set_fluid_synth_audio_jack_autoconnect_callback,
 										   0, 0, NULL,
 										   _SET_VALUE | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -396,9 +404,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_audio_jack_autoconnect(bool aut
  */
 fluid_res_t FluidSynthInterface::set_fluid_synth_audio_period_size(int size)
 {
-	return parent_instrument->instrument_settings->set_int_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_int_param(*active_settings_params,
 																 "fluid.audio.period-size", size, 8192, 64,
-																 "fluid-synth-param",
+																 "fluid-synth-preset",
 										  &set_fluid_synth_audio_period_size_callback,
 										  0, 0, NULL,
 										  _SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -412,9 +420,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_audio_period_size(int size)
  */
 fluid_res_t FluidSynthInterface::set_fluid_synth_audio_num_of_periods(int periods)
 {
-	return parent_instrument->instrument_settings->set_int_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_int_param(*active_settings_params,
 																 "fluid.audio.periods", periods, 64, 2,
-																 "fluid-synth-param",
+																 "fluid-synth-preset",
 										  &set_fluid_synth_audio_num_of_periods_callback,
 										  0, 0, NULL,
 										  _SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -429,9 +437,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_audio_num_of_periods(int period
  */
 fluid_res_t FluidSynthInterface::select_fluid_synth_midi_bank(string bank)
 {
-	return parent_instrument->instrument_settings->set_string_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_string_param(*active_settings_params,
 																	"fluid.synth.midi-bank-select", bank,
-																	"fluid-synth-param",
+																	"fluid-synth-preset",
 											 &select_fluid_synth_midi_bank_callback,
 											 0, 0, NULL,
 											 _SET_VALUE | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -484,9 +492,9 @@ fluid_res_t FluidSynthInterface::select_fluid_synth_program(int channel, unsigne
 fluid_res_t FluidSynthInterface::set_fluid_synth_gain(double gain)
 {
 
-	return parent_instrument->instrument_settings->set_float_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param(*active_settings_params,
 																   "fluid.synth.volume", gain, 1.0, 0.0,
-																   "fluid-synth-param",
+																   "fluid-synth-preset",
 											&set_fluid_synth_gain_callback,
 											0, 0, NULL,
 											_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -504,9 +512,9 @@ fluid_res_t FluidSynthInterface::enable_fluid_synth_reverb()
 
 	res = set_fluid_synth_reverb_params();
 
-	res |= parent_instrument->instrument_settings->set_bool_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_bool_param(*active_settings_params,
 																  "fluid.synth.reverb.active", true,
-																  "fluid-synth-param",
+																  "fluid-synth-preset",
 										   &set_fluid_synth_reverb_active_callback,
 										   0, 0, NULL,
 										   _SET_VALUE | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -522,9 +530,9 @@ fluid_res_t FluidSynthInterface::enable_fluid_synth_reverb()
  */
 fluid_res_t FluidSynthInterface::disable_fluid_synth_reverb()
 {
-	return parent_instrument->instrument_settings->set_bool_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_bool_param(*active_settings_params,
 																  "fluid.synth.reverb.active", false,
-																  "fluid-synth-param",
+																  "fluid-synth-preset",
 										   &set_fluid_synth_reverb_active_callback,
 										   0, 0, NULL,
 										   _SET_VALUE | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -538,9 +546,9 @@ fluid_res_t FluidSynthInterface::disable_fluid_synth_reverb()
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_room_size(double size)
 {
-	return parent_instrument->instrument_settings->set_float_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param(*active_settings_params,
 																   "fluid.synth.reverb.room-size", size, 1.0, 0.0,
-																   "fluid-synth-param", NULL,
+																   "fluid-synth-preset", NULL,
 											0, 0, NULL,
 											_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -553,9 +561,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_room_size(double size)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_damp(double damp)
 {
-	return parent_instrument->instrument_settings->set_float_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param(*active_settings_params,
 																   "fluid.synth.reverb.damp", damp, 1.0, 0.0,
-																   "fluid-synth-param", NULL,
+																   "fluid-synth-preset", NULL,
 											0, 0, NULL,
 											_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -568,9 +576,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_damp(double damp)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_width(double width)
 {
-	return parent_instrument->instrument_settings->set_float_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param(*active_settings_params,
 																   "fluid.synth.reverb.width", width, 1.0, 0.0,
-																   "fluid-synth-param", NULL,
+																   "fluid-synth-preset", NULL,
 											0, 0, NULL,
 											_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -583,9 +591,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_width(double width)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_level(double level)
 {
-	return parent_instrument->instrument_settings->set_float_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param(*active_settings_params,
 																   "fluid.synth.reverb.level", level, 1.0, 0.0,
-																   "fluid-synth-param", NULL,
+																   "fluid-synth-preset", NULL,
 											0, 0, NULL,
 											_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -602,7 +610,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_params()
 	_settings_float_param_t param;
 	float room_size, damp, width, level;
 
-	res = parent_instrument->instrument_settings->get_float_param(*active_settings_params, "fluid.synth.reverb.room-size", &param);
+	res = parent_instrument->instrument_settings_manager->get_float_param(*active_settings_params, "fluid.synth.reverb.room-size", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
 		return _SETTINGS_FAILED;
@@ -610,7 +618,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_params()
 
 	room_size = param.value;
 
-	res = parent_instrument->instrument_settings->get_float_param(*active_settings_params, "fluid.synth.reverb.damp", &param);
+	res = parent_instrument->instrument_settings_manager->get_float_param(*active_settings_params, "fluid.synth.reverb.damp", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
 		return _SETTINGS_FAILED;
@@ -618,7 +626,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_params()
 
 	damp = param.value;
 
-	res = parent_instrument->instrument_settings->get_float_param(*active_settings_params, "fluid.synth.reverb.width", &param);
+	res = parent_instrument->instrument_settings_manager->get_float_param(*active_settings_params, "fluid.synth.reverb.width", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
 		return _SETTINGS_FAILED;
@@ -626,7 +634,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_params()
 
 	width = param.value;
 
-	res = parent_instrument->instrument_settings->get_float_param(*active_settings_params, "fluid.synth.reverb.level", &param);
+	res = parent_instrument->instrument_settings_manager->get_float_param(*active_settings_params, "fluid.synth.reverb.level", &param);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
 		return _SETTINGS_FAILED;
@@ -654,7 +662,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_enabled_value(bool en)
 
 	res = set_fluid_synth_reverb_params();
 
-	res |= parent_instrument->instrument_settings->set_bool_param_value(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_bool_param_value(*active_settings_params,
 												 "fluid.synth.reverb.active",
 												 en,
 												 _SET_VALUE | _EXEC_CALLBACK,
@@ -671,7 +679,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_enabled_value(bool en)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_room_size_value(double size)
 {
-	return parent_instrument->instrument_settings->set_float_param_value(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param_value(*active_settings_params,
 												  "fluid.synth.reverb.room-size",
 												  size,
 												  _SET_VALUE,
@@ -686,7 +694,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_room_size_value(double s
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_damp_value(double damp)
 {
-	return parent_instrument->instrument_settings->set_float_param_value(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param_value(*active_settings_params,
 												  "fluid.synth.reverb.damp",
 												  damp,
 												  _SET_VALUE,
@@ -701,7 +709,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_damp_value(double damp)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_width_value(double width)
 {
-	return parent_instrument->instrument_settings->set_float_param_value(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param_value(*active_settings_params,
 												  "fluid.synth.reverb.width",
 												  width,
 												  _SET_VALUE,
@@ -716,7 +724,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_width_value(double width
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_reverb_level_value(double level)
 {
-	return parent_instrument->instrument_settings->set_float_param_value(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param_value(*active_settings_params,
 												  "fluid.synth.reverb.level",
 												  level,
 												  _SET_VALUE,
@@ -735,9 +743,9 @@ fluid_res_t FluidSynthInterface::enable_fluid_synth_chorus()
 
 	res = set_fluid_synth_chorus_params();
 
-	res |= parent_instrument->instrument_settings->set_bool_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_bool_param(*active_settings_params,
 																  "fluid.synth.chorus.active", true,
-																  "fluid-synth-param",
+																  "fluid-synth-preset",
 										   &set_fluid_synth_chorus_active_callback,
 										   0, 0, NULL,
 										   _SET_VALUE | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -753,9 +761,9 @@ fluid_res_t FluidSynthInterface::enable_fluid_synth_chorus()
  */
 fluid_res_t FluidSynthInterface::disable_fluid_synth_chorus()
 {
-	return parent_instrument->instrument_settings->set_bool_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_bool_param(*active_settings_params,
 																  "fluid.synth.chorus.active", false,
-																  "fluid-synth-param",
+																  "fluid-synth-preset",
 										   &set_fluid_synth_chorus_active_callback,
 										   0, 0, NULL,
 										   _SET_VALUE | _SET_TYPE | _SET_CALLBACK | _EXEC_CALLBACK);
@@ -769,9 +777,9 @@ fluid_res_t FluidSynthInterface::disable_fluid_synth_chorus()
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_N(int N)
 {
-	return parent_instrument->instrument_settings->set_int_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_int_param(*active_settings_params,
 																 "fluid.synth.chorus.nr", N, 99, 0,
-																 "fluid-synth-param", NULL,
+																 "fluid-synth-preset", NULL,
 										  0, 0, NULL,
 										  _SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -784,9 +792,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_N(int N)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_level(double level)
 {
-	return parent_instrument->instrument_settings->set_float_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param(*active_settings_params,
 																   "fluid.synth.chorus.level", level, 10.0, 0.0,
-																   "fluid-synth-param", NULL,
+																   "fluid-synth-preset", NULL,
 											0, 0, NULL,
 											_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -799,9 +807,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_level(double level)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_speed(double speed)
 {
-	return parent_instrument->instrument_settings->set_float_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param(*active_settings_params,
 																   "fluid.synth.chorus.speed", speed, 5.0, 0.29,
-																   "fluid-synth-param", NULL,
+																   "fluid-synth-preset", NULL,
 											0, 0, NULL,
 											_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -814,9 +822,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_speed(double speed)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_depth(double depth)
 {
-	return parent_instrument->instrument_settings->set_float_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param(*active_settings_params,
 																   "fluid.synth.chorus.depth", depth, 256.0, 0.0,
-																   "fluid-synth-param", NULL,
+																   "fluid-synth-preset", NULL,
 											0, 0, NULL,
 											_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -829,9 +837,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_depth(double depth)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_waveform(int wform)
 {
-	return parent_instrument->instrument_settings->set_int_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_int_param(*active_settings_params,
 																 "fluid.synth.chorus.waveform", wform, 1, 0,
-																 "fluid-synth-param", NULL,
+																 "fluid-synth-preset", NULL,
 										  0, 0, NULL,
 										  _SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -850,7 +858,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_params()
 	int N;
 	float level, speed, depth;
 
-	res = parent_instrument->instrument_settings->get_int_param(*active_settings_params, "fluid.synth.chorus.nr", &iparam);
+	res = parent_instrument->instrument_settings_manager->get_int_param(*active_settings_params, "fluid.synth.chorus.nr", &iparam);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
 		return _SETTINGS_FAILED;
@@ -858,7 +866,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_params()
 
 	N = iparam.value;
 
-	res = parent_instrument->instrument_settings->get_float_param(*active_settings_params, "fluid.synth.chorus.level", &fparam);
+	res = parent_instrument->instrument_settings_manager->get_float_param(*active_settings_params, "fluid.synth.chorus.level", &fparam);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
 		return _SETTINGS_FAILED;
@@ -866,7 +874,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_params()
 
 	level = fparam.value;
 
-	res = parent_instrument->instrument_settings->get_float_param(*active_settings_params, "fluid.synth.chorus.speed", &fparam);
+	res = parent_instrument->instrument_settings_manager->get_float_param(*active_settings_params, "fluid.synth.chorus.speed", &fparam);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
 		return _SETTINGS_FAILED;
@@ -874,7 +882,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_params()
 
 	speed = fparam.value;
 
-	res = parent_instrument->instrument_settings->get_float_param(*active_settings_params, "fluid.synth.chorus.depth", &fparam);
+	res = parent_instrument->instrument_settings_manager->get_float_param(*active_settings_params, "fluid.synth.chorus.depth", &fparam);
 	if (res != _SETTINGS_KEY_FOUND)
 	{
 		return _SETTINGS_FAILED;
@@ -903,7 +911,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_enabled_value(bool en)
 
 	res = set_fluid_synth_chorus_params();
 
-	res |= parent_instrument->instrument_settings->set_bool_param_value(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_bool_param_value(*active_settings_params,
 												 "fluid.synth.chorus.active",
 												 en,
 												 _SET_VALUE | _EXEC_CALLBACK,
@@ -920,7 +928,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_enabled_value(bool en)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_N_value(int N)
 {
-	return parent_instrument->instrument_settings->set_int_param_value(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_int_param_value(*active_settings_params,
 												"fluid.synth.chorus.nr",
 												N,
 												_SET_VALUE,
@@ -935,7 +943,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_N_value(int N)
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_level_value(double level)
 {
-	return parent_instrument->instrument_settings->set_float_param_value(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param_value(*active_settings_params,
 												  "fluid.synth.chorus.level",
 												  level,
 												  _SET_VALUE,
@@ -950,7 +958,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_level_value(double level
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_speed_value(double speed)
 {
-	return parent_instrument->instrument_settings->set_float_param_value(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param_value(*active_settings_params,
 												  "fluid.synth.chorus.speed",
 												  speed,
 												  _SET_VALUE,
@@ -965,7 +973,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_speed_value(double speed
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_depth_value(double depth)
 {
-	return parent_instrument->instrument_settings->set_float_param_value(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_float_param_value(*active_settings_params,
 												  "fluid.synth.chorus.depth",
 												  depth,
 												  _SET_VALUE,
@@ -980,7 +988,7 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_depth_value(double depth
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_waveform_value(int wform)
 {
-	return parent_instrument->instrument_settings->set_int_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_int_param(*active_settings_params,
 										  "fluid.synth.chorus.waveform",
 										  wform,
 										  _SET_VALUE,
@@ -995,9 +1003,9 @@ fluid_res_t FluidSynthInterface::set_fluid_synth_chorus_waveform_value(int wform
 */
 fluid_res_t FluidSynthInterface::set_fluid_synth_soundfont_file(string path)
 {
-	return parent_instrument->instrument_settings->set_string_param(*active_settings_params,
+	return parent_instrument->instrument_settings_manager->set_string_param(*active_settings_params,
 																	"fluid.synth.soundfont-file", path,
-																	"fluid-synth-param", NULL,
+																	"fluid-synth-preset", NULL,
 											 0, 0, NULL,
 											 _SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL | _SET_TYPE);
 }
@@ -1288,51 +1296,51 @@ fluid_res_t FluidSynthInterface::set_callbacks()
 {
 	fluid_res_t res;
 
-	res = parent_instrument->instrument_settings->set_string_param(*active_settings_params,
+	res = parent_instrument->instrument_settings_manager->set_string_param(*active_settings_params,
 																   "fluid.audio.driver", 
-																   "jack", "fluid-synth-param",
+																   "jack", "fluid-synth-preset",
 											&set_fluid_synth_audio_driver_callback,
 											_SET_CALLBACK | _EXEC_CALLBACK);
 
-	res |= parent_instrument->instrument_settings->set_string_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_string_param(*active_settings_params,
 																	"fluid.audio.jack.id", 0, 
-																	"fluid-synth-param",
+																	"fluid-synth-preset",
 											 &set_fluid_synth_audio_jack_id_callback,
 											 _SET_CALLBACK | _EXEC_CALLBACK);
 
-	res |= parent_instrument->instrument_settings->set_bool_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_bool_param(*active_settings_params,
 																  "fluid.audio.jack.autoconnect",
-																  false, "fluid-synth-param",
+																  false, "fluid-synth-preset",
 										   &set_fluid_synth_audio_jack_autoconnect_callback,
 										   _SET_CALLBACK | _EXEC_CALLBACK);
 
-	res |= parent_instrument->instrument_settings->set_int_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_int_param(*active_settings_params,
 																 "fluid.audio.period-size", 64, 8192, 64,
-																 "fluid-synth-param",
+																 "fluid-synth-preset",
 										  &set_fluid_synth_audio_period_size_callback,
 										  _SET_CALLBACK | _EXEC_CALLBACK);
 
-	res |= parent_instrument->instrument_settings->set_int_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_int_param(*active_settings_params,
 																 "fluid.audio.periods", 2, 64, 2,
-																 "fluid-synth-param",
+																 "fluid-synth-preset",
 										  &set_fluid_synth_audio_num_of_periods_callback,
 										  _SET_CALLBACK | _EXEC_CALLBACK);
 
-	res |= parent_instrument->instrument_settings->set_string_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_string_param(*active_settings_params,
 																	"fluid.synth.midi-bank-select", "gm", 
-																	"fluid-synth-param",
+																	"fluid-synth-preset",
 											 &select_fluid_synth_midi_bank_callback,
 											 _SET_CALLBACK | _EXEC_CALLBACK);
 
-	res |= parent_instrument->instrument_settings->set_bool_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_bool_param(*active_settings_params,
 																  "fluid.synth.reverb.active", false,
-																  "fluid-synth-param",
+																  "fluid-synth-preset",
 										   &set_fluid_synth_reverb_active_callback,
 										   _SET_CALLBACK | _EXEC_CALLBACK);
 
-	res |= parent_instrument->instrument_settings->set_bool_param(*active_settings_params,
+	res |= parent_instrument->instrument_settings_manager->set_bool_param(*active_settings_params,
 																  "fluid.synth.chorus.active", false,
-																  "fluid-synth-param",
+																  "fluid-synth-preset",
 										   &set_fluid_synth_chorus_active_callback,
 										   _SET_CALLBACK | _EXEC_CALLBACK);
 

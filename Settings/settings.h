@@ -1,16 +1,18 @@
 /**
 * @file		settings.h
 *	@author		Nahum Budin
-*	@date		23-Sep-2025
-*	@version	1.2
-*					1. Refactoring.
-*					2. Comments
-*					3. Adding a mutex to each settings structure to be used instead
-*						of the global mutex.
+*	@date		22-Apr-2026
+*	@version	1.3
+*					1. Adding a function to set the type string of all the paremeters in a param struct.
 *	
 *	@brief		Instruments and common settings.
 *
 *	History: see h file\n
+*		version	1.2 23-Sep-2025
+*					1. Refactoring.
+*					2. Comments
+*					3. Adding a mutex to each settings structure to be used instead
+*						of the global mutex.
 *		ver. 1.1  28-Jun-2024
 *					1. A parent class to each individual instrument son.
 *					2. File handling is common and is managed by the modSynth settings object.
@@ -258,6 +260,8 @@ class Settings
 	~Settings();
 
 	_settings_params_t *get_active_settings_parameters();
+	
+	void set_all_params_type(_settings_params_t *settings, string type_string);
 
 	void settings_params_deep_copy(_settings_params_t *destination_params,
 								   _settings_params_t *source_params);
