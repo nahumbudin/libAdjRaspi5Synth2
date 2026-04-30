@@ -18,7 +18,7 @@
 class InstrumentHammondOrgan : public Instrument
 {
   public:
-	InstrumentHammondOrgan(AdjSynth *adj_synth);
+	InstrumentHammondOrgan(AdjSynth *adj_synth, _settings_params_t *external_settings);
 
 	~InstrumentHammondOrgan();
 
@@ -31,6 +31,8 @@ class InstrumentHammondOrgan : public Instrument
 	void sysex_handler(uint8_t *message, int len);
 
 	int set_default_settings_parameters(_settings_params_t *params = NULL, int prog = -1);
+	
+	int set_instrument_settings(_settings_params_t *preset);
 
 	int events_handler(int moduleid, int paramid, int val, _settings_params_t *params, int program = -1);
 	int events_handler(int moduleid, int paramid, double val, _settings_params_t *params, int program = -1);
@@ -75,6 +77,7 @@ private:
 	int drawbar_levels[9];
 	bool square_wave_enable;
 	int percussion_mode;
+	bool percussion_soft;
 	int leslie_speed;
 	int leslie_level;
 	int send_filter_1;

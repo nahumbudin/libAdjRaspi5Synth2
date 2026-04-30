@@ -4,6 +4,8 @@
  *	@date		22-Apr-2026
  *	@version	1.3
  *					1. Adding program param to not on and note off calls.
+ *					2. Using programs as the sketches settings parameters holder.
+ *					3. Copy sketch: deep copy setting parameters (and not set voices parameters)	
 
 *					
 *	@brief		A collection of 4 synthesizers: Additive, Karplus String, PAD and Morphed Sine Oscilator (MSO)
@@ -131,6 +133,7 @@ AdjSynth::AdjSynth()
 
 	// Create a settings managers
 	adj_synth_settings_manager = new Settings(&active_adj_synth_settings_params);
+	
 	// Initialize the settings parameters structure.
 	//set_default_preset_parameters(&active_adj_synth_settings_params, 0);
 
@@ -681,7 +684,7 @@ void AdjSynth::init_synth_programs()
 	{
 		// Create new instances of the programs with default parameters.
 		_settings_params_t *default_params = new _settings_params_t;
-		set_default_preset_parameters(default_params, 0);
+		set_default_preset_parameters(default_params, program);
 		synth_program[program] = new AdjSynthPrograms(program, _PAD_DEFAULT_WAVETABLE_SIZE,
 													   default_params, audio_polyphony_mixer);
 	}
@@ -1079,7 +1082,10 @@ int AdjSynth::copy_sketch(int srcsk, int destsk)
 	else
 	{
 #ifdef _USE_NEW_MIDI_PROGRAM
-		synth_program[destsk]->set_program_preset_params(synth_program[srcsk]->active_preset_params);
+		//synth_program[destsk]->set_program_preset_params(synth_program[srcsk]->active_preset_params);
+		adj_synth_settings_manager->settings_params_deep_copy(
+			synth_program[destsk]->active_preset_params,
+			synth_program[srcsk]->active_preset_params);
 #else
 		synth_program[destsk]->set_program_preset_params(&synth_program[srcsk]->active_preset_params);
 #endif		
@@ -1233,14 +1239,23 @@ int AdjSynth::set_settings_params(Settings *settings,
 	
 	///active_adj_synth_settings_params = *settings_params;
 
-	active_adj_synth_settings_params.bool_parameters_map = settings_params->bool_parameters_map;
-	active_adj_synth_settings_params.float_parameters_map = settings_params->float_parameters_map;
-	active_adj_synth_settings_params.int_parameters_map = settings_params->int_parameters_map;
-	active_adj_synth_settings_params.string_parameters_map = settings_params->string_parameters_map;
+	//active_adj_synth_settings_params.bool_parameters_map = settings_params->bool_parameters_map;
+	//active_adj_synth_settings_params.float_parameters_map = settings_params->float_parameters_map;
+	//active_adj_synth_settings_params.int_parameters_map = settings_params->int_parameters_map;
+	//active_adj_synth_settings_params.string_parameters_map = settings_params->string_parameters_map;
 
-	active_adj_synth_settings_params.name = "default_settings";
-	active_adj_synth_settings_params.settings_type = "instrument_settings_param";
-	active_adj_synth_settings_params.version = settings->get_settings_version();
+	//active_adj_synth_settings_params.name = "default_settings";
+	//active_adj_synth_settings_params.settings_type = "instrument_settings_param";
+	//active_adj_synth_settings_params.version = settings->get_settings_version();
+	//
+	get_active_preset_params()->bool_parameters_map = settings_params->bool_parameters_map;
+	get_active_preset_params()->float_parameters_map = settings_params->float_parameters_map;
+	get_active_preset_params()->int_parameters_map = settings_params->int_parameters_map;
+	get_active_preset_params()->string_parameters_map = settings_params->string_parameters_map;
+
+	get_active_preset_params()->name = "default_settings";
+	get_active_preset_params()->settings_type = "instrument_settings_param";
+	get_active_preset_params()->version = settings->get_settings_version();
 
 	// Amp level, pan send mixer settings not preset
 	
@@ -1302,7 +1317,8 @@ _settings_params_t *AdjSynth::get_active_common_params()
 */
 _settings_params_t *AdjSynth::get_active_settings_params()
 {
-	return &active_adj_synth_settings_params;
+	//return &active_adj_synth_settings_params;
+	return get_active_preset_params();
 }
 
 /**

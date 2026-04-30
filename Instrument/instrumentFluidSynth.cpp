@@ -23,7 +23,8 @@
 //FluidSynthInterface *InstrumentFluidSynth::fluid_synth_int_instance = NULL;
 
 InstrumentFluidSynth::InstrumentFluidSynth()
-	: Instrument(_INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY, true, true, false)
+	: Instrument(_INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY, true, true, false,
+	NULL, NULL, AdjSynth::get_instance(), NULL, _INSTRUMENT_TYPE_PLAYING)
 {
 
 	int res = 0;

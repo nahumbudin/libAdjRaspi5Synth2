@@ -13,6 +13,10 @@
 
 #define _MAX_NUM_OF_INSTRUMENTS									256
 
+#define _INSTRUMENT_TYPE_PLAYING								0
+#define _INSTRUMENT_TYPE_EFFECT									1
+#define _INSTRUMENT_TYPE_CONTROL								2
+
 #define _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY					"Adj-Fluid-Synth"
 #define _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY					"Adj-Hammond-Organ"
 #define _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY					"Adj-Analog-Synth"

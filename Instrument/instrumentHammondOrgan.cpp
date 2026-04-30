@@ -13,9 +13,9 @@
 #include "instrumentHammondOrgan.h"
 #include "../LibAPI/synthesizer.h"
 
-InstrumentHammondOrgan::InstrumentHammondOrgan(AdjSynth *adj_synth)
+InstrumentHammondOrgan::InstrumentHammondOrgan(AdjSynth *adj_synth, _settings_params_t *external_settings)
 	: Instrument(_INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY, true, true, false,
-					NULL, NULL, adj_synth)
+					NULL, NULL, adj_synth, external_settings, _INSTRUMENT_TYPE_PLAYING)
 {
 	adjheart_synth = adj_synth;
 	
@@ -27,17 +27,29 @@ InstrumentHammondOrgan::InstrumentHammondOrgan(AdjSynth *adj_synth)
 	drawbar_levels[0] =  8;
 	square_wave_enable = false;
 	percussion_mode = _HAMMOND_ORGAN_PERCUSION_MODE_OFF;
+	percussion_soft = true;
 	leslie_speed = 50;
 	leslie_level = 0;
 	send_filter_1 = 40;
 	send_filter_2 = 40;
 	
+	// Use LFO 6 for the Leslie effect modulation. TODO: allocate a dedicated LFO?
+	// Set for all allocated MIDI channels.
+	for (int chan = 0; chan < 16; chan++)
+	{
+		if (get_active_midi_channels())
+		{
+			mod_synth_midi_mixer_set_channel_pan_mod_lfo(chan, _LFO_6);
+		}
+	}	
+	
 	alsa_midi_sequencer_events_handler->set_instrument(this);
 	
 	init_analog_synth_default_settings(active_settings_params);
-	instrument_settings_manager->set_all_params_type(active_settings_params, "hammond-organ-preset");
+	//instrument_settings_manager->set_all_params_type(active_settings_params, "hammond-organ-preset");
 	// Adjust the specific settings parameters that are relevant to the Hammond Organ instrument
 	init_specific_hammond_organ_default_settings(active_settings_params);
+	instrument_settings_manager->set_all_params_type(active_settings_params, "hammond-organ-preset");
 }
 
 InstrumentHammondOrgan::~InstrumentHammondOrgan()
@@ -46,12 +58,12 @@ InstrumentHammondOrgan::~InstrumentHammondOrgan()
 
 void InstrumentHammondOrgan::note_on_handler(uint8_t channel, uint8_t note, uint8_t velocity)
 {
-	AdjSynth::get_instance()->midi_play_note_on(channel, note, velocity, 0, _HAMMOND_ORGAN_PROGRAM_20);
+	adjheart_synth->midi_play_note_on(channel, note, velocity, 0, _HAMMOND_ORGAN_PROGRAM_20);
 }
 
 void InstrumentHammondOrgan::note_off_handler(uint8_t channel, uint8_t note, uint8_t velocity)
 {
-	AdjSynth::get_instance()->midi_play_note_off(channel, note, 0, 0, _HAMMOND_ORGAN_PROGRAM_20);
+	adjheart_synth->midi_play_note_off(channel, note, 0, 0, _HAMMOND_ORGAN_PROGRAM_20);
 }
 
 void InstrumentHammondOrgan::change_program_handler(uint8_t channel, uint8_t program)
@@ -64,6 +76,68 @@ void InstrumentHammondOrgan::channel_pressure_handler(uint8_t channel, uint8_t v
 
 void InstrumentHammondOrgan::controller_event_handler(uint8_t channel, uint8_t num, uint8_t val)
 {
+	int res = 0;
+	
+	// All Notes/Sounds Off handler (ignore channel) TODO: channel
+	if ((num == _MIDI_ALL_SOUNDS_OFF) || (num == _MIDI_ALL_NOTES_OFF))
+	{
+		for (int v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+		{
+			adjheart_synth->synth_voice[v]->audio_voice->set_inactive();
+			adjheart_synth->synth_voice[v]->audio_voice->reset_wait_for_not_active();
+		}
+	}
+	else if (num == _MIDI_EVENT_CHANNEL_VOLUME_BYTE_2)
+	{
+		//AdjSynth::get_instance()->audio_out->set_master_volume(val);
+		//AdjSynth::get_instance()->set
+		
+		adjheart_synth->polyphonic_mixer_event(
+			_POLYPHONIC_MIXER_EVENT, 
+			_MIXER_CHAN_1_LEVEL + channel,
+			val,
+			adjheart_synth->get_active_common_params(),
+			_HAMMOND_ORGAN_PROGRAM_20);
+	}
+	else if (num == _MIDI_EVENT_CHANNEL_BALANCE_BYTE_2)
+	{
+		//AdjSynth::get_instance()->amp_event();
+
+		adjheart_synth->polyphonic_mixer_event(
+			_POLYPHONIC_MIXER_EVENT,
+			_MIXER_CHAN_1_PAN + channel,
+			val,
+			adjheart_synth->get_active_common_params(),
+			_HAMMOND_ORGAN_PROGRAM_20);
+	}
+	else if (num == _MIDI_EVENT_CHANNEL_SEND_BYTE_2)
+	{
+		adjheart_synth->polyphonic_mixer_event(
+			_POLYPHONIC_MIXER_EVENT,
+			_MIXER_CHAN_1_SEND + channel,
+			val,
+			adjheart_synth->get_active_common_params(),
+			_HAMMOND_ORGAN_PROGRAM_20);
+	}
+	else if (num == _MIDI_EVENT_CHANNEL_PAN_MOD_LFO_LEVEL_BYTE_2)
+	{
+		adjheart_synth->polyphonic_mixer_event(
+			_POLYPHONIC_MIXER_EVENT,
+			_MIXER_CHAN_1_PAN_MOD_LFO_LEVEL + channel,
+			val,
+			adjheart_synth->get_active_common_params(),
+			_HAMMOND_ORGAN_PROGRAM_20);
+	}
+	else if (num == _MIDI_EVENT_CHANNEL_PAN_MOD_LFO_SELECT_BYTE_2)
+	{
+		adjheart_synth->polyphonic_mixer_event(
+			_POLYPHONIC_MIXER_EVENT,
+			_MIXER_CHAN_1_PAN_MOD_LFO + channel,
+			val,
+			adjheart_synth->get_active_common_params(),
+			_HAMMOND_ORGAN_PROGRAM_20);
+	}
+	
 }
 
 void InstrumentHammondOrgan::pitch_bend_handler(uint8_t channel, int pitch)
@@ -128,9 +202,14 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 			_SET_VALUE,
 			_HAMMOND_ORGAN_PROGRAM_20);
 		
+		// Set active playing voice settings
+		res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, keyString);
+		
 		break;
 		
 	case _HAMMOND_ORGAN_DETUNE_OCTAVE:
+		
+		val += _OSC_DETUNE_MIN_OCTAVE;
 		
 		if (val < _OSC_DETUNE_MIN_OCTAVE || val > _OSC_DETUNE_MAX_OCTAVE)
 		{
@@ -146,9 +225,14 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 			_SET_VALUE,
 			_HAMMOND_ORGAN_PROGRAM_20);
 		
+		// Set active playing voice settings
+		res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, "adjsynth.osc1.tune_offset_oct");
+		
 		break;
 		
 	case _HAMMOND_ORGAN_DETUNE_SEMITONES:
+		
+		val += _OSC_DETUNE_MIN_SEMITONES;
 		
 		if (val < _OSC_DETUNE_MIN_SEMITONES || val > _OSC_DETUNE_MAX_SEMITONES)
 		{
@@ -164,9 +248,14 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 			_SET_VALUE,
 			_HAMMOND_ORGAN_PROGRAM_20);
 		
+		// Set active playing voice settings
+		res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, "adjsynth.osc1.tune_offset_semitones");
+		
 		break;
 		
 	case _HAMMOND_ORGAN_DETUNE_CENTS:
+		
+		val += _OSC_DETUNE_MIN_CENTS / _OSC_DETUNE_CENTS_FACTORIAL; // 0.25 steps
 		
 		if (val < _OSC_DETUNE_MIN_CENTS || val > _OSC_DETUNE_MAX_CENTS)
 		{
@@ -181,6 +270,9 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 			detune_cents,
 			_SET_VALUE,
 			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		// Set active playing voice settings
+		res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, "adjsynth.osc1.tune_offset_cents");
 		
 		break;
 		
@@ -201,8 +293,10 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 			_SET_VALUE,
 			_HAMMOND_ORGAN_PROGRAM_20);
 		
-		// Call the callback to update the percussion mode in the synth engine
-		// Set OSC2 etc. 
+		adjheart_synth->set_hammond_percusion_mode(val, params, _HAMMOND_ORGAN_PROGRAM_20);
+		
+		// Set active playing voice settings
+		res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, "adjsynth.osc1.hammond_percussion_mode");
 		
 		break;
 		
@@ -214,9 +308,23 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 			}
 			
 			leslie_speed = val;
+		
+		// Refresh if cahnnels allocation was changed.
+		for (int chan = 0; chan < 16; chan++)
+		{
+			if (get_active_midi_channels() & (1 << chan))
+			{
+				mod_synth_midi_mixer_set_channel_pan_mod_lfo(chan, _LFO_6);
+				mod_synth_modulator_event_int(_LFO_6_EVENT, _MOD_LFO_RATE, leslie_speed);
+			}
+		}	
 			
-		// Update active settings parameters - LFO frequency. 
-		// TODO:
+		res |= instrument_settings_manager->set_int_param_value(
+			params,
+			"adjsynth.hammond.organ_leslie_speed",
+			leslie_speed,
+			_SET_VALUE,
+			_HAMMOND_ORGAN_PROGRAM_20);
 		
 		break;
 		
@@ -228,9 +336,24 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 		}
 			
 		leslie_level = val;
+		
+		// Refresh if cahnnels allocation was changed.
+		for (int chan = 0; chan < 16; chan++)
+		{
+			if (get_active_midi_channels() & (1 << chan))
+			{
+				mod_synth_midi_mixer_set_channel_pan_mod_lfo(chan, _LFO_6);
+				mod_synth_midi_mixer_set_channel_pan_mod_level(chan, leslie_level);
+			}
+		}	
 			
-		// Update active settings parameters - PAN modulation level. 
-		// TODO:
+		res |= instrument_settings_manager->set_int_param_value(
+			params,
+			"adjsynth.hammond.organ_leslie_level",
+			leslie_level,
+			_SET_VALUE,
+			_HAMMOND_ORGAN_PROGRAM_20);
+		
 		break;
 		
 	case _HAMMOND_ORGAN_SEND_FILTER_1:
@@ -248,6 +371,34 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 			send_filter_1,
 			_SET_VALUE,
 			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		// Set active playing voice settings
+		res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, "adjsynth.osc1.send_filter_1");
+		
+		// If the percussion mode is active, VCO2 send filter 1 should be relative to send filter 1.
+		int vco2_send_filter_1;
+		if (percussion_mode != _HAMMOND_ORGAN_PERCUSION_MODE_OFF)
+		{
+			if (percussion_soft)
+			{
+				vco2_send_filter_1 = send_filter_1 / 3;
+			}
+			else
+			{
+				vco2_send_filter_1 = send_filter_1;
+			}
+			
+			res |= instrument_settings_manager->set_int_param_value(
+				params,
+				"adjsynth.osc2.send_filter_1",
+				vco2_send_filter_1,
+				_SET_VALUE,
+				_HAMMOND_ORGAN_PROGRAM_20);
+			
+			// Set active playing voice settings
+			res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, "adjsynth.osc2.send_filter_1");
+		}
+		
 		break;
 		
 	case _HAMMOND_ORGAN_SEND_FILTER_2:
@@ -265,6 +416,33 @@ int InstrumentHammondOrgan::events_handler(int moduleid, int paramid, int val, _
 			send_filter_2,
 			_SET_VALUE,
 			_HAMMOND_ORGAN_PROGRAM_20);
+		
+		// Set active playing voice settings
+		res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, "adjsynth.osc1.send_filter_2");
+		
+		// If the percussion mode is active, VCO2 send filter 2 should be relative to send filter 2.
+		int vco2_send_filter_2;
+		if (percussion_mode != _HAMMOND_ORGAN_PERCUSION_MODE_OFF)
+		{
+			if (percussion_soft)
+			{
+				vco2_send_filter_2 = send_filter_2 / 3;
+			}
+			else
+			{
+				vco2_send_filter_2 = send_filter_2;
+			}
+			
+			res |= instrument_settings_manager->set_int_param_value(
+				params,
+				"adjsynth.osc2.send_filter_2",
+				vco2_send_filter_2,
+				_SET_VALUE,
+				_HAMMOND_ORGAN_PROGRAM_20);
+			
+			// Set active playing voice settings
+			res |= adjheart_synth->update_program_voices_parameter(_HAMMOND_ORGAN_PROGRAM_20, "adjsynth.osc2.send_filter_2");
+		}
 		
 		break;
 		
@@ -336,16 +514,6 @@ int InstrumentHammondOrgan::set_drawbar_level(int drawbar_num, int level)
 	
 	return 0;
 }
-
-int InstrumentHammondOrgan::get_drawbar_level(int drawbar_num)
-{
-	if (drawbar_num < 1 || drawbar_num > 9)
-	{
-		return -1;
-	}
-
-	return drawbar_levels[drawbar_num - 1];
-}
 	
 int InstrumentHammondOrgan::set_octave_detune(int detune)
 {
@@ -361,11 +529,6 @@ int InstrumentHammondOrgan::set_octave_detune(int detune)
 	return 0;
 }
 	
-int InstrumentHammondOrgan::get_octave_detune()
-{
-	return detune_octave;
-}
-	
 int InstrumentHammondOrgan::set_semitones_detune(int detune)
 {
 	if (detune < _OSC_DETUNE_MIN_SEMITONES || detune > _OSC_DETUNE_MAX_SEMITONES)
@@ -378,11 +541,6 @@ int InstrumentHammondOrgan::set_semitones_detune(int detune)
 	// Update active settings parameters
 	
 	return 0;
-}
-
-int InstrumentHammondOrgan::get_semitones_detune()
-{
-	return detune_semitones;
 }
 	
 int InstrumentHammondOrgan::set_cents_detune(int detune)
@@ -398,11 +556,6 @@ int InstrumentHammondOrgan::set_cents_detune(int detune)
 	
 	return 0;
 }
-
-int InstrumentHammondOrgan::get_cents_detune()
-{
-	return detune_cents;
-}
 	
 int InstrumentHammondOrgan::set_square_wave_enable(bool state)
 {
@@ -411,11 +564,6 @@ int InstrumentHammondOrgan::set_square_wave_enable(bool state)
 	// Update active settings parameters
 	
 	return 0;
-}
-
-bool InstrumentHammondOrgan::get_square_wave_enable()
-{
-	return square_wave_enable;
 }
 	
 int InstrumentHammondOrgan::set_percussion_mode(int mode)
@@ -427,15 +575,26 @@ int InstrumentHammondOrgan::set_percussion_mode(int mode)
 	
 	percussion_mode = mode;
 	
+	switch (percussion_mode)
+	{
+	case _HAMMOND_ORGAN_PERCUSION_MODE_2ND_SOFT_SLOW:
+	case _HAMMOND_ORGAN_PERCUSION_MODE_2ND_SOFT_FAST:
+	case _HAMMOND_ORGAN_PERCUSION_MODE_3RD_SOFT_SLOW:
+	case _HAMMOND_ORGAN_PERCUSION_MODE_3RD_SOFT_FAST:
+		percussion_soft = true;
+		break;
+		
+	default:
+		percussion_soft = false;
+		break;
+	}
+	
 	// Update active settings parameters
 	
 	return 0;
 }
 
-int InstrumentHammondOrgan::get_percussion_mode()
-{
-	return percussion_mode;
-}
+// The leselie rotating speaker effect is simulated using the mixer pan modilation.
 	
 int InstrumentHammondOrgan::set_leslie_speed(int speed)
 {
@@ -449,11 +608,6 @@ int InstrumentHammondOrgan::set_leslie_speed(int speed)
 	// Update active settings parameters
 	
 	return 0;
-}
-
-int InstrumentHammondOrgan::get_leslie_speed()
-{
-	return leslie_speed;
 }
 	
 int InstrumentHammondOrgan::set_leslie_level(int level)
@@ -469,11 +623,6 @@ int InstrumentHammondOrgan::set_leslie_level(int level)
 	
 	return 0;
 }
-
-int InstrumentHammondOrgan::get_leslie_level()
-{
-	return leslie_level;
-}
 	
 int InstrumentHammondOrgan::set_send_filter_1(int level)
 {
@@ -487,11 +636,6 @@ int InstrumentHammondOrgan::set_send_filter_1(int level)
 	// Update active settings parameters
 	
 	return 0;
-}
-
-int InstrumentHammondOrgan::get_send_filter_1()
-{
-	return send_filter_1;
 }
 	
 int InstrumentHammondOrgan::set_send_filter_2(int level)
@@ -508,101 +652,5 @@ int InstrumentHammondOrgan::set_send_filter_2(int level)
 	return 0;
 }
 
-int InstrumentHammondOrgan::get_send_filter_2()
-{
-	return send_filter_2;
-}
 
-// Set all analog synth parameters to default values for the Hammond Organ program.
-int InstrumentHammondOrgan::init_analog_synth_default_settings(_settings_params_t *params)
-{
-	int res = 0;
-	
-	res = adjheart_synth->set_default_preset_parameters_amp(params, _HAMMOND_ORGAN_PROGRAM_20);
-	res |= adjheart_synth->set_default_preset_parameters_distortion(params, _HAMMOND_ORGAN_PROGRAM_20);
-	res |= adjheart_synth->set_default_preset_parameters_filter(params, _HAMMOND_ORGAN_PROGRAM_20);
-	res |= adjheart_synth->set_default_preset_parameters_kps(params, _HAMMOND_ORGAN_PROGRAM_20);
-	res |= adjheart_synth->set_default_preset_parameters_modulators(params, _HAMMOND_ORGAN_PROGRAM_20);
-	res |= adjheart_synth->set_default_preset_parameters_mso(params, _HAMMOND_ORGAN_PROGRAM_20);
-	res |= adjheart_synth->set_default_preset_parameters_noise(params, _HAMMOND_ORGAN_PROGRAM_20);
-	res |= adjheart_synth->set_default_preset_parameters_pad(params, _HAMMOND_ORGAN_PROGRAM_20);
-	res |= adjheart_synth->set_default_preset_parameters_vco(params, _HAMMOND_ORGAN_PROGRAM_20);
-	
-	return res;
-}
-
-// Set and modify all the specific Hammond Organ parameters that differs from the default analog synth values.
-int InstrumentHammondOrgan::init_specific_hammond_organ_default_settings(_settings_params_t *params)
-{
-	int res = 0;
-	
-	// "adjsynth.osc1.enabled" is set to true by default in the analog synth default settings.
-	// "adjsynth.osc1.waveform" is set to sine wave by default in the analog synth default settings.
-	// "adjsynth.osc1.symmetry" is set to 50% by default in the analog synth default settings.
-	// "adjsynth.osc1.tune_offset_oct" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.tune_offset_semitones" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.tune_offset_cents" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.freq_modulation_lfo_num" is set to 0 (no mod) by default in the analog synth default settings.
-	// "adjsynth.osc1.freq_modulation_lfo_level" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.freq_modulation_env_num" is set to 0 (no mod) by default in the analog synth default settings.
-	// "adjsynth.osc1.freq_modulation_env_level" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.pwm_modulation_lfo_num" is set to 0 (no mod) by default in the analog synth default settings.
-	// "adjsynth.osc1.pwm_modulation_lfo_level" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.pwm_modulation_env_num" is set to 0 (no mod) by default in the analog synth default settings.
-	// "adjsynth.osc1.pwm_modulation_env_level" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.amp_modulation_lfo_num" is set to 0 (no mod) by default in the analog synth default settings.
-	// "adjsynth.osc1.amp_modulation_lfo_level" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.hammond_percussion_mode" is set to 0 (off) by default in the analog synth default settings.
-	// "adjsynth.osc1.unison_level_1" is set to 100 by default in the analog synth default settings.
-	// "adjsynth.osc1.unison_level_2" - level_9 are set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.unison_distortion" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.unison_detune" is set to 0 by default in the analog synth default settings.
-	// "adjsynth.osc1.unison_square_wave" is set to false by default in the analog synth default settings.
-	// All OSC2 parameters are set to default values in the analog synth default settings.
-	
-	
-	
-	res |= instrument_settings_manager->set_int_param_value(
-		params,
-		"adjsynth.osc1.send_filter_1",
-		40,
-		_SET_VALUE,
-		_HAMMOND_ORGAN_PROGRAM_20);
-	
-	res |= instrument_settings_manager->set_int_param_value(
-		params,
-		"adjsynth.osc1.send_filter_2",
-		40,
-		_SET_VALUE,
-		_HAMMOND_ORGAN_PROGRAM_20);
-	
-	// Use ADSR 1 for amplitude modulation envelope
-	res |= instrument_settings_manager->set_int_param_value(
-		params,
-		"adjsynth.osc1.amp_modulation_env_num",
-		_ENV_1,
-		_SET_VALUE,
-		_HAMMOND_ORGAN_PROGRAM_20);
-
-	// Set the amplitude modulation envelope level to 100%
-	res |= instrument_settings_manager->set_int_param_value(
-		params,
-		"adjsynth.osc1.amp_modulation_env_level",
-		100,
-		_SET_VALUE,
-		_HAMMOND_ORGAN_PROGRAM_20);
-	
-	// Set the unison mode to Hammond Organ specific unison mode (octave and fifths)
-	res |= instrument_settings_manager->set_int_param_value(
-		params,
-		"adjsynth.osc1.unison_mode",
-		_OSC_UNISON_MODE_HAMMOND,
-		_SET_VALUE,
-		_HAMMOND_ORGAN_PROGRAM_20);
-	
-	
-	
-	
-	return res;
-}
 

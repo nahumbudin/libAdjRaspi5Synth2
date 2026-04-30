@@ -4,7 +4,11 @@
 *	@date		11-Apr-2026
 *	@version	2.0	
 *					1. Specific instruments settings are handled by each instrument.
-*					2. 
+*					2. No need to split to voice and common - decide per case which settings parameters are needed, 
+*					   and use only them.
+*					3. Instrument settings params may be local or refernced to, for example, 
+*					    a program settings params in the AdjSynth
+*					4. Add instrument type: playing, effect, control.
 *					   
 *					
 *	@brief		The basic music generating object, e.g., analog-synthesizer,
@@ -13,9 +17,12 @@
 *	History:\n
 *				versio 1.1	  24-09-2025
 *					1. Adding a pointer to a AdjSynth object
-*					2. Splitting the settings parameters to two groups: active_preset_settings_params and active_common_settings_params,
-*					3. Splitting active_preset_settings_params to two groups: active_program_settings_params and active_common_settings_params, 
-*					   used for the AdjSynth setting params and adding a active_fluid_synth_settings_params for the FluidSynth settings params
+*					2. Splitting the settings parameters to two groups: active_preset_settings_params and 
+*					   active_common_settings_params,
+*					3. Splitting active_preset_settings_params to two groups: active_program_settings_params and 
+*					    active_common_settings_params, used for the AdjSynth setting params and adding a 
+*					    active_fluid_synth_settings_params for the FluidSynth settings params
+*					    
 *				version 1.0		24-06-2024: First version
 *	
 */
@@ -50,13 +57,27 @@ Instrument::Instrument(std::string name, bool with_midi_in,
 					   bool with_audio_out, bool with_midi_out,
 					   AlsaMidiSysControl *alsa_control,
 					   std::string *alsa_client_in_name,
-					   AdjSynth *adj_synth)
+					   AdjSynth *adj_synth,
+					   _settings_params_t *external_settings,
+						int inst_type)
 {
 	instrument_name = name;
+	instrument_type = inst_type;
 
 	midi_in_enable = with_midi_in;
 	midi_out_enable = with_midi_out;
 	audio_out_enable = with_audio_out;
+	
+	
+	// CRITICAL: Set active_settings_params BEFORE any init code
+	if (external_settings != nullptr) {
+		// Use external settings (e.g., from a Program)
+		active_settings_params = external_settings;
+	}
+	else {
+		// Use local settings (default)
+		active_settings_params = &local_settings_params;
+	}
 
 	//	instrument_connections_control = new InstrumentConnectionsControl();
 
@@ -105,6 +126,24 @@ Instrument::~Instrument()
 	
 }
 
+// Use instrument's own local settings
+void Instrument::use_local_settings() {
+	active_settings_params = &local_settings_params;
+}
+    
+// Use external settings (e.g., from a Program)
+void Instrument::use_external_settings(_settings_params_t* external_params) {
+	if (external_params != nullptr) {
+		active_settings_params = external_params;
+	}
+	// else keep current (safe fallback)
+}
+    
+// Get current active settings
+_settings_params_t* Instrument::get_active_settings_params() {
+	return active_settings_params;
+}
+
 int Instrument::init()
 {
 	if (midi_in_enable)
@@ -120,12 +159,35 @@ int Instrument::init()
 	//active_preset_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
 	//active_common_settings_params = new _settings_params_t(); // TODO: presets or active_settings_param?
 	
-	active_settings_params = new _settings_params_t(); 
+	//active_settings_params = new _settings_params_t();  // initiated at the constractor.
+	
+	// Just in case
+	if (active_settings_params == nullptr)
+	{
+		active_settings_params = new _settings_params_t();
+	}
 
 	//instrument_settings = new Settings(active_preset_settings_params); // TODO: presets or active_settings_param?
 	instrument_settings_manager = new Settings(active_settings_params);
 
 	return 0;
+}
+
+void Instrument::set_instrument_type(int type)
+{
+	if (type >= _INSTRUMENT_TYPE_PLAYING && type <= _INSTRUMENT_TYPE_CONTROL)
+	{
+		instrument_type = type;
+	}
+	else
+	{
+		instrument_type = _INSTRUMENT_TYPE_PLAYING; // default
+	}
+}
+
+int Instrument::get_instrument_type()
+{
+	return instrument_type;
 }
 
 /**

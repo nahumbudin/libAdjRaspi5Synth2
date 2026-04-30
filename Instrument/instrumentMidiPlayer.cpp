@@ -51,7 +51,8 @@ void send_midi_commands_wrapper(const std::vector<MidiFileEvent> events, int vol
 InstrumentMidiPlayer::InstrumentMidiPlayer(AlsaMidiSysControl *alsa_control,
 										   std::string *alsa_client_in_name)
 	: Instrument(_INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY, false, false, true,
-				 alsa_control, alsa_client_in_name)
+				 alsa_control, alsa_client_in_name, AdjSynth::get_instance(), NULL, 
+				_INSTRUMENT_TYPE_CONTROL)
 {
 
 	instrument_midi_player_instance = this;

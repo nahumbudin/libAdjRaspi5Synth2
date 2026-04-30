@@ -18,7 +18,8 @@ func_ptr_void_int_int_t InstrumentMidiMixer::midi_mixer_channel_pan_update_callb
 func_ptr_void_int_int_t InstrumentMidiMixer::midi_mixer_channel_pan_mod_lfo_update_callback_ptr = NULL;
 func_ptr_void_int_int_t InstrumentMidiMixer::midi_mixer_channel_pan_mod_lfo_level_update_callback_ptr = NULL;
 InstrumentMidiMixer::InstrumentMidiMixer()
-	: Instrument(_INSTRUMENT_NAME_MIDI_MIXER_STR_KEY, true, false, false) // MIDI input (for control messages?), no audio output, no MIDI output
+	: Instrument(_INSTRUMENT_NAME_MIDI_MIXER_STR_KEY, true, false, false, // MIDI input (for control messages?), no audio output, no MIDI output
+					NULL, NULL, AdjSynth::get_instance(), NULL, _INSTRUMENT_TYPE_CONTROL) 
 {	
 	active_preset = 0;
 	

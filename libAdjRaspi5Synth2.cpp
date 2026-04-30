@@ -1505,11 +1505,6 @@ int mod_synth_set_hammond_organ_param_value(int mod_id, int param_id, int value)
 		
 		case _HAMMOND_ORGAN_DETUNE_OCTAVE:
 		
-		if (value < _OSC_DETUNE_MIN_OCTAVE || value > _OSC_DETUNE_MAX_OCTAVE)
-		{
-			return -1;
-		}
-		
 		ModSynth::get_instance()->get_hammond_organ()->events_handler(
 			_HAMMOND_ORGAN_EVENT,
 			_HAMMOND_ORGAN_DETUNE_OCTAVE,
@@ -1521,11 +1516,6 @@ int mod_synth_set_hammond_organ_param_value(int mod_id, int param_id, int value)
 		
 		case _HAMMOND_ORGAN_DETUNE_SEMITONES:
 		
-		if (value < _OSC_DETUNE_MIN_SEMITONES || value > _OSC_DETUNE_MAX_SEMITONES)
-		{
-			return -1;
-		}
-		
 		ModSynth::get_instance()->get_hammond_organ()->events_handler(
 			_HAMMOND_ORGAN_EVENT,
 			_HAMMOND_ORGAN_DETUNE_SEMITONES,
@@ -1536,11 +1526,6 @@ int mod_synth_set_hammond_organ_param_value(int mod_id, int param_id, int value)
 		break;
 		
 		case _HAMMOND_ORGAN_DETUNE_CENTS:
-		
-		if (value < _OSC_DETUNE_MIN_CENTS || value > _OSC_DETUNE_MAX_CENTS)
-		{
-			return -1;
-		}
 		
 		ModSynth::get_instance()->get_hammond_organ()->events_handler(
 			_HAMMOND_ORGAN_EVENT,
@@ -1756,6 +1741,11 @@ int mod_synth_save_midi_mixer_patch_file(string path)
 int mod_synth_save_analog_reverberation_patch_file(string path)
 {
 	return mod_synthesizer->get_analog_reverberation()->save_instrument_active_settings(path, "analog-reverb-preset");
+}
+
+int mod_synth_save_hammond_organ_patch_file(string path)
+{
+	return mod_synthesizer->get_hammond_organ()->save_instrument_active_settings(path, "hammond-organ-preset");
 }
 
 

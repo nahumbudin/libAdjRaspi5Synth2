@@ -17,7 +17,7 @@
 
 InstrumentAnalogSynth::InstrumentAnalogSynth(AdjSynth *adj_synth)
 	: Instrument(_INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY, true, true, false, 
-				 NULL, NULL, adj_synth)
+				 NULL, NULL, adj_synth, adj_synth->get_active_preset_params(), _INSTRUMENT_TYPE_PLAYING)
 {
 	adjheart_synth = adj_synth;
 	alsa_midi_sequencer_events_handler->set_instrument(this);

@@ -24,6 +24,8 @@
 #include "../Instrument/instrumentAnalogSynth.h"
 #include "../Instrument/instrumentMidiMixer.h"
 #include "../Instrument/instrumentAnalogReverbration.h"
+#include "../Instrument/instrumentMidiMapper.h"
+#include "../Instrument/instrumentHammondOrgan.h"
 #include "../utils/utils.h"
 #include "../LibAPI/connections.h"
 #include "../LibAPI/defines.h"
@@ -591,7 +593,7 @@ int PatchsHandler::create_active_instruments_settings_files(vector<string> inst_
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY)
 		{
-			// TODO:
+			mod_synth_save_hammond_organ_patch_file(settings_file_path);
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
 		{
@@ -671,6 +673,8 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 	vector<string> midi_input_connections;
 	string midi_in_connection;
 	int client_num;
+	int res = 0;
+	_settings_int_param_t value;
 	
 	/* Set connections BEFORE or AFTER ? all modules are oppened as some instruments initialization are utilizing MIDI messages */
 	
@@ -741,14 +745,48 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY)
 			{
 				ModSynth::get_instance()->get_analog_synth()->instrument_settings_manager->read_settings_file(
-					ModSynth::get_instance()->get_analog_synth()->active_settings_params,
+					AdjSynth::get_instance()->get_active_preset_params(),
 					settings_file_path,
-					_ADJ_SYNTH_PRESET_PARAMS, _SKETCH_PROGRAM_1); // TODO: fix sketch number
-				
+					_ADJ_SYNTH_PRESET_PARAMS,
+					AdjSynth::get_instance()->get_active_sketch()); 			
 			}
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY)
 			{
+				ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+					settings_file_path,
+					"hammond-organ-preset",
+					_HAMMOND_ORGAN_PROGRAM_20);
 				
+				// Update the Leslie speed and level.
+				// Go over all allocated MIDI channels.
+				for (int chan = 0; chan < 16; chan++)
+				{
+					if (ModSynth::get_instance()->get_hammond_organ()->get_active_midi_channels() & (1 << chan))
+					{
+						res = ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->get_int_param(
+							ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+							"adjsynth.hammond.organ_leslie_speed",
+							&value);
+						
+						if (res == _SETTINGS_KEY_FOUND)
+						{
+							mod_synth_midi_mixer_set_channel_pan_mod_lfo(chan, _LFO_6);
+							mod_synth_modulator_event_int(_LFO_6_EVENT, _MOD_LFO_RATE, value.value);
+						}
+						
+						res = ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->get_int_param(
+							ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+							"adjsynth.hammond.organ_leslie_level",
+							&value);
+						
+						if (res == _SETTINGS_KEY_FOUND)
+						{
+		
+							mod_synth_midi_mixer_set_channel_pan_mod_level(chan, value.value);
+						}
+					}
+				}
 			}
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY)
 			{

@@ -299,6 +299,9 @@ public:
 	/* Holds the AdjSynth settings parameters ?*/
 	_settings_params_t active_adj_synth_settings_params;
 	
+	/* Holds the AdjSynth active sketch settings parameters ? (replacing the above?)*/
+	_settings_params_t active_adj_synth_sketch_settings_params[_NUM_OF_SKETCHES];
+	
 	/* Holds the ModSynth general settings parameters */
 	//_setting_params_t active_adj_synth_general_settings_params;
 	

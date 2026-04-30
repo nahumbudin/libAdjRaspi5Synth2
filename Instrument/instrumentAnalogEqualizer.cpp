@@ -15,7 +15,8 @@
 func_ptr_void_void_t InstrumentAnalogEqualizer::analog_equalizer_channel_gui_update_callback_ptr = NULL;
 
 InstrumentAnalogEqualizer::InstrumentAnalogEqualizer()
-	: Instrument(_INSTRUMENT_NAME_GRAPHIC_EQUALIZER_STR_KEY, false, false, false) // No MIDI input, no audio output, no MIDI output
+	: Instrument(_INSTRUMENT_NAME_GRAPHIC_EQUALIZER_STR_KEY, false, false, false, // No MIDI input, no audio output, no MIDI output
+					NULL, NULL, AdjSynth::get_instance(), NULL, _INSTRUMENT_TYPE_EFFECT) 
 {	
 	active_preset = 0;
 	
