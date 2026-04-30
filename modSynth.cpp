@@ -176,19 +176,21 @@ ModSynth::ModSynth()
 	
 	
 	// An Hammond Organ Instrument (TODO: define the Analog Synth based innstruments concept)
-	hammond_organ = new InstrumentHammondOrgan(adj_synth);
+	hammond_organ = new InstrumentHammondOrgan(adj_synth,
+											adj_synth->synth_program[_HAMMOND_ORGAN_PROGRAM_20]->active_preset_params);
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY, 
 										hammond_organ);
-	adj_synth->set_program_preset_params_ptr(_HAMMOND_ORGAN_PROGRAM_20, hammond_organ->active_settings_params);
+	hammond_organ->use_external_settings(adj_synth->synth_program[_HAMMOND_ORGAN_PROGRAM_20]->active_preset_params);
+	//adj_synth->set_program_preset_params_ptr(_HAMMOND_ORGAN_PROGRAM_20, hammond_organ->active_settings_params);
 	
 	// An Analog Synth Instrument (implements all the non-sampled based synthesis methods, 
 	// including additive, subtractive, Karplus-Strong, PADsynth, etc.)
 	analog_synth = new InstrumentAnalogSynth(this->adj_synth);
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY,
 										analog_synth);
-	adj_synth->set_program_preset_params_ptr(_PROGRAM_16, adj_synth->synth_program[_SKETCH_PROGRAM_1]->active_preset_params);
-	adj_synth->set_program_preset_params_ptr(_PROGRAM_17, adj_synth->synth_program[_SKETCH_PROGRAM_2]->active_preset_params);
-	adj_synth->set_program_preset_params_ptr(_PROGRAM_18, adj_synth->synth_program[_SKETCH_PROGRAM_3]->active_preset_params);
+	//adj_synth->set_program_preset_params_ptr(_PROGRAM_16, adj_synth->synth_program[_SKETCH_PROGRAM_1]->active_preset_params);
+	//adj_synth->set_program_preset_params_ptr(_PROGRAM_17, adj_synth->synth_program[_SKETCH_PROGRAM_2]->active_preset_params);
+	//adj_synth->set_program_preset_params_ptr(_PROGRAM_18, adj_synth->synth_program[_SKETCH_PROGRAM_3]->active_preset_params);
 	
 	// Midi Mixer Instrument
 	midi_mixer_instrument = new InstrumentMidiMixer();
@@ -344,6 +346,11 @@ ModSynth::ModSynth()
 	general_settings_manager = new Settings(&active_general_synth_settings_params);
 	/* Create the FLuidSynth settings manager */
 	fluid_synth_settings_manager = new Settings(&active_fluid_synth_settings_params);
+
+	// Initialize before use
+	active_general_synth_settings_params.name = "";
+	active_general_synth_settings_params.settings_type = "";
+	active_general_synth_settings_params.version = 0;
 	
 	/* Create a singleton of the AdjSynth. */ // TODO: can it be above
 	//adj_synth = AdjSynth::get_instance();
@@ -437,7 +444,11 @@ std::string ModSynth::get_mod_synth_general_settings_file_path()
 
 int ModSynth::init()
 {
-	settings_res_t res;	
+	settings_res_t res;
+
+	// Init programs - must be called before init voices and settings.
+	// Set the synth programs and their preset settings to default values, and assign them to the voices.
+	adj_synth->init_synth_programs();
 	
 	/* Assign the ModSynth general settings manager, active general settings settings parameters.
 	 * Mixer, Keyboard, Eqalizer and reverb */
@@ -449,6 +460,15 @@ int ModSynth::init()
 	adj_synth->set_settings_params(adj_synth->adj_synth_settings_manager,
 		adj_synth->get_active_settings_params());
 	
+	for (int s = _SKETCH_PROGRAM_1; s <= _SKETCH_PROGRAM_3; s++)
+	{
+		adj_synth->set_active_sketch(s);
+		adj_synth->set_settings_params(adj_synth->adj_synth_settings_manager,
+			adj_synth->get_active_settings_params());
+	}
+
+	adj_synth->set_active_sketch(_SKETCH_PROGRAM_1);
+	
 	// Create and initialize the AdjSynth default Preset parameters values.
 	
 	
@@ -457,7 +477,7 @@ int ModSynth::init()
 	
 	// Init programs - must be called before init voices.
 	// Set the synth programs and their preset settings to default values, and assign them to the voices.
-	adj_synth->init_synth_programs();
+	//adj_synth->init_synth_programs(); // Moved up.
 	
 	// Init voices
 	adj_synth->init_synth_voices();
@@ -1004,9 +1024,9 @@ int ModSynth::open_adj_synth_patch_file(string path, Settings *settings, _settin
 int ModSynth::save_adj_synth_patch_file(string path)
 {
 	return save_adj_synth_patch_file(path,
-									 adj_synth->adj_synth_settings_manager,
-#ifdef _USE_NEW_MIDI_PROGRAM
-									 adj_synth->synth_program[mod_synth_get_active_sketch()]->active_preset_params);
+		adj_synth->adj_synth_settings_manager,
+		#ifdef _USE_NEW_MIDI_PROGRAM
+		adj_synth->get_active_preset_params());  // synth_program[mod_synth_get_active_sketch()]->active_preset_params);
 #else
 									 &adj_synth->synth_program[mod_synth_get_active_sketch()]->active_preset_params);							 
 #endif

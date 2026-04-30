@@ -372,6 +372,63 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 			ModSynth::get_instance()->get_hammond_organ()->
 				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 			midi_channels_allocated_synth[ch] = synth;
+
+			// Can we set the MIDI Mixer channel settings here (Others will be set when allocating a voiceprogram]?
+
+			sprintf(key_string, "adjsynth.mixer_channel_%i.level", ch + 1);
+			res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				key_string,
+				&int_param);
+
+			if (res == _SETTINGS_KEY_FOUND)
+			{
+				AdjSynth::get_instance()->polyphonic_mixer_event(
+					_POLYPHONIC_MIXER_EVENT,
+					_MIXER_CHAN_1_LEVEL + ch,
+					int_param.value,
+					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+					_HAMMOND_ORGAN_PROGRAM_20); //AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
+			}
+
+			sprintf(key_string, "adjsynth.mixer_channel_%i.send", ch + 1);
+			res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				key_string,
+				&int_param);
+
+			if (res == _SETTINGS_KEY_FOUND)
+			{
+				AdjSynth::get_instance()->polyphonic_mixer_event(
+					_POLYPHONIC_MIXER_EVENT,
+					_MIXER_CHAN_1_SEND + ch,
+					int_param.value,
+					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+					_HAMMOND_ORGAN_PROGRAM_20); // AdjSynth::get_instance()->get_active_sketch());
+			}
+
+			_settings_int_param_t value;
+			
+			res = ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+				"adjsynth.hammond.organ_leslie_speed",
+				&value);
+
+			if (res == _SETTINGS_KEY_FOUND)
+			{
+				mod_synth_midi_mixer_set_channel_pan_mod_lfo(ch, _LFO_6);
+				mod_synth_modulator_event_int(_LFO_6_EVENT, _MOD_LFO_RATE, value.value);
+			}
+
+			res = ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+				"adjsynth.hammond.organ_leslie_level",
+				&value);
+
+			if (res == _SETTINGS_KEY_FOUND)
+			{
+				mod_synth_midi_mixer_set_channel_pan_mod_level(ch, value.value);
+			}
 		}
 	}
 	

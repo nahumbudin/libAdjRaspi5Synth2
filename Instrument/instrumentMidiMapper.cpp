@@ -38,7 +38,7 @@ func_ptr_void_int_bool_t InstrumentMidiMapper::midi_channel_active_indication_ca
 InstrumentMidiMapper::InstrumentMidiMapper(AlsaMidiSysControl *alsa_control,
 										   std::string *alsa_client_in_name)
 	: Instrument(_INSTRUMENT_NAME_MIDI_MAPPER_STR_KEY, true, false, true,		// midi in, no audio out, midi out
-				 alsa_control, alsa_client_in_name)
+				 alsa_control, alsa_client_in_name, AdjSynth::get_instance(), NULL, _INSTRUMENT_TYPE_CONTROL)
 {
 
 	keyboard_split_note = 64;

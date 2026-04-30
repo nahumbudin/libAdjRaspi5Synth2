@@ -15,7 +15,8 @@
 #include "instrumentControlBoxHandler.h"
 
 InstrumentControlBoxEventsHandler::InstrumentControlBoxEventsHandler()
-	: Instrument(_INSTRUMENT_NAME_CONTROL_BOX_HANDLER_STR_KEY, true, true, false)
+	: Instrument(_INSTRUMENT_NAME_CONTROL_BOX_HANDLER_STR_KEY, true, true, false,
+		NULL, NULL, AdjSynth::get_instance(), NULL, _INSTRUMENT_TYPE_CONTROL)
 {
 	
 	alsa_midi_sequencer_events_handler->set_instrument(this);

@@ -16,7 +16,7 @@ func_ptr_void_void_t InstrumentAnalogReverbration::update_gui_callback_ptr = NUL
 
 InstrumentAnalogReverbration::InstrumentAnalogReverbration()
 	: Instrument(_INSTRUMENT_NAME_REVERB_STR_KEY, false, false, false, 
-				 NULL, NULL)
+				 NULL, NULL, AdjSynth::get_instance(), NULL, _INSTRUMENT_TYPE_EFFECT)
 {
 	
 	active_preset = 0;

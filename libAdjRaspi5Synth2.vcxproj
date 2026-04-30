@@ -171,6 +171,7 @@
     <ClCompile Include="I2C\i2cInterface.cpp" />
     <ClCompile Include="Instrument\analogEqualizerPresets.cpp" />
     <ClCompile Include="Instrument\analogReverbrationPresets.cpp" />
+    <ClCompile Include="Instrument\hammondOrganPresets.cpp" />
     <ClCompile Include="Instrument\Instrument.cpp" />
     <ClCompile Include="Instrument\instrumentAnalogEqualizer.cpp" />
     <ClCompile Include="Instrument\instrumentAnalogReverbration.cpp" />

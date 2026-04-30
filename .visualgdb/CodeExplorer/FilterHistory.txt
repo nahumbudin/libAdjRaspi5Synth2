@@ -12,3 +12,5 @@ su
 get
 hamm
 note
+lfo
+activ

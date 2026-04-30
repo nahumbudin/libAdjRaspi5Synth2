@@ -4,7 +4,11 @@
 *	@date		11-Apr-2026
 *	@version	2.0	
 *					1. Specific instruments settings are handled by each instrument.
-*					2. No need to split to voice and common - decide per case which settings parameters are needed, and use only them.
+*					2. No need to split to voice and common - decide per case which settings parameters are needed, 
+*					   and use only them.
+*					3. Instrument settings params may be local or refernced to, for example, 
+*					    a program settings params in the AdjSynth
+*					4. Add instrument type: playing, effect, control.
 *					   
 *					
 *	@brief		The basic music generating object, e.g., analog-synthesizer,
@@ -13,9 +17,12 @@
 *	History:\n
 *				versio 1.1	  24-09-2025
 *					1. Adding a pointer to a AdjSynth object
-*					2. Splitting the settings parameters to two groups: active_preset_settings_params and active_common_settings_params,
-*					3. Splitting active_preset_settings_params to two groups: active_program_settings_params and active_common_settings_params, 
-*					   used for the AdjSynth setting params and adding a active_fluid_synth_settings_params for the FluidSynth settings params
+*					2. Splitting the settings parameters to two groups: active_preset_settings_params and 
+*					   active_common_settings_params,
+*					3. Splitting active_preset_settings_params to two groups: active_program_settings_params and 
+*					    active_common_settings_params, used for the AdjSynth setting params and adding a 
+*					    active_fluid_synth_settings_params for the FluidSynth settings params
+*					    
 *				version 1.0		24-06-2024: First version
 *	
 */
@@ -45,13 +52,26 @@ public:
 			 bool with_audio_out = true, bool with_midi_out = false,
 			 AlsaMidiSysControl *alsa_control = NULL,
 			 string *alsa_client_in_name = NULL,
-			 AdjSynth *adj_synth = NULL);
+			 AdjSynth *adj_synth = NULL,
+			 _settings_params_t *external_settings = NULL, 
+			 int inst_type = _INSTRUMENT_TYPE_PLAYING);
 	~Instrument();
+	
+	// Use instrument's own local settings
+	void use_local_settings();	
+	// Use external settings (e.g., from a Program)
+	void use_external_settings(_settings_params_t* external_params);
+	// Get current active settings
+	_settings_params_t* get_active_settings_params();
 
 	void set_active_midi_channels(uint16_t act_chans);
 	uint16_t get_active_midi_channels();
 	
 	virtual int init();
+	
+	void set_instrument_type(int type);
+	int get_instrument_type();
+	
 	
 	// Settings parameters management
 	
@@ -97,7 +117,8 @@ public:
 	// Settings managers of the instrument, used to manage the settings parameters of the instrument.
 	Settings *instrument_settings_manager;
 	
-	_settings_params_t *active_settings_params;		
+	_settings_params_t local_settings_params; // Optional local storage
+	_settings_params_t *active_settings_params; // Pointer to active settings		
 
 //	InstrumentConnectionsControl *instrument_connections_control;
 	AlsaMidiSysControl *alsa_connections;
@@ -114,6 +135,9 @@ public:
 	/** RawMidi handle to send out MIDI */
 
 	int mode;
+	
+	// Playing, effect, control.
+	int instrument_type;
 
 	SafeQueue<snd_seq_event_t*> alsa_rx_queue;
 
