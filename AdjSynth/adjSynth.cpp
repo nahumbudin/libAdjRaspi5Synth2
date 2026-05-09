@@ -5,8 +5,7 @@
  *	@version	1.3
  *					1. Adding program param to not on and note off calls.
  *					2. Using programs as the sketches settings parameters holder.
- *					3. Copy sketch: deep copy setting parameters (and not set voices parameters)	
-
+ *					3. Copy sketch: deep copy setting parameters (and not set voices parameters
 *					
 *	@brief		A collection of 4 synthesizers: Additive, Karplus String, PAD and Morphed Sine Oscilator (MSO)
 *					
@@ -1329,7 +1328,7 @@ _settings_params_t *AdjSynth::get_active_settings_params()
 */
 int AdjSynth::set_program_preset_params_ptr(int program_num, _settings_params_t *params)
 {
-	if ((program_num < 0) || (program_num > _HAMMOND_ORGAN_PROGRAM_20) || (params == NULL))
+	if ((program_num < 0) || (program_num > _SYNTH_MAX_NUM_OF_PROGRAMS) || (params == NULL))
 	{
 		return -1;
 	}
@@ -1346,7 +1345,7 @@ int AdjSynth::set_program_preset_params_ptr(int program_num, _settings_params_t 
  **  */
 _settings_params_t *AdjSynth::get_program_preset_params_ptr(int program_num)
 {
-	if ((program_num < 0) || (program_num > _HAMMOND_ORGAN_PROGRAM_20))
+	if ((program_num < 0) || (program_num > _SYNTH_MAX_NUM_OF_PROGRAMS))
 	{
 		return NULL;
 	}
@@ -1365,7 +1364,8 @@ int AdjSynth::update_program_voices_parameter(int program_num, const char* param
 	int result = -2;
 	
 	if (((program_num >= _PROGRAM_16) && (program_num <= _PROGRAM_18)) || // Analog synth sketches
-		(program_num == _HAMMOND_ORGAN_PROGRAM_20)) // Or Hammond organ.
+		(program_num == _HAMMOND_ORGAN_PROGRAM_20) ||
+		(program_num == _STRING_SYNTH_PROGRAM_21)) 
 	{	
 		_settings_params_t* program_params = synth_program[program_num]->get_active_program_preset_params();
 			

@@ -49,6 +49,8 @@
 
 #include "MIDI/midiStream.h"
 
+#include "./LibAPI/synthesizer.h"
+
 #include "./Instrument/instrumentsManager.h"
 #include "./Instrument/instrumentControlBoxHandler.h"
 #include "./Instrument/instrumentFluidSynth.h"
@@ -58,6 +60,8 @@
 #include "./Instrument/instrumentAnalogReverbration.h"
 #include "./Instrument/instrumentAnalogSynth.h"
 #include "./Instrument/instrumentHammondOrgan.h"
+#include "./Instrument/instrumentStringSynth.h"
+#include "./Instrument/InstrumentKeyboardMapper.h"
 
 #include "./utils/xmlFiles.h"
 
@@ -972,6 +976,80 @@ void mod_synth_adj_synt_panic_action()
 	AdjSynth::get_instance()->synth_panic_action();
 }
 
+void mod_synth_set_keyboard_mapper_zone_octave_offset(int zone, int offset)
+{
+	if (zone == 0)
+	{
+		ModSynth::get_instance()->get_keyboard_mapper()->set_zone_1_transpose(offset + _OSC_DETUNE_MIN_OCTAVE);
+	}
+	else if (zone == 1)
+	{
+		ModSynth::get_instance()->get_keyboard_mapper()->set_zone_2_transpose(offset + _OSC_DETUNE_MIN_OCTAVE);	
+	}
+}
+
+int mod_synth_get_keyboard_mapper_zone_octave_offset(int zone)
+{
+	if (zone == 0)
+	{
+		return ModSynth::get_instance()->get_keyboard_mapper()->get_zone_1_transpose() - _OSC_DETUNE_MIN_OCTAVE;
+	}
+	else if (zone == 1)
+	{
+		return ModSynth::get_instance()->get_keyboard_mapper()->get_zone_2_transpose() - _OSC_DETUNE_MIN_OCTAVE;
+	}
+	
+	return -1;
+}
+
+void mod_synth_set_keyboard_mapper_zone_midi_channel(int zone, int midi_chan)
+{
+	if (zone == 0)
+	{
+		ModSynth::get_instance()->get_keyboard_mapper()->set_zone_1_midi_chan(midi_chan);
+	}
+	else if (zone == 1)
+	{
+		ModSynth::get_instance()->get_keyboard_mapper()->set_zone_2_midi_chan(midi_chan);	
+	}
+}
+
+int mod_synth_get_keyboard_mapper_zone_midi_channel(int zone)
+{
+	if (zone == 0)
+	{
+		return ModSynth::get_instance()->get_keyboard_mapper()->get_zone_1_midi_chan();
+	}
+	else if (zone == 1)
+	{
+		return ModSynth::get_instance()->get_keyboard_mapper()->get_zone_2_midi_chan();
+	}
+	
+	return -1;
+}
+
+void mod_synth_set_keyboard_mapper_bypass_on(bool bypass)
+{
+	ModSynth::get_instance()->get_keyboard_mapper()->set_bypass_on(bypass);
+}
+
+bool mod_synth_get_keyboard_mapper_bypass_on()
+{
+	return ModSynth::get_instance()->get_keyboard_mapper()->get_bypass_on();
+}
+
+void mod_synth_set_keyboard_mapper_split_point_note(int note)
+{
+	ModSynth::get_instance()->get_keyboard_mapper()->set_split_point_note(note);
+}
+
+int mod_synth_get_keyboard_mapper_split_point_note()
+{
+	return ModSynth::get_instance()->get_keyboard_mapper()->get_split_point_note();
+}
+
+
+
 void mod_synth_register_set_osc_1_unison_mode_callback(func_ptr_void_int_t ptr)
 {
 	callback_ptr_set_osc1_unison_labales_callback = ptr;
@@ -1723,6 +1801,18 @@ int mod_synth_get_hammond_organ_param_value(int mod_id, int param_id)
 	return 0;
 }
 
+int mod_synth_set_string_synth_param_value(int mod_id, int param_id, int value)
+{
+	return ModSynth::get_instance()->get_string_synth()->events_handler(
+		mod_id, param_id, value, ModSynth::get_instance()->get_string_synth()->active_settings_params, 
+		_STRING_SYNTH_PROGRAM_21);
+}
+
+int mod_synth_get_string_synth_param_value(int mod_id, int param_id)
+{
+	return ModSynth::get_instance()->get_string_synth()->get_param_value(param_id);
+}
+
 int mod_synth_save_adj_synth_patch_file(string path)
 {
 	return mod_synthesizer->save_adj_synth_patch_file(path);
@@ -1746,6 +1836,11 @@ int mod_synth_save_analog_reverberation_patch_file(string path)
 int mod_synth_save_hammond_organ_patch_file(string path)
 {
 	return mod_synthesizer->get_hammond_organ()->save_instrument_active_settings(path, "hammond-organ-preset");
+}
+
+int mod_synth_save_string_synth_patch_file(string path)
+{
+	return mod_synthesizer->get_string_synth()->save_instrument_active_settings(path, "string-synth-preset");
 }
 
 
@@ -2035,6 +2130,7 @@ void mod_synth_midi_mixer_set_channel_pan_mod_level(int chan, int lvl)
 			break;
 		case en_instruments_ids_t::adj_analog_synth:
 		case en_instruments_ids_t::adj_hammond_organ:
+		case en_instruments_ids_t::adj_karplusstrong_string_synth:
 			mod_synthesizer->midi_mapper->set_midi_channel_pan_mod_lfo_level(chan, lvl);
 			break;
 		
@@ -2067,6 +2163,7 @@ void mod_synth_midi_mixer_set_channel_pan_mod_lfo(int chan, int lfo)
 		break;
 	case en_instruments_ids_t::adj_analog_synth:
 	case en_instruments_ids_t::adj_hammond_organ:
+	case en_instruments_ids_t::adj_karplusstrong_string_synth:
 		mod_synthesizer->midi_mapper->set_midi_channel_pan_mod_lfo(chan, lfo);
 		
 		break;
@@ -2100,6 +2197,7 @@ void mod_synth_midi_mixer_set_channel_send_level(int chan, int snd)
 		break;
 	case en_instruments_ids_t::adj_analog_synth:
 	case en_instruments_ids_t::adj_hammond_organ:
+	case en_instruments_ids_t::adj_karplusstrong_string_synth:
 		mod_synthesizer->midi_mapper->set_midi_channel_send(chan, snd);
 		break;
 		

@@ -41,6 +41,8 @@ std::string AlsaMidiSysControl::control_box_xt_midi_in_client_name = "";
 std::string AlsaMidiSysControl::midi_player_client_in_name = "";
 /* Holds the MIDI mapper input clent name. */
 std::string AlsaMidiSysControl::midi_mapper_client_in_name = "";
+/* Holds the MIDI keyboard mapper input client name. */
+std::string AlsaMidiSysControl::midi_keyboard_mapper_client_in_name = "";
 
 /**
 *   @brief  Creates an Instrument object

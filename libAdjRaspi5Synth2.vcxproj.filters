@@ -202,6 +202,12 @@
     <Filter Include="Source files\Insrtument\Analog Reverbration">
       <UniqueIdentifier>{cb7d0a28-dc51-4c28-a040-c5fb101f3913}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\Instrument\Keyboard Mapper">
+      <UniqueIdentifier>{aed02c9b-fea7-4da1-96e7-5dc1c670b7e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Insrtument\Keyboard Mapper">
+      <UniqueIdentifier>{39a571f2-2eec-4778-a745-cc21cc1b6056}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjSynth\synthKeyboard.cpp">
@@ -738,6 +744,15 @@
     <ClCompile Include="AdjSynth\adjSynthProgram.cpp">
       <Filter>Source files\Synthesizer\AdjSynth</Filter>
     </ClCompile>
+    <ClCompile Include="Instrument\hammondOrganPresets.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrument\instrumentStringSynthesizer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrument\InstrumentKeyboardMapper.cpp">
+      <Filter>Source files\Insrtument\Keyboard Mapper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdjSynth\synthKeyboard.h">
@@ -1072,6 +1087,15 @@
     </ClInclude>
     <ClInclude Include="AdjSynth\adjSynthProgram.h">
       <Filter>Header files\Synthesizer\AdjSynth</Filter>
+    </ClInclude>
+    <ClInclude Include="Instrument\instrumentStringSynth.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="LibAPI\stringSynthesizer.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Instrument\InstrumentKeyboardMapper.h">
+      <Filter>Header files\Instrument\Keyboard Mapper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

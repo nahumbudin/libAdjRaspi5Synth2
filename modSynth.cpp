@@ -7,6 +7,7 @@
  *					2. Adding support in both old and new MIDI program objects.
  *					3. Definning a global settings handling mutex
  *					4. Adding I2C interface support
+ *					5. Adding MIDI Mapper and MIDI Mixer , Hammon Organ anf String Synthesizer instruments
  *
  *	@brief		This is the main modular synthesizer libraray object.
  *
@@ -37,12 +38,14 @@
 #include "./Instrument/instrumentsManager.h"
 #include "./Instrument/instrumentFluidSynth.h"
 #include "./Instrument/instrumentHammondOrgan.h"
+#include "./Instrument/instrumentStringSynth.h"
 #include "./Instrument/instrumentAnalogSynth.h"
 
 #include "./Instrument/instrumentMidiPlayer.h"
 #include "./Instrument/instrumentMidiMapper.h"
 #include "./Instrument/instrumentMidiMixer.h"
 #include "./Instrument/instrumentAnalogReverbration.h"
+#include "./Instrument/InstrumentKeyboardMapper.h"
 
 #include "./Instrument/instrumentControlBoxHandler.h"
 
@@ -175,13 +178,20 @@ ModSynth::ModSynth()
 	init();
 	
 	
-	// An Hammond Organ Instrument (TODO: define the Analog Synth based innstruments concept)
+	// An Hammond Organ Instrument 
 	hammond_organ = new InstrumentHammondOrgan(adj_synth,
 											adj_synth->synth_program[_HAMMOND_ORGAN_PROGRAM_20]->active_preset_params);
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY, 
 										hammond_organ);
 	hammond_organ->use_external_settings(adj_synth->synth_program[_HAMMOND_ORGAN_PROGRAM_20]->active_preset_params);
 	//adj_synth->set_program_preset_params_ptr(_HAMMOND_ORGAN_PROGRAM_20, hammond_organ->active_settings_params);
+	
+	// A String Synthesizer Instrument
+	string_synth = new InstrumentStringSynth(adj_synth,
+		adj_synth->synth_program[_STRING_SYNTH_PROGRAM_21]->active_preset_params);
+	instruments_manager->add_instrument(_INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY, 
+		string_synth);
+	string_synth->use_external_settings(adj_synth->synth_program[_STRING_SYNTH_PROGRAM_21]->active_preset_params);
 	
 	// An Analog Synth Instrument (implements all the non-sampled based synthesis methods, 
 	// including additive, subtractive, Karplus-Strong, PADsynth, etc.)
@@ -207,6 +217,12 @@ ModSynth::ModSynth()
 										   &alsa_midi_system_control->midi_mapper_client_in_name);
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_MIDI_MAPPER_STR_KEY,
 										midi_mapper);
+	
+	// A MIDI Keyboard Mapper Instrument.
+	keyboard_mapper = new InstrumentKeyboardMapper(alsa_midi_system_control,
+		&alsa_midi_system_control->midi_keyboard_mapper_client_in_name);
+	instruments_manager->add_instrument(_INSTRUMENT_NAME_KEYBOARD_MAPPER_STR_KEY,
+		keyboard_mapper);
 
 	// A MIDI Player Instrument.
 	midi_player = new InstrumentMidiPlayer(alsa_midi_system_control, 
@@ -628,6 +644,16 @@ InstrumentHammondOrgan *ModSynth::get_hammond_organ()
 }
 
 /**
+*   @brief  retruns a pointer to the String instrument object
+*   @param  none
+*   @return a pointer to the InstrumentStringSynthesizer instrument object
+*/
+InstrumentStringSynth *ModSynth::get_string_synth()
+{
+	return string_synth;
+}
+
+/**
 *   @brief  retruns a pointer to the MIDI-Mixer instrument object
 *   @param  none
 *   @return a pointer to the MIDI-Mixer instrument object
@@ -645,6 +671,16 @@ InstrumentMidiMixer *ModSynth::get_midi_mixer()
 InstrumentAnalogReverbration *ModSynth::get_analog_reverberation()
 {
 	return analog_reverberation_instrument;
+}
+
+/**
+*   @brief  retruns a pointer to the KeyboardMapper instrument object
+*   @param  none
+*   @return a pointer to the KeyboardMapper instrument object
+*/
+InstrumentKeyboardMapper *ModSynth::get_keyboard_mapper()
+{
+	return keyboard_mapper;
 }
 
 /**

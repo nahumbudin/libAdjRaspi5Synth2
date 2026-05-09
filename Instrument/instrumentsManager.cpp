@@ -19,6 +19,7 @@
 #include "instrumentFluidSynth.h"
 #include "instrumentAnalogSynth.h"
 #include "instrumentHammondOrgan.h"
+#include "instrumentStringSynth.h"
 #include "instrumentMidiMixer.h"
 #include "../modSynth.h"
 
@@ -296,6 +297,17 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		}
 	}
+	else if (last_connected == en_instruments_ids_t::adj_karplusstrong_string_synth)
+	{
+		if (ModSynth::get_instance()->get_string_synth() != NULL)
+		{
+			channels = ModSynth::get_instance()->get_string_synth()->
+				alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+			
+			ModSynth::get_instance()->get_string_synth()->
+				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+		}
+	}
 	
 	// Add the new channel to the other selected instruments
 	
@@ -313,7 +325,7 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 			midi_channels_allocated_synth[ch] = synth;
 		}
 	}
-	if (synth == en_instruments_ids_t::adj_analog_synth)
+	else if (synth == en_instruments_ids_t::adj_analog_synth)
 	{
 		if (ModSynth::get_instance()->get_analog_synth() != NULL)
 		{
@@ -430,6 +442,13 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 				mod_synth_midi_mixer_set_channel_pan_mod_level(ch, value.value);
 			}
 		}
+	}
+	else if (synth == en_instruments_ids_t::adj_karplusstrong_string_synth)
+	{
+		channels = ModSynth::get_instance()->get_string_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
+
+		ModSynth::get_instance()->get_string_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+		midi_channels_allocated_synth[ch] = synth;
 	}
 	
 	return 0;

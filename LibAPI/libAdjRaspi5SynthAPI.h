@@ -39,4 +39,5 @@
 #include "synthesizer.h"
 #include "utils.h"
 #include "hammondOrgan.h"
+#include "stringSynthesizer.h"
 

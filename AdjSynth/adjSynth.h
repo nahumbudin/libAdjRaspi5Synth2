@@ -499,6 +499,9 @@ int set_program_karplus_synth_send_filter_1_cb(int snd, int prog);
 int set_program_karplus_synth_send_filter_2_cb(int snd, int prog);
 int set_program_karplus_synth_on_decay_cb(int dec, int prog);
 int set_program_karplus_synth_off_decay_cb(int dec, int prog);
+int set_program_karplus_synth_character_variations_cb(int var, int prog);
+int set_program_karplus_synth_tune_offset_oct_cb(int oct, int prog);
+int set_program_karplus_synth_tune_offset_semitones_cb(int smt, int prog);
 
 int set_program_mso_synth_enabled_cb(bool enable, int prog);
 int set_program_mso_synth_symmetry_cb(int sym, int prog);

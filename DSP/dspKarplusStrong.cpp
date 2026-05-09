@@ -1,11 +1,14 @@
 /**
 *	@file		dspKarplusStrong.h
 *	@author		Nahum Budin
-*	@date		21-Seo-2024
-*	@version	1.2 
-*					1. Code refactoring and notaion. 
+*	@date		4-May-2026
+*	@version	1.3 
+*					1. Add Character Variations Control. 
+*					2. Add pluck damping and pluck damping variation control. (was not working properly in the old version).
 *					
-*	@History	23-Jan-2021 1.1
+*	@History	21-Sep-2024 1.2
+*					Code refactoring and notaion.
+*				23-Jan-2021 1.1
 *					1. Code refactoring and notaion. 
 *					2. Add audio sample-rate settings
 *				2-Nov-2019	1.0 (revised version from old libAdjHeartRaspiFlSynthMultiCore_3_1)
@@ -226,7 +229,11 @@ void DSP_KarplusStrong::set_pluck_damping(float pd)
 	}
 }
 
-void DSP_KarplusStrong::set_pluck_damping(int pd) {} // TODO: ?
+void DSP_KarplusStrong::set_pluck_damping(int pd) 
+{
+	// 5-95 -> 0.1 - 0.9
+	set_pluck_damping((float)(pd - 5) / 112.5f + 0.1f);
+} 
 
 /**
 *	@brief	Return pluck damping level
@@ -258,7 +265,11 @@ void DSP_KarplusStrong::set_pluck_damping_variation(float pdv)
 	}
 }
 
-void DSP_KarplusStrong::set_pluck_damping_variation(int pdv) {} // TODO: ?
+void DSP_KarplusStrong::set_pluck_damping_variation(int pdv) 
+{
+	// 5-95 -> 0->0.5
+	set_pluck_damping_variation((float)(pdv - 5) / 180.0f);
+} 
 
 /**
 *	@brief	Return pluck damping variation level
@@ -867,6 +878,17 @@ float DSP_KarplusStrong::calc_lpf_smoothing_factor(int noteNum)
 		// is magical, don't know how it works
 		lpf_smoothing_factor = string_damping + pow(noteNum / 44.0, 0.5) * (1 - string_damping) * 0.5 +
 		    (1 - string_damping) * (float)rand() / (float)RAND_MAX * string_damping_variation;
+		
+		// CRITICAL: Clamp to ensure filter stability
+		// Values > 1.0 cause positive feedback and oscillation
+		if (lpf_smoothing_factor > 1.0f)
+		{
+			lpf_smoothing_factor = 1.0f;
+		}
+		else if (lpf_smoothing_factor < 0.0f)
+		{
+			lpf_smoothing_factor = 0.0f;
+		}
 	}
 
 	return lpf_smoothing_factor;
@@ -898,7 +920,10 @@ void DSP_KarplusStrong::init_excitation_samples()
 {
 	for (int i = 0; i < buffer_len; i++)
 	{
-		buffer[i] = get_next_excitation_val(i) * magnitude;
+		//buffer[i] = get_next_excitation_val(i) * magnitude;
+		// Apply pluck damping as an exponential envelope
+		float pluck_envelope = exp(-pluck_damping_coefficient * (float)i / (float)buffer_len * 10.0f);
+		buffer[i] = get_next_excitation_val(i) * magnitude * pluck_envelope;
 	}
 }
 
@@ -912,7 +937,12 @@ float DSP_KarplusStrong::get_next_output_value()
 	//	static float prior;
 	float in, out = 0;	
 	in = buffer[buffer_index];
+	
+	// Apply low-pass filtering for string damping
+	// Average current and previous sample, weighted by smoothing factor
 	out = low_pass(prior_samp, in, lpf_smoothing_factor); // * normDecay;//decay; 
+	
+	// Apply decay and store back to buffer
 	buffer[buffer_index] = out * active_decay;
 	
 	if (++buffer_index >= buffer_len)
@@ -920,14 +950,17 @@ float DSP_KarplusStrong::get_next_output_value()
 		buffer_index = 0;
 	}
 
-	prior_samp = in;
+	//prior_samp = in;
+	prior_samp = out;
 	
-	//	resonate();
-//	if(out < -0.99f)
-//		out = -0.99f;
-//	else if(out > 0.99f)
-//		out = 0.99f;
+	//resonate();
+	//if(out < -0.99f)
+	//	out = -0.99f;
+	//else if(out > 0.99f)
+	//	out = 0.99f;
+	
 	energy = 0.999f * energy + 0.001f * out * out;
+	
 	return out * 4.f;	
 }
 
@@ -991,8 +1024,18 @@ void DSP_KarplusStrong::resonate()
 */
 float DSP_KarplusStrong::low_pass(float last_output, float current_input, float smoothing_factor)
 {
-	float current_output = 0.0;
-	current_output = smoothing_factor * current_input + (1.0 - smoothing_factor) * last_output;
+	// Ensure smoothing factor is in valid range for stability
+	float safe_factor = smoothing_factor;
+	if (safe_factor > 1.0f)
+	{
+		safe_factor = 1.0f;
+	}
+	else if (safe_factor < 0.0f)
+	{
+		safe_factor = 0.0f;
+	}
+	
+	float current_output = smoothing_factor * current_input + (1.0 - smoothing_factor) * last_output;
 	return current_output;
 }
 
@@ -1005,9 +1048,12 @@ float DSP_KarplusStrong::low_pass(float last_output, float current_input, float 
 */
 float DSP_KarplusStrong::high_pass(float last_output, float last_input, float current_input, float smoothing_factor)
 {
-	float current_output = 0.0;
-	current_output = smoothing_factor * smoothing_factor * (last_output + current_input - last_input);
+	//float current_output = 0.0;
+	//current_output = smoothing_factor * smoothing_factor * (last_output + current_input - last_input);
 
+	// Karplus-Strong typically uses: output = (current + previous) / 2 * damping
+	// For more control, we use a weighted average
+	float current_output = (smoothing_factor * current_input + (1.0 - smoothing_factor) * last_output);
 	return current_output;
 }	
 

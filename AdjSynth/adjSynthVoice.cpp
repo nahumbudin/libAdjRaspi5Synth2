@@ -1208,6 +1208,16 @@ int SynthVoice::set_voice_params(_settings_params_t *params, _settings_params_t 
 		}
 	}
 	
+	if (update_all || strcmp(key_filter, "adjsynth.karplus_synth.character_variations") == 0)
+	{
+		res = settings_manager->get_int_param(params, "adjsynth.karplus_synth.character_variations", &int_param);
+		if (res == _SETTINGS_KEY_FOUND)
+		{
+			dsp_voice->karplus_1->set_character_variation(int_param.value);
+			param_updated = 0;
+		}
+	}
+	
 	if (update_all || strcmp(key_filter, "adjsynth.karplus_synth.send_filter_1") == 0)
 	{
 		res = settings_manager->get_int_param(params, "adjsynth.karplus_synth.send_filter_1", &int_param);

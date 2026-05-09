@@ -132,6 +132,7 @@ class AlsaMidiSysControl
 	static string control_box_xt_midi_in_client_name;
 	static string midi_player_client_in_name;
 	static string midi_mapper_client_in_name;
+	static string midi_keyboard_mapper_client_in_name;
 
   private:
 	AlsaMidiSysControl();

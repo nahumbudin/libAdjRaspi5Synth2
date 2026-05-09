@@ -5,7 +5,8 @@
 *	@version	1.1
 *					1. Code refactoring rename modules to instruments
 *					2. Implementation: init connections before opening instruments as some instruments initialization are utilizing MIDI messages
-*	
+*					3. Add Presets handling.
+*					
 *	@brief		Modular synthersizer patches handling.
 *
 *	History: 
@@ -26,10 +27,13 @@
 #include "../Instrument/instrumentAnalogReverbration.h"
 #include "../Instrument/instrumentMidiMapper.h"
 #include "../Instrument/instrumentHammondOrgan.h"
+#include "../Instrument/instrumentStringSynth.h"
+#include "../Instrument/InstrumentKeyboardMapper.h"
 #include "../utils/utils.h"
 #include "../LibAPI/connections.h"
 #include "../LibAPI/defines.h"
 #include "../LibAPI/fluidSynth.h"
+#include "../LibAPI/synthesizer.h"
 
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/document.h"
@@ -486,6 +490,117 @@ int PatchsHandler::load_patch_file(std::string file_path)
 	return -1;
 }
 
+/**
+*   @brief Load Preset parametrs as a XML file.
+*   @param  file path	patch file full path string
+*	@return 0 if done; -1 otherwise 
+*/	
+int mod_synth_load_hammond_preset_file(std::string path)
+{
+	int res = 0;
+	_settings_int_param_t value;
+	
+	ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+		path,
+		"hammond-organ-preset",
+		_HAMMOND_ORGAN_PROGRAM_20);
+				
+	// Update the Leslie speed and level.
+	// Go over all allocated MIDI channels.
+	for (int chan = 0; chan < 16; chan++)
+	{
+		if (ModSynth::get_instance()->get_hammond_organ()->get_active_midi_channels() & (1 << chan))
+		{
+			res = ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+				"adjsynth.hammond.organ_leslie_speed",
+				&value);
+						
+			if (res == _SETTINGS_KEY_FOUND)
+			{
+				mod_synth_midi_mixer_set_channel_pan_mod_lfo(chan, _LFO_6);
+				mod_synth_modulator_event_int(_LFO_6_EVENT, _MOD_LFO_RATE, value.value);
+			}
+						
+			res = ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
+				"adjsynth.hammond.organ_leslie_level",
+				&value);
+						
+			if (res == _SETTINGS_KEY_FOUND)
+			{
+		
+				mod_synth_midi_mixer_set_channel_pan_mod_level(chan, value.value);
+			}
+		}
+	}
+	
+	return res;
+}
+
+/**
+*   @brief Save Preset parametrs as a XML file.
+*   @param  file path	patch file full path string
+*	@return 0 if done; -1 otherwise 
+*/	
+int mod_synth_save_hammond_preset_file(std::string path)
+{
+	return ModSynth::get_instance()->get_hammond_organ()->save_instrument_active_settings(path, "hammond-organ-preset");
+}
+
+/**
+*   @brief Load Preset parametrs as a XML file.
+*   @param  file path	patch file full path string
+*	@return 0 if done; -1 otherwise 
+*/	
+int mod_synth_load_string_synthesizer_preset_file(std::string path)
+{
+	ModSynth::get_instance()->get_string_synth()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_string_synth()->active_settings_params,
+		path,
+		"string-synth-preset",
+		_STRING_SYNTH_PROGRAM_21);
+	
+	return 0;
+}
+
+/**
+*   @brief Save Preset parametrs as a XML file.
+*   @param  file path	patch file full path string
+*	@return 0 if done; -1 otherwise 
+*/	
+int mod_synth_save_string_synthesizer_preset_file(std::string path)
+{
+	return ModSynth::get_instance()->get_string_synth()->save_instrument_active_settings(path, "string-synth-preset");
+}
+
+/**
+*   @brief Load Preset parametrs as a XML file.
+*   @param  file path	patch file full path string
+*	@return 0 if done; -1 otherwise 
+*/	
+int mod_synth_load_keyboard_mapper_preset_file(std::string path)
+{
+	ModSynth::get_instance()->get_keyboard_mapper()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_keyboard_mapper()->active_settings_params,
+		path,
+		"keyboard-mapper-preset",
+		_PROGRAM_NA);
+	
+	return 0;
+}
+
+/**
+*   @brief Save Preset parametrs as a XML file.
+*   @param  file path	patch file full path string
+*	@return 0 if done; -1 otherwise 
+*/	
+int mod_synth_save_keyboard_mapper_preset_file(std::string path)
+{
+	return ModSynth::get_instance()->get_keyboard_mapper()->save_instrument_active_settings(path, "keyboard-mapper-preset");
+}
+
 void PatchsHandler::register_callback_get_active_instruments_names_list(func_ptr_vector_std_string_void_t ptr)
 {
 	callback_get_active_instruments_names_list_ptr = ptr;
@@ -602,7 +717,7 @@ int PatchsHandler::create_active_instruments_settings_files(vector<string> inst_
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY)
 		{
-			// TODO:
+			mod_synth_save_string_synth_patch_file(settings_file_path);
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY)
 		{
@@ -790,7 +905,11 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 			}
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY)
 			{
-				
+				ModSynth::get_instance()->get_string_synth()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_string_synth()->active_settings_params,
+					settings_file_path,
+					"string-synth-preset",
+					_STRING_SYNTH_PROGRAM_21);
 			}
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY)
 			{

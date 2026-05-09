@@ -24,7 +24,7 @@
 
 #include "../LibAPI/types.h"
 
-#define MAX_NUM_OF_MODULES 7
+#define MAX_NUM_OF_MODULES 16
 
 #define _MAX_NUM_OF_MIDI_DEVICES 32
 #define _MAX_NUM_OF_MIDI_DEVICE_PORTS 32

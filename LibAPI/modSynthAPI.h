@@ -842,6 +842,16 @@ void mod_synth_panic_action();
  */
 void mod_synth_adj_synt_panic_action();
 
+void mod_synth_set_keyboard_mapper_zone_octave_offset(int zone, int offset);
+void mod_synth_set_keyboard_mapper_zone_midi_channel(int zone, int channel);
+void mod_synth_set_keyboard_mapper_zone_enabled(int zone, bool enabled);
+void mod_synth_set_keyboard_mapper_split_point_note(int note);
+void mod_synth_set_keyboard_mapper_bypass_on(bool bypass);
+
+int mod_synth_get_keyboard_mapper_zone_octave_offset(int zone);
+int mod_synth_get_keyboard_mapper_zone_midi_channel(int zone);
+bool mod_synth_get_keyboard_mapper_bypass_on();
+int mod_synth_get_keyboard_mapper_split_point_note();
 
 
 

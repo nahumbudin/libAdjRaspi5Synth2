@@ -180,11 +180,13 @@
     <ClCompile Include="Instrument\instrumentControlBoxHandler.cpp" />
     <ClCompile Include="Instrument\instrumentFluidSynth.cpp" />
     <ClCompile Include="Instrument\instrumentHammondOrgan.cpp" />
+    <ClCompile Include="Instrument\InstrumentKeyboardMapper.cpp" />
     <ClCompile Include="Instrument\instrumentMidiMapper.cpp" />
     <ClCompile Include="Instrument\instrumentMidiMixer.cpp" />
     <ClCompile Include="Instrument\instrumentMidiPlayer.cpp" />
     <ClCompile Include="Instrument\instrumentMidiPlayerPlaybackThread.cpp" />
     <ClCompile Include="Instrument\instrumentsManager.cpp" />
+    <ClCompile Include="Instrument\instrumentStringSynthesizer.cpp" />
     <ClCompile Include="Instrument\midiMixerPresets.cpp" />
     <ClCompile Include="Jack\jackAudioClients.cpp" />
     <ClCompile Include="Jack\JackConfigurationFile.cpp" />
@@ -292,11 +294,13 @@
     <ClInclude Include="Instrument\instrumentControlBoxHandler.h" />
     <ClInclude Include="Instrument\instrumentFluidSynth.h" />
     <ClInclude Include="Instrument\instrumentHammondOrgan.h" />
+    <ClInclude Include="Instrument\InstrumentKeyboardMapper.h" />
     <ClInclude Include="Instrument\instrumentMidiMapper.h" />
     <ClInclude Include="Instrument\instrumentMidiPlayer.h" />
     <ClInclude Include="Instrument\instrumentMidiPlayerPlaybackThread.h" />
     <ClInclude Include="Instrument\instrumentsManager.h" />
     <ClInclude Include="Instrument\instrumentMidiMixer.h" />
+    <ClInclude Include="Instrument\instrumentStringSynth.h" />
     <ClInclude Include="Jack\jackAudioClients.h" />
     <ClInclude Include="Jack\JackConfigurationFile.h" />
     <ClInclude Include="Jack\jackConnections.h" />
@@ -315,6 +319,7 @@
     <ClInclude Include="LibAPI\patch.h" />
     <ClInclude Include="LibAPI\Scales.h" />
     <ClInclude Include="LibAPI\settingsApi.h" />
+    <ClInclude Include="LibAPI\stringSynthesizer.h" />
     <ClInclude Include="LibAPI\synthesizer.h" />
     <ClInclude Include="LibAPI\types.h" />
     <ClInclude Include="LibAPI\utils.h" />

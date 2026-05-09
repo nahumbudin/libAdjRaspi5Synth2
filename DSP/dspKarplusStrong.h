@@ -1,11 +1,14 @@
 /**
 *	@file		dspKarplusStrong.h
 *	@author		Nahum Budin
-*	@date		21-Seo-2024
-*	@version	1.2 
-*					1. Code refactoring and notaion. 
+*	@date		4-May-2026
+*	@version	1.3 
+*					1. Add Character Variations Control. 
+*					2. Add pluck damping and pluck damping variation control. (was not working properly in the old version).
 *					
-*	@History	23-Jan-2021 1.1
+*	@History	21-Sep-2024 1.2
+*					Code refactoring and notaion.
+*				23-Jan-2021 1.1
 *					1. Code refactoring and notaion. 
 *					2. Add audio sample-rate settings
 *				2-Nov-2019	1.0 (revised version from old libAdjHeartRaspiFlSynthMultiCore_3_1)

@@ -200,6 +200,8 @@ Error - must be no more than 64
 #define _MSO_MAX_SYMETRY			95
 #define _MSO_MIN_SYMETRY			5
 	
+#define _PROGRAM_NA					-1  // Midi program is not applicable
+	
 #define _PROGRAM_0					0
 #define _PROGRAM_1					1
 #define _PROGRAM_2					2
@@ -221,11 +223,12 @@ Error - must be no more than 64
 #define _PROGRAM_18					18
 	
 #define _HAMMOND_ORGAN_PROGRAM_20	20
+#define _STRING_SYNTH_PROGRAM_21	21
 	
-#define _SYNTH_MAX_NUM_OF_PROGRAMS		_HAMMOND_ORGAN_PROGRAM_20 + 1
-#if (_SYNTH_MAX_NUM_OF_PROGRAMS > _HAMMOND_ORGAN_PROGRAM_20 + 1)
+#define _SYNTH_MAX_NUM_OF_PROGRAMS		_STRING_SYNTH_PROGRAM_21 + 1
+#if (_SYNTH_MAX_NUM_OF_PROGRAMS > _STRING_SYNTH_PROGRAM_21 + 1)
 	Error -
-	must be no more than _HAMMOND_ORGAN_PROGRAM_20 + 1
+	must be no more than _STRING_SYNTH_PROGRAM_21 + 1
 #endif
 		
 #define _SYNTH_NUM_OF_PROGRAMS						_SYNTH_MAX_NUM_OF_PROGRAMS
@@ -312,6 +315,7 @@ Error - must be no more than 64
 #define _POLYPHONIC_MIXER_EVENT						95
 	
 #define _HAMMOND_ORGAN_EVENT						100
+#define _STRING_SYNTH_EVENT							101
 
 #define _OSC_PARAM_WAVEFORM							110		
 	
@@ -596,7 +600,8 @@ Error - must be no more than 64
 #define _KARPLUS_STRONG_ON_DECAY					806
 #define _KARPLUS_STRONG_OFF_DECAY					807
 #define _KARPLUS_STRONG_EXCITATION_WAVEFORM_VARIATIONS 808
-#define _KARPLUS_STRONG_ENABLE						809	
+#define _KARPLUS_STRONG_ENABLE						809
+#define _KARPLUS_STRONG_CHARACTER_VARIATIONS		810
 	
 #define _KARPLUS_STRONG_SEND_1						812
 #define _KARPLUS_STRONG_SEND_2						813

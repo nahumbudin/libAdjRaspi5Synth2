@@ -32,6 +32,10 @@ InstrumentHammondOrgan::InstrumentHammondOrgan(AdjSynth *adj_synth, _settings_pa
 	leslie_level = 0;
 	send_filter_1 = 40;
 	send_filter_2 = 40;
+
+	detune_octave = 0;
+	detune_semitones = 0;
+	detune_cents = 0;
 	
 	// Use LFO 6 for the Leslie effect modulation. TODO: allocate a dedicated LFO?
 	// Set for all allocated MIDI channels.

@@ -170,6 +170,17 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 			
 			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.off_decay");
 		}
+		else if (eventid == _KARPLUS_STRONG_CHARACTER_VARIATIONS)
+		{
+			adj_synth_settings_manager->set_int_param_value
+				(params,
+				"adjsynth.karplus_synth.character_variations",
+				val,
+				_EXEC_CALLBACK,
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.character_variations");
+		}
 		else if (eventid == _KARPLUS_STRONG_SEND_1)
 		{
 			adj_synth_settings_manager->set_int_param_value

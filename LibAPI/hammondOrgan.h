@@ -52,3 +52,4 @@
 
 int mod_synth_set_hammond_organ_param_value(int mod_id, int param_id, int value);
 int mod_synth_get_hammond_organ_param_value(int mod_id, int param_id);
+

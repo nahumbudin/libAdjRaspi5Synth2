@@ -300,3 +300,58 @@ int set_program_karplus_synth_off_decay_cb(int dec, int prog)
 
 	return res;
 }
+
+int set_program_karplus_synth_character_variations_cb(int var, int prog)
+{
+	AdjSynthPrograms *synth_program = AdjSynth::get_instance()->synth_program[prog];
+	int res = -1;
+	if (synth_program != NULL)
+	{
+		ModSynth::settings_handler_mutex.unlock();
+		res = synth_program->program_settings_manager->set_int_param_value(
+			synth_program->get_active_program_preset_params(),
+			"adjsynth.karplus_synth.character_variations",
+			var,
+			_SET_VALUE,
+			prog);
+		ModSynth::settings_handler_mutex.lock();
+	}
+	
+	return res;
+}
+int set_program_karplus_synth_tune_offset_oct_cb(int oct, int prog)
+{
+	AdjSynthPrograms *synth_program = AdjSynth::get_instance()->synth_program[prog];
+	int res = -1;
+	if (synth_program != NULL)
+	{
+		ModSynth::settings_handler_mutex.unlock();
+		res = synth_program->program_settings_manager->set_int_param_value(
+			synth_program->get_active_program_preset_params(),
+			"adjsynth.karplus_synth.tune_offset_oct",
+			oct,
+			_SET_VALUE,
+			prog);
+		ModSynth::settings_handler_mutex.lock();
+	}
+	
+	return res;
+}
+int set_program_karplus_synth_tune_offset_semitones_cb(int smt, int prog)
+{
+	AdjSynthPrograms *synth_program = AdjSynth::get_instance()->synth_program[prog];
+	int res = -1;
+	if (synth_program != NULL)
+	{
+		ModSynth::settings_handler_mutex.unlock();
+		res = synth_program->program_settings_manager->set_int_param_value(
+			synth_program->get_active_program_preset_params(),
+			"adjsynth.karplus_synth.tune_offset_semitones",
+			smt,
+			_SET_VALUE,
+			prog);
+		ModSynth::settings_handler_mutex.lock();
+	}
+	
+	return res;
+}

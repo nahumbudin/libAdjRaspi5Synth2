@@ -48,7 +48,8 @@ typedef enum
 	midi_mixer,
 	adj_midi_mapper,
 	adj_ext_midi_interface,
-	adj_keyboard_control
+	adj_keyboard_control,
+	adj_keyboard_mapper
 
 } en_instruments_ids_t;
 

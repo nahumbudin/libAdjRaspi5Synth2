@@ -7,7 +7,7 @@
 #define _FLUID_DEFAULT_SOUNDFONT_FILE "/home/pi/AdjRaspi5Synth/SoundFonts/FluidR3_GM.sf2"
 #define _FLUID_DEFAULT_SOUNDFONT_DIR "/home/pi/AdjRaspi5Synth/SoundFonts"
 
-#define _FLUID_PRESETS_FILES_DEFAULT_DIR "/home/pi/AdjRaspi5Synth/Settings/Fluid"
+#define _FLUID_PRESETS_FILES_DEFAULT_DIR "/home/pi/AdjRaspi5Synth/Presets/Fluid"
 
 #define _PATCHES_FILES_DEFAULT_DIR "/home/pi/AdjRaspi5Synth/Patches"
 

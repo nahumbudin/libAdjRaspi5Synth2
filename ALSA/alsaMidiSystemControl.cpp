@@ -894,6 +894,11 @@ void AlsaMidiSysControl::get_midi_input_client_name_string(int cln, std::string 
 		{
 			*name = _ALSA_NAME_CLIENT_MIDI_MAPPER_STR;
 		}
+		else if ((midi_keyboard_mapper_client_in_name != "") &&
+				 (*name == midi_keyboard_mapper_client_in_name))
+		{
+			*name = _ALSA_NAME_CLIENT_MIDI_KEYBOARD_MAPPER_STR;
+		}
 	}
 }
 
@@ -985,6 +990,11 @@ int AlsaMidiSysControl::get_midi_input_client_id(std::string name, bool replace)
 		else if (client_name == _ALSA_NAME_CLIENT_MIDI_MAPPER_STR)
 		{
 			client_name = midi_mapper_client_in_name;
+			replaced = true;
+		}
+		else if (client_name == _ALSA_NAME_CLIENT_MIDI_KEYBOARD_MAPPER_STR)
+		{
+			client_name = midi_keyboard_mapper_client_in_name;
 			replaced = true;
 		}
 		

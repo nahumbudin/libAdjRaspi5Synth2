@@ -166,7 +166,7 @@ int AdjSynth::set_default_preset_parameters_kps(_settings_params_t *params, int 
 	res |= adj_synth_settings_manager->set_int_param(
 		params,
 		"adjsynth.karplus_synth.send_filter_1",
-		0,
+		40,
 		100,
 		0,
 		_ADJ_SYNTH_PRESET_PARAMS,
@@ -182,7 +182,7 @@ int AdjSynth::set_default_preset_parameters_kps(_settings_params_t *params, int 
 	res |= adj_synth_settings_manager->set_int_param(
 		params,
 		"adjsynth.karplus_synth.send_filter_2",
-		0,
+		40,
 		100,
 		0,
 		_ADJ_SYNTH_PRESET_PARAMS,
@@ -222,6 +222,54 @@ int AdjSynth::set_default_preset_parameters_kps(_settings_params_t *params, int 
 		0,
 		num_of_voices - 1,
 		set_voice_block_karplus_synth_off_decay_cb,
+		_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL |
+			_SET_TYPE | _SET_BLOCK_START_INDEX |
+			_SET_BLOCK_STOP_INDEX | _SET_CALLBACK | _SET_BLOCK_CALLBACK,
+		prog);
+	
+	res |= adj_synth_settings_manager->set_int_param(
+		params,
+		"adjsynth.karplus_synth.character_variations",
+		50,
+		100,
+		0,
+		_ADJ_SYNTH_PRESET_PARAMS,
+		set_program_karplus_synth_character_variations_cb,
+		0,
+		num_of_voices - 1,
+		NULL, // set_voice_block_karplus_synth_character_variations_cb,
+		_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL |
+			_SET_TYPE | _SET_BLOCK_START_INDEX |
+			_SET_BLOCK_STOP_INDEX | _SET_CALLBACK | _SET_BLOCK_CALLBACK,
+		prog);
+	
+	res |= adj_synth_settings_manager->set_int_param(
+		params,
+		"adjsynth.karplus_synth.tune_offset_oct",
+		0,
+		_OSC_DETUNE_MAX_OCTAVE,
+		_OSC_DETUNE_MIN_OCTAVE,
+		_ADJ_SYNTH_PRESET_PARAMS,
+		set_program_osc_1_tune_offset_oct_cb,
+		0,
+		num_of_voices - 1,
+		NULL, //set_voice_block_osc_1_tune_offset_oct_cb,
+		_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL |
+			_SET_TYPE | _SET_BLOCK_START_INDEX |
+			_SET_BLOCK_STOP_INDEX | _SET_CALLBACK | _SET_BLOCK_CALLBACK,
+		prog);
+
+	res |= adj_synth_settings_manager->set_int_param(
+		params,
+		"adjsynth.karplus_synth.tune_offset_semitones",
+		0,
+		_OSC_DETUNE_MAX_SEMITONES,
+		_OSC_DETUNE_MIN_SEMITONES,
+		_ADJ_SYNTH_PRESET_PARAMS,
+		set_program_osc_1_tune_offset_semitones_cb,
+		0,
+		num_of_voices - 1,
+		NULL, // set_voice_block_osc_1_tune_offset_semitones_cb,
 		_SET_VALUE | _SET_MAX_VAL | _SET_MIN_VAL |
 			_SET_TYPE | _SET_BLOCK_START_INDEX |
 			_SET_BLOCK_STOP_INDEX | _SET_CALLBACK | _SET_BLOCK_CALLBACK,
