@@ -56,6 +56,8 @@ class AdjSynthPrograms
 		AudioPolyMixer *audio_poly_mixer = NULL);
 	~AdjSynthPrograms();
 	
+	void update_all_voices_pad_wavetable();
+	
 	/* Get the program number */
 	int get_program_num();
 
@@ -126,6 +128,7 @@ class AdjSynthPrograms
 	
 
   private:
+	
 	/* Mange the program settings */
 	
 

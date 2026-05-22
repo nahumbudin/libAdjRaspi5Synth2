@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <atomic>
 
 #include "../DSP/dspWavetable.h"
 #include "../LibAPI/audio.h"
@@ -37,6 +38,8 @@ class SynthPADcreator
 public:
 	SynthPADcreator(Wavetable *wavetable_buff = NULL, int size = 0, int samp_rate = _DEFAULT_SAMPLE_RATE);
 	~SynthPADcreator();
+	
+	Wavetable* get_active_wavetable() const;
 	
 	int set_sample_rate(int samp_rate);
 	int get_sample_rate();
@@ -83,6 +86,11 @@ public:
 	
 	
 private:
+	
+	Wavetable *wavetable; // Keep for backward compatibility
+	Wavetable *buffer_a; // First buffer
+	Wavetable *buffer_b; // Second buffer
+	std::atomic<Wavetable*> active_buffer; // Atomic pointer to active buffer
 
 	bool external_wavetable;
 
@@ -97,6 +105,8 @@ private:
 		const float *profile,
 		int profile_size,
 		float bw_scale);
+	
+	void update_all_voices_wavetable_pointer(Wavetable *new_wt);
 
 	//	static SynthPADcreator *synthPADcreator;
 	
@@ -112,7 +122,7 @@ private:
 	/*static*/ float profile[profile_size] = { 0 };
 
 	float *spectrum;
-	Wavetable *wavetable;
+	//Wavetable *wavetable;
 	
 	int sample_rate;
 };

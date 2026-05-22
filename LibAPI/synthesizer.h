@@ -224,11 +224,12 @@ Error - must be no more than 64
 	
 #define _HAMMOND_ORGAN_PROGRAM_20	20
 #define _STRING_SYNTH_PROGRAM_21	21
+#define _PAD_SYNTH_PROGRAM_22		22
 	
-#define _SYNTH_MAX_NUM_OF_PROGRAMS		_STRING_SYNTH_PROGRAM_21 + 1
-#if (_SYNTH_MAX_NUM_OF_PROGRAMS > _STRING_SYNTH_PROGRAM_21 + 1)
+#define _SYNTH_MAX_NUM_OF_PROGRAMS		_PAD_SYNTH_PROGRAM_22 + 1
+#if (_SYNTH_MAX_NUM_OF_PROGRAMS > _PAD_SYNTH_PROGRAM_22 + 1)
 	Error -
-	must be no more than _STRING_SYNTH_PROGRAM_21 + 1
+	must be no more than _PAD_SYNTH_PROGRAM_22 + 1
 #endif
 		
 #define _SYNTH_NUM_OF_PROGRAMS						_SYNTH_MAX_NUM_OF_PROGRAMS
@@ -316,6 +317,7 @@ Error - must be no more than 64
 	
 #define _HAMMOND_ORGAN_EVENT						100
 #define _STRING_SYNTH_EVENT							101
+#define _PAD_SYNTH_EVENT							102
 
 #define _OSC_PARAM_WAVEFORM							110		
 	

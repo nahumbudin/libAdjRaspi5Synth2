@@ -853,6 +853,47 @@ int mod_synth_get_keyboard_mapper_zone_midi_channel(int zone);
 bool mod_synth_get_keyboard_mapper_bypass_on();
 int mod_synth_get_keyboard_mapper_split_point_note();
 
+void mod_synth_disable_pad_synth_instrument();
+void mod_synth_enable_pad_synth_instrument();
+
+// In patch.h
+//int mod_synth_save_pad_synthesizer_preset_file(string file_path);
+//int mod_synth_load_pad_synthesizer_preset_file(string file_path);
+
+
+int mod_synth_get_pad_synth_active_env_mod_attack();
+int mod_synth_get_pad_synth_active_env_mod_decay();
+int mod_synth_get_pad_synth_active_env_mod_sustain();
+int mod_synth_get_pad_synth_active_env_mod_release();
+
+int mod_synth_get_pad_synth_int_param(int paramid);
+
+/**
+*   @brief  Returns a pointer to the PAD synth base harmony shape vector.
+*   @param  None.
+*   @return float*  a pointer to the PAD synth base harmony shape vector
+*/
+float *mod_synth_get_pad_synth_base_harmony_profile();
+/**
+*   @brief  Returns the PAD synth base harmony shape vector number of elements.
+*   @param  None.
+*   @return int  the PAD synth base harmony shape vector  number of elements.
+*/
+int mod_synth_get_pad_synth_base_harmony_profile_size();
+/**
+*   @brief  Returns a pointer to the PAD synth spectrum vector.
+*   @param  None.
+*   @return float*  a pointer to the PAD synth spectrum vector
+*/
+float *mod_synth_get_pad_synth_spectrum();
+/**
+*   @brief  Returns the PAD synth spectrum vector number of elements.
+*   @param  None.
+*   @return int  the PAD synth spectrum vector  number of elements.
+*/
+int mod_synth_get_pad_synth_spectrum_size();
+
+int mod_synth_pad_synth_event_int(int padid, int eventid, int val);
 
 
 /**

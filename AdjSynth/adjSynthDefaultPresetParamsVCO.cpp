@@ -32,7 +32,7 @@ int AdjSynth::set_default_preset_parameters_vco(_settings_params_t *params, int 
 	res = adj_synth_settings_manager->set_bool_param(
 		params,
 		"adjsynth.osc1.enabled",
-		true,
+		false,
 		_ADJ_SYNTH_PRESET_PARAMS,
 		set_program_osc_1_enabled_cb,
 		0,

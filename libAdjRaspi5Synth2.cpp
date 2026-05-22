@@ -61,6 +61,7 @@
 #include "./Instrument/instrumentAnalogSynth.h"
 #include "./Instrument/instrumentHammondOrgan.h"
 #include "./Instrument/instrumentStringSynth.h"
+#include "./Instrument/instrumentPADsynthesizer.h"
 #include "./Instrument/InstrumentKeyboardMapper.h"
 
 #include "./utils/xmlFiles.h"
@@ -400,7 +401,7 @@ int mod_synth_connect_jack_connection(
 		(out_client_name == _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY) ||
 		(out_client_name == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY) ||
 		(out_client_name == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY) ||
-		(out_client_name == _INSTRUMENT_NAME_PADSYNTH_SYNTH_STR_KEY))
+		(out_client_name == _INSTRUMENT_NAME_PAD_SYNTH_STR_KEY))
 	{
 		is_analog_synth = true;
 
@@ -1046,6 +1047,127 @@ void mod_synth_set_keyboard_mapper_split_point_note(int note)
 int mod_synth_get_keyboard_mapper_split_point_note()
 {
 	return ModSynth::get_instance()->get_keyboard_mapper()->get_split_point_note();
+}
+
+void mod_synth_disable_pad_synth_instrument()
+{
+	
+}
+
+void mod_synth_enable_pad_synth_instrument()
+{
+	
+}
+
+// In patch.cpp
+//int mod_synth_save_pad_synthesizer_preset_file(string file_path)
+//{
+//	
+//}
+
+//int mod_synth_load_pad_synthesizer_preset_file(string file_path)
+//{
+//	
+//}
+
+
+int mod_synth_get_pad_synth_active_env_mod_attack()
+{
+	return ModSynth::get_instance()->get_pad_synth()->get_int_parameter(
+		_PAD_SYNTH_EVENT, _MOD_ADSR_ATTACK);
+}
+
+int mod_synth_get_pad_synth_active_env_mod_decay()
+{
+	return ModSynth::get_instance()->get_pad_synth()->get_int_parameter(
+		_PAD_SYNTH_EVENT, _MOD_ADSR_DECAY);
+}
+
+int mod_synth_get_pad_synth_active_env_mod_sustain()
+{
+	return ModSynth::get_instance()->get_pad_synth()->get_int_parameter(
+		_PAD_SYNTH_EVENT, _MOD_ADSR_SUSTAIN);
+}
+
+int mod_synth_get_pad_synth_active_env_mod_release()
+{
+	return ModSynth::get_instance()->get_pad_synth()->get_int_parameter(
+		_PAD_SYNTH_EVENT, _MOD_ADSR_RELEASE);
+}
+
+int mod_synth_get_pad_synth_int_param(int paramid)
+{
+	return ModSynth::get_instance()->get_pad_synth()->get_int_parameter(
+		_PAD_SYNTH_EVENT, paramid);
+}
+
+float *mod_synth_get_pad_synth_base_harmony_profile()
+{
+	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
+	
+	return AdjSynth::get_instance()->synth_program[_PAD_SYNTH_PROGRAM_22]->synth_pad_creator->get_profile_data(); 
+}
+
+int mod_synth_get_pad_synth_base_harmony_profile_size()
+{
+	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
+	
+	return AdjSynth::get_instance()->synth_program[_PAD_SYNTH_PROGRAM_22]->synth_pad_creator->get_profile_size(); 
+}
+
+float *mod_synth_get_pad_synth_spectrum()
+{
+	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
+	
+	return AdjSynth::get_instance()->synth_program[_PAD_SYNTH_PROGRAM_22]->synth_pad_creator->get_spectrum_data();
+}
+
+int mod_synth_get_pad_synth_spectrum_size()
+{
+	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
+	
+	return AdjSynth::get_instance()->synth_program[_PAD_SYNTH_PROGRAM_22]->synth_pad_creator->get_spectrum_size();
+}
+
+int mod_synth_pad_synth_event_int(int padid, int eventid, int val)
+{
+	// No need to call the instrument event handler since the pad synth is not a real instrument 
+	// but rather a sound design tool, so we can directly call the AdjSynth event handler for it,
+	// and point out the the PAD instrument MIDI program and associated settings.
+	
+	// TODO: implement also for the string synth and the hammon organ.
+	
+	// The Amp modulation controls
+	if ((eventid == _MOD_LFO_RATE) || (eventid == _MOD_LFO_SYMMETRY) || (eventid == _MOD_LFO_WAVEFORM))
+	{
+		return AdjSynth::get_instance()->modulator_event_int(
+			_LFO_1_EVENT,
+			eventid,
+			val,
+			ModSynth::get_instance()->get_pad_synth()->active_settings_params,
+			_PAD_SYNTH_PROGRAM_22);
+	}
+	else if ((eventid == _MOD_ADSR_ATTACK) || (eventid == _MOD_ADSR_DECAY) ||
+		(eventid == _MOD_ADSR_SUSTAIN) || (eventid == _MOD_ADSR_RELEASE))
+	{
+		return AdjSynth::get_instance()->modulator_event_int(
+			_ENV_1_EVENT,
+			eventid,
+			val,
+			ModSynth::get_instance()->get_pad_synth()->active_settings_params,
+			_PAD_SYNTH_PROGRAM_22);
+	}
+	else 
+	{
+		return AdjSynth::get_instance()->pad_event_int(
+			padid,
+			eventid,
+			val,
+			ModSynth::get_instance()->get_pad_synth()->active_settings_params,
+			_PAD_SYNTH_PROGRAM_22);
+	}
+	
+	return -1;
 }
 
 
@@ -1843,6 +1965,11 @@ int mod_synth_save_string_synth_patch_file(string path)
 	return mod_synthesizer->get_string_synth()->save_instrument_active_settings(path, "string-synth-preset");
 }
 
+int mod_synth_save_pad_synth_patch_file(string path)
+{
+	return mod_synthesizer->get_pad_synth()->save_instrument_active_settings(path, "pad-synthesizer-preset");
+}
+
 
 std::string mod_synth_get_program_patch_name(int prog)
 {
@@ -2131,6 +2258,7 @@ void mod_synth_midi_mixer_set_channel_pan_mod_level(int chan, int lvl)
 		case en_instruments_ids_t::adj_analog_synth:
 		case en_instruments_ids_t::adj_hammond_organ:
 		case en_instruments_ids_t::adj_karplusstrong_string_synth:
+		case en_instruments_ids_t::adj_pad_synth:
 			mod_synthesizer->midi_mapper->set_midi_channel_pan_mod_lfo_level(chan, lvl);
 			break;
 		
@@ -2164,6 +2292,7 @@ void mod_synth_midi_mixer_set_channel_pan_mod_lfo(int chan, int lfo)
 	case en_instruments_ids_t::adj_analog_synth:
 	case en_instruments_ids_t::adj_hammond_organ:
 	case en_instruments_ids_t::adj_karplusstrong_string_synth:
+	case en_instruments_ids_t::adj_pad_synth:
 		mod_synthesizer->midi_mapper->set_midi_channel_pan_mod_lfo(chan, lfo);
 		
 		break;
@@ -2198,6 +2327,7 @@ void mod_synth_midi_mixer_set_channel_send_level(int chan, int snd)
 	case en_instruments_ids_t::adj_analog_synth:
 	case en_instruments_ids_t::adj_hammond_organ:
 	case en_instruments_ids_t::adj_karplusstrong_string_synth:
+	case en_instruments_ids_t::adj_pad_synth:
 		mod_synthesizer->midi_mapper->set_midi_channel_send(chan, snd);
 		break;
 		

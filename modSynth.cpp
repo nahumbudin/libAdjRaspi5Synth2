@@ -40,6 +40,7 @@
 #include "./Instrument/instrumentHammondOrgan.h"
 #include "./Instrument/instrumentStringSynth.h"
 #include "./Instrument/instrumentAnalogSynth.h"
+#include "./Instrument/instrumentPADsynthesizer.h"
 
 #include "./Instrument/instrumentMidiPlayer.h"
 #include "./Instrument/instrumentMidiMapper.h"
@@ -192,6 +193,13 @@ ModSynth::ModSynth()
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY, 
 		string_synth);
 	string_synth->use_external_settings(adj_synth->synth_program[_STRING_SYNTH_PROGRAM_21]->active_preset_params);
+	
+	// A PAD Synthesizer Instrument
+	pad_synth = new InstrumentPADsynthesizer(adj_synth,
+		adj_synth->synth_program[_PAD_SYNTH_PROGRAM_22]->active_preset_params);
+	instruments_manager->add_instrument(_INSTRUMENT_NAME_PAD_SYNTH_STR_KEY, 
+		pad_synth);
+	pad_synth->use_external_settings(adj_synth->synth_program[_PAD_SYNTH_PROGRAM_22]->active_preset_params);
 	
 	// An Analog Synth Instrument (implements all the non-sampled based synthesis methods, 
 	// including additive, subtractive, Karplus-Strong, PADsynth, etc.)
@@ -651,6 +659,16 @@ InstrumentHammondOrgan *ModSynth::get_hammond_organ()
 InstrumentStringSynth *ModSynth::get_string_synth()
 {
 	return string_synth;
+}
+
+/**
+*   @brief  retruns a pointer to the PAD Synthesizer instrument object
+*   @param  none
+*   @return a pointer to the InstrumentPADsynthesizer instrument object
+*/
+InstrumentPADsynthesizer *ModSynth::get_pad_synth()
+{
+	return pad_synth;
 }
 
 /**

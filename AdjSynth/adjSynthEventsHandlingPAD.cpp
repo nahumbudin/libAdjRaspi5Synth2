@@ -400,8 +400,13 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 	else if (eventid == _PAD_GENERATE)
 	{
 		//		AdjSynth::get_instance()->synthPADcreator->getprofile();
-		synth_program[program]->synth_pad_creator->generate_wavetable(synth_program[program]->program_wavetable);
-
+		//synth_program[program]->synth_pad_creator->generate_wavetable(synth_program[program]->program_wavetable);
+		
+		// Pass NULL to use internal double-buffered wavetables
+		synth_program[program]->synth_pad_creator->generate_wavetable(NULL);
+	
+		// Update all voices with new wavetable pointer after generation
+		synth_program[program]->update_all_voices_pad_wavetable();
 	}
 	else if (eventid == _PAD_SHAPE_CUTOFF)
 	{

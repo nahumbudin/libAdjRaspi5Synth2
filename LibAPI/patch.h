@@ -29,6 +29,9 @@ int mod_synth_save_hammond_preset_file(std::string path);
 int mod_synth_load_string_synthesizer_preset_file(std::string path);
 int mod_synth_save_string_synthesizer_preset_file(std::string path);
 
+int mod_synth_load_pad_synthesizer_preset_file(std::string path);
+int mod_synth_save_pad_synthesizer_preset_file(std::string path);
+
 int mod_synth_load_keyboard_mapper_preset_file(std::string path);
 int mod_synth_save_keyboard_mapper_preset_file(std::string path);
 

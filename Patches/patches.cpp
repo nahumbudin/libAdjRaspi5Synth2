@@ -28,6 +28,7 @@
 #include "../Instrument/instrumentMidiMapper.h"
 #include "../Instrument/instrumentHammondOrgan.h"
 #include "../Instrument/instrumentStringSynth.h"
+#include "../Instrument/instrumentPADsynthesizer.h"
 #include "../Instrument/InstrumentKeyboardMapper.h"
 #include "../utils/utils.h"
 #include "../LibAPI/connections.h"
@@ -575,6 +576,22 @@ int mod_synth_save_string_synthesizer_preset_file(std::string path)
 	return ModSynth::get_instance()->get_string_synth()->save_instrument_active_settings(path, "string-synth-preset");
 }
 
+int mod_synth_load_pad_synthesizer_preset_file(std::string path)
+{
+	ModSynth::get_instance()->get_pad_synth()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_pad_synth()->active_settings_params,
+		path,
+		"pad-synthesizer-preset",
+		_PAD_SYNTH_PROGRAM_22);
+	
+	return 0;
+}
+
+int mod_synth_save_pad_synthesizer_preset_file(std::string path)
+{
+	return ModSynth::get_instance()->get_pad_synth()->save_instrument_active_settings(path, "pad-synthesizer-preset");
+}
+
 /**
 *   @brief Load Preset parametrs as a XML file.
 *   @param  file path	patch file full path string
@@ -723,9 +740,9 @@ int PatchsHandler::create_active_instruments_settings_files(vector<string> inst_
 		{
 			// TODO:
 		}
-		else if (instrument_name == _INSTRUMENT_NAME_PADSYNTH_SYNTH_STR_KEY)
+		else if (instrument_name == _INSTRUMENT_NAME_PAD_SYNTH_STR_KEY)
 		{
-			// TODO:
+			mod_synth_save_pad_synth_patch_file(settings_file_path);
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY)
 		{
@@ -915,9 +932,13 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 			{
 				
 			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_PADSYNTH_SYNTH_STR_KEY)
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_PAD_SYNTH_STR_KEY)
 			{
-				
+				ModSynth::get_instance()->get_pad_synth()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_pad_synth()->active_settings_params,
+					settings_file_path,
+					"pad-synthesizer-preset",
+					_PAD_SYNTH_PROGRAM_22);
 			}
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY)
 			{

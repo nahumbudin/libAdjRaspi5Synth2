@@ -70,6 +70,7 @@ class InstrumentControlBoxEventsHandler;
 class InstrumentMidiMixer;
 class InstrumentAnalogReverbration;
 class InstrumentStringSynth;
+class InstrumentPADsynthesizer;
 
 class AdjSynth;
 
@@ -111,6 +112,7 @@ public:
 	InstrumentAnalogSynth *get_analog_synth();
 	InstrumentHammondOrgan *get_hammond_organ();
 	InstrumentStringSynth *get_string_synth();
+	InstrumentPADsynthesizer *get_pad_synth();
 	InstrumentMidiPlayer *get_midi_player();
 	InstrumentMidiMapper *get_midi_mapper();
 	InstrumentMidiMixer *get_midi_mixer();
@@ -205,7 +207,6 @@ public:
 
 	I2Cinterface *i2c_interface_main_control;
 	I2Cinterface *i2c_interface_control_board;
-	;
 
 	MidiExtInterface *midi_ext_interface;
 	
@@ -217,6 +218,7 @@ public:
 	InstrumentHammondOrgan *hammond_organ;
 	InstrumentStringSynth *string_synth;
 	InstrumentAnalogSynth *analog_synth;
+	InstrumentPADsynthesizer *pad_synth;
 	
 	/* The modular synthesizer master volume level (0-100) */
 	int master_volume;

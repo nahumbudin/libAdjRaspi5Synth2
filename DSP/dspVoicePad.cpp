@@ -12,6 +12,8 @@
 *				version	1.0	9-Jun-2018 (modulators part of voice; no control blocks and connections.)
 *
 *	@brief		Synthesizer voice dsp processing - PAD Wavetable Generator Handling.
+*	
+*	https://zynaddsubfx.sourceforge.io/doc/PADsynth/PADsynth.htm
 *				
 */
 

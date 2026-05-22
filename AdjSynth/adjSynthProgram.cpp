@@ -71,14 +71,29 @@ AdjSynthPrograms::AdjSynthPrograms(
 		exit(1);
 	}
 
-	program_wavetable = new Wavetable();
-	program_wavetable->size = wt_size;
-	program_wavetable->samples = (float *)malloc(wt_size * sizeof(float));
+	//program_wavetable = new Wavetable();
+	//program_wavetable->size = wt_size;
+	//program_wavetable->samples = (float *)malloc(wt_size * sizeof(float));
+	
+	//synth_pad_creator = new SynthPADcreator(program_wavetable, program_wavetable->size);
 
-	synth_pad_creator = new SynthPADcreator(program_wavetable, program_wavetable->size);
-	program_wavetable->base_freq =
+	// CHANGED: Let PAD creator manage its own wavetable buffers
+	// Pass NULL so it creates internal double-buffered wavetables
+	synth_pad_creator = new SynthPADcreator(NULL, wt_size);
+	
+	// ⚠️ CHANGED: Get the active wavetable pointer from PAD creator
+	program_wavetable = synth_pad_creator->get_active_wavetable();
+	
+	// Set base frequency on the active wavetable
+	//program_wavetable->base_freq =
 		synth_pad_creator->set_base_frequency(program_wavetable, _PAD_DEFAULT_BASE_NOTE);
-	synth_pad_creator->generate_wavetable(program_wavetable);
+	
+	// Generate the initial wavetable - pass NULL to use internal buffers
+	//synth_pad_creator->generate_wavetable(program_wavetable);
+	synth_pad_creator->generate_wavetable(NULL);
+	
+	// Get updated pointer after generation
+	program_wavetable = synth_pad_creator->get_active_wavetable();
 
 	mso_wtab = new DSP_MorphingSinusOscWTAB();
 	mso_wtab->calc_segments_lengths(&mso_wtab->base_segment_lengths, &mso_wtab->base_segment_positions);
@@ -93,11 +108,36 @@ AdjSynthPrograms::AdjSynthPrograms(
 }
 AdjSynthPrograms::~AdjSynthPrograms()
 {
-	delete[] program_wavetable->samples;
-	delete program_wavetable;
+	// CHANGED: Don't delete wavetable - PAD creator owns it now
+	// delete[] program_wavetable->samples;  // REMOVE THIS
+	// delete program_wavetable;              // REMOVE THIS
+	
+	// PAD creator will clean up its own wavetables
+	delete synth_pad_creator;
 
 	delete[] mso_wtab->base_waveform_tab;
 	delete[] mso_wtab->morphed_waveform_tab;
+}
+
+void AdjSynthPrograms::update_all_voices_pad_wavetable()
+{
+	Wavetable *new_wt = synth_pad_creator->get_active_wavetable();
+	
+	// Iterate through all voices and update those assigned to this program
+	for (int v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		if (assigned_voices[v] == _VOICE_ASSIGNED)
+		{
+			SynthVoice *voice = AdjSynth::get_instance()->synth_voice[v];
+			if (voice != NULL)
+			{
+				voice->set_pad_wave_table(new_wt);
+			}
+		}
+	}
+	
+	// Update the cached pointer
+	program_wavetable = new_wt;
 }
 
 /* Get the program number */
@@ -172,7 +212,8 @@ int AdjSynthPrograms::assign_voice_with_preset_program_params(SynthVoice *voice,
 	// Set the MSO wavetable
 	voice->dsp_voice->mso_1->set_wavetable(mso_wtab);
 	// Set the PAD wavetable
-	voice->set_pad_wave_table(program_wavetable);
+	//voice->set_pad_wave_table(program_wavetable);
+	voice->set_pad_wave_table(synth_pad_creator->get_active_wavetable());
 
 	// Add the voice to the assigned voices list
 	assigned_voices[voice_num] = _VOICE_ASSIGNED;

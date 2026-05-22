@@ -19,9 +19,10 @@
 DSP_WaveformTab::DSP_WaveformTab(int len)
 {
 	waveform_tab = NULL;
+	wtab_length = 0;
 	
+	// This now handles everything: validation, allocation, initialization
 	set_wtab_length(len);
-	init_waveform_table();
 }
 
 DSP_WaveformTab::~DSP_WaveformTab()
@@ -50,28 +51,59 @@ int DSP_WaveformTab::init_waveform_table()
 }
 
 /**
-*	@brief	Set WTAB length
+*	@brief	Set WTAB length and reallocate buffer
+*	@param len WTAB length - must be a power of 2 between _WTAB_MIN_LEN and _WTAB_MAX_LEN
+*	@return WTAB length
+*/
+/**
+*	@brief	Set WTAB length and reallocate buffer if needed
 *	@param len WTAB length - must be a power of 2 between _WTAB_MIN_LEN and _WTAB_MAX_LEN
 *	@return WTAB length
 */
 int DSP_WaveformTab::set_wtab_length(int len)
 {
-	wtab_length = len;
+	int old_length = wtab_length;
+	int new_length = len;
 	
 	// Length must be a power of 2
-	if (!(wtab_length & (wtab_length - 1)))
+	// Check: n & (n-1) == 0 only for powers of 2
+	if ((new_length & (new_length - 1)) != 0)  // NOT a power of 2
 	{
-		// not a power of 2 - next power of 2 
-		wtab_length = (int)pow(2, ceil(log(wtab_length) / log(2)));
+		// Round up to next power of 2
+		new_length = (int)pow(2, ceil(log(new_length) / log(2)));
 	}
 
-	if (wtab_length < _WTAB_MIN_LEN)
+	// Clamp to valid range
+	if (new_length < _WTAB_MIN_LEN)
 	{
-		wtab_length = _WTAB_MIN_LEN;
+		new_length = _WTAB_MIN_LEN;
 	}
-	else if (wtab_length > _WTAB_MAX_LEN)
+	else if (new_length > _WTAB_MAX_LEN)
 	{
-		wtab_length = _WTAB_MAX_LEN;
+		new_length = _WTAB_MAX_LEN;
+	}
+	
+	// Only reallocate if size actually changed
+	if (new_length != old_length)
+	{
+		// Deallocate old buffer
+		if (waveform_tab != NULL)
+		{
+			delete[] waveform_tab;
+			waveform_tab = NULL;
+		}
+		
+		// Update length
+		wtab_length = new_length;
+		
+		// Allocate new buffer
+		waveform_tab = new float[wtab_length];
+		
+		// Initialize to zero to avoid garbage data
+		for (int i = 0; i < wtab_length; i++)
+		{
+			waveform_tab[i] = 0.0f;
+		}
 	}
 	
 	return wtab_length;

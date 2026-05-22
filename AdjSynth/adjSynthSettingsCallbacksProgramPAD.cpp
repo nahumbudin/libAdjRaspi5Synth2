@@ -341,10 +341,16 @@ int set_program_pad_synth_quality_cb(int qlt, int prog)
 
 		ModSynth::settings_handler_mutex.lock();
 
-		// Don't just set the params that will be assign to new voices.
+		// Resize the wavetable buffers
 		AdjSynth::get_instance()->synth_program[prog]->synth_pad_creator->set_wavetable_length(
-			AdjSynth::get_instance()->synth_program[prog]->program_wavetable,
+			NULL,  // Pass NULL - uses internal buffers
 			qlt);
+		
+		// ⚠️ CRITICAL: Regenerate wavetable with new size
+		AdjSynth::get_instance()->synth_program[prog]->synth_pad_creator->generate_wavetable(NULL);
+		
+		// ⚠️ CRITICAL: Update all voice pointers to new wavetable
+		AdjSynth::get_instance()->synth_program[prog]->update_all_voices_pad_wavetable();
 	}
 
 	return res;
@@ -368,8 +374,11 @@ int set_program_pad_synth_base_note_cb(int bnot, int prog)
 
 		ModSynth::settings_handler_mutex.lock();
 
+		// Get current active wavetable
+		Wavetable *wt = AdjSynth::get_instance()->synth_program[prog]->synth_pad_creator->get_active_wavetable();
+		
 		AdjSynth::get_instance()->synth_program[prog]->synth_pad_creator->set_base_note(
-			AdjSynth::get_instance()->synth_program[prog]->program_wavetable,
+			wt,
 			bnot);
 	}
 

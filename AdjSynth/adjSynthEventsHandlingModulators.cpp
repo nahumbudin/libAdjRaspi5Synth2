@@ -58,7 +58,9 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				"adjsynth.env_1.attack",
 				val,
 				_EXEC_CALLBACK,
-				program);	
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_1.attack");
 		}
 		else if (modid == _ENV_2_EVENT)
 		{
@@ -68,6 +70,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_2.attack");
 		}
 		else if (modid == _ENV_3_EVENT)
 		{
@@ -77,6 +81,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_3.attack");
 		}
 		else if (modid == _ENV_4_EVENT)
 		{
@@ -86,6 +92,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_4.attack");
 		}
 		else if (modid == _ENV_5_EVENT)
 		{
@@ -95,6 +103,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_5.attack");
 		}
 		else if (modid == _ENV_6_EVENT)
 		{
@@ -104,6 +114,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_6.attack");
 		}
 		break;
 
@@ -116,6 +128,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_1.decay");
 		}
 		else if (modid == _ENV_2_EVENT)
 		{
@@ -125,6 +139,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_2.decay");
 		}
 		else if (modid == _ENV_3_EVENT)
 		{
@@ -134,6 +150,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_3.decay");
 		}
 		else if (modid == _ENV_4_EVENT)
 		{
@@ -143,6 +161,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_4.decay");
 		}
 		else if (modid == _ENV_5_EVENT)
 		{
@@ -152,6 +172,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_5.decay");
 		}
 		else if (modid == _ENV_6_EVENT)
 		{
@@ -161,6 +183,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_6.decay");
 		}
 		break;
 
@@ -242,6 +266,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_1.release");
 		}
 		else if (modid == _ENV_2_EVENT)
 		{
@@ -251,6 +277,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_2.release");
 		}
 		else if (modid == _ENV_3_EVENT)
 		{
@@ -260,6 +288,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_3.release");
 		}
 		else if (modid == _ENV_4_EVENT)
 		{
@@ -269,6 +299,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_4.release");
 		}
 		else if (modid == _ENV_5_EVENT)
 		{
@@ -278,6 +310,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_5.release");
 		}
 		else if (modid == _ENV_6_EVENT)
 		{
@@ -287,6 +321,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.env_6.release");
 		}
 		break;
 
@@ -301,6 +337,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_1->set_waveform(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_1.waveform");
 		}
 		else if (modid == _LFO_2_EVENT)
 		{
@@ -312,6 +350,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_2->set_waveform(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_2.waveform");
 		}
 		else if (modid == _LFO_3_EVENT)
 		{
@@ -323,6 +363,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_3->set_waveform(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_3.waveform");
 		}
 		else if (modid == _LFO_4_EVENT)
 		{
@@ -334,6 +376,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_4->set_waveform(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_4.waveform");
 		}
 		else if (modid == _LFO_5_EVENT)
 		{
@@ -345,6 +389,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_5->set_waveform(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_5.waveform");
 		}
 		else if (modid == _LFO_6_EVENT)
 		{
@@ -356,6 +402,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_6->set_waveform(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_6.waveform");
 		}
 		break;
 
@@ -370,6 +418,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			set_global_lfo_1_frequency(float(val));
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_1.rate");
 		}
 		else if (modid == _LFO_2_EVENT)
 		{
@@ -381,6 +431,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			set_global_lfo_2_frequency(float(val));
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_2.rate");
 		}
 		else if (modid == _LFO_3_EVENT)
 		{
@@ -392,6 +444,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			set_global_lfo_3_frequency(float(val));
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_3.rate");
 		}
 		else if (modid == _LFO_4_EVENT)
 		{
@@ -401,6 +455,10 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				val,
 				_EXEC_CALLBACK,
 				program);
+			
+			set_global_lfo_4_frequency(float(val));
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_4.rate");
 		}
 		else if (modid == _LFO_5_EVENT)
 		{
@@ -412,6 +470,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			set_global_lfo_5_frequency(float(val));
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_5.rate");
 		}
 		else if (modid == _LFO_6_EVENT)
 		{
@@ -423,6 +483,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			set_global_lfo_6_frequency(float(val));
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_6.rate");
 		}
 		break;
 
@@ -437,6 +499,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_1->set_pwm_dcycle(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_1.symmetry");
 		}
 		else if (modid == _LFO_2_EVENT)
 		{
@@ -448,6 +512,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_2->set_pwm_dcycle(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_2.symmetry");
 		}
 		else if (modid == _LFO_3_EVENT)
 		{
@@ -459,6 +525,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_3->set_pwm_dcycle(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_3.symmetry");
 		}
 		else if (modid == _LFO_4_EVENT)
 		{
@@ -470,6 +538,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_4->set_pwm_dcycle(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_4.symmetry");
 		}
 		else if (modid == _LFO_5_EVENT)
 		{
@@ -481,6 +551,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_5->set_pwm_dcycle(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_5.symmetry");
 		}
 		else if (modid == _LFO_6_EVENT)
 		{
@@ -492,6 +564,8 @@ int AdjSynth::modulator_event_int(int modid, int eventid, int val, _settings_par
 				program);
 
 			global_lfo_6->set_pwm_dcycle(val);
+			
+			result = update_program_voices_parameter(program, "adjsynth.lfo_6.symmetry");
 		}
 		break;
 	}

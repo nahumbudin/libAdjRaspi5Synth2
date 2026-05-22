@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include "adjSynthPADcreator.h"
+#include "adjSynthVoice.h"
 #include "../utils/FFTwrapper.h"
 #include "../utils/utils.h"
 #include "../commonDefs.h"
@@ -46,34 +47,71 @@ void SynthPADcreator::init(Wavetable *wavetable_buff, int size, int samp_rate)
 {
 	set_sample_rate(samp_rate);
 	
-	if ((wavetable_buff == NULL) || (size <= 0))
+	// Determine the wavetable size
+	int buffer_size;
+	if (size > 0)
 	{
-		external_wavetable = false;
-		wavetable = new Wavetable();
-		wavetable->size = _PAD_DEFAULT_WAVETABLE_SIZE;
-		wavetable->samples = new float[wavetable->size];
-		wavetable->samples[0] = 0.0f;
-		wavetable->base_freq = _PAD_DEFAULT_BASE_NOTE_FREQ;
+		buffer_size = size;
+	}
+	else if (wavetable_buff != NULL)
+	{
+		buffer_size = wavetable_buff->size;
 	}
 	else
 	{
-		external_wavetable = true;
-		wavetable = wavetable_buff;
-		// Verify that size is a power of 2
-		if ((wavetable->size & (wavetable->size - 1)) != 0)
-		{
-			// Not a power of 2
-			printf("PAD creator Error: wavetable length must be a power of 2");
-			sleep(3);
-			exit(1);
-		}
+		buffer_size = _PAD_DEFAULT_WAVETABLE_SIZE;
 	}
+	
+	// Verify size is power of 2
+	if ((buffer_size & (buffer_size - 1)) != 0)
+	{
+		printf("PAD creator Error: wavetable length must be a power of 2\n");
+		sleep(3);
+		exit(1);
+	}
+	
+	// Always create double buffers (we don't support external wavetables anymore)
+	external_wavetable = false;
+	
+	// Allocate buffer A
+	buffer_a = new Wavetable();
+	buffer_a->size = buffer_size;
+	buffer_a->samples = new float[buffer_a->size];
+	buffer_a->base_freq = _PAD_DEFAULT_BASE_NOTE_FREQ;
+	
+	// Allocate buffer B
+	buffer_b = new Wavetable();
+	buffer_b->size = buffer_size;
+	buffer_b->samples = new float[buffer_b->size];
+	buffer_b->base_freq = _PAD_DEFAULT_BASE_NOTE_FREQ;
+	
+	// Initialize both buffers
+	for (int i = 0; i < buffer_a->size; i++)
+	{
+		buffer_a->samples[i] = 0.0f;
+		buffer_b->samples[i] = 0.0f;
+	}
+	
+	// If external wavetable provided, copy its initial data to buffer_a
+	if (wavetable_buff != NULL && wavetable_buff->samples != NULL)
+	{
+		memcpy(buffer_a->samples,
+			wavetable_buff->samples, 
+			std::min(buffer_a->size, wavetable_buff->size) * sizeof(float));
+		buffer_a->base_freq = wavetable_buff->base_freq;
+	}
+	
+	// Set buffer_a as active
+	active_buffer.store(buffer_a, std::memory_order_release);
+	wavetable = buffer_a;
 
+	// Initialize rest of PAD synth parameters
 	base_harmony_bandwidth = 500.f;
 	harmony_shape = _PAD_SHAPE_RECTANGULAR;
 	harmony_shape_cutoff = _PAD_SHAPE_CUTOFF_FULL;
 	spectrum_length = wavetable->size / 2;
 	set_base_note(wavetable, _PAD_DEFAULT_BASE_NOTE);
+	
 	harmonies_levels[0] = 1.f;
 	for (int i = 1; i < _PAD_NUM_OF_HAROMONIES; i++)
 	{
@@ -85,20 +123,44 @@ void SynthPADcreator::init(Wavetable *wavetable_buff, int size, int samp_rate)
 	base_harmony_bandwidth = 500.f;
 
 	spectrum = (float*)malloc(spectrum_length * sizeof(float));
+	
+	if (spectrum == NULL)
+	{
+		printf("PAD creator Error: Failed to allocate spectrum buffer\n");
+		exit(1);
+	}
+	
+	// Initialize spectrum
+	memset(spectrum, 0, spectrum_length * sizeof(float));
 }
 
 SynthPADcreator::~SynthPADcreator()
 {
-	if ((wavetable != NULL) && !external_wavetable)
+	// Always clean up both buffers (we own them now)
+	if (buffer_a != NULL)
 	{
-		delete[] wavetable->samples;
-		delete(wavetable);
+		delete[] buffer_a->samples;
+		delete buffer_a;
+	}
+	if (buffer_b != NULL)
+	{
+		delete[] buffer_b->samples;
+		delete buffer_b;
 	}
 
 	if (spectrum != NULL) 
 	{
-		delete[] spectrum;
+		free(spectrum); // Use free() because allocated with malloc()
 	}
+}
+
+/**
+ * @brief  Get the currently active wavetable (thread-safe)
+ * @return pointer to active Wavetable
+ */
+Wavetable* SynthPADcreator::get_active_wavetable() const
+{
+	return active_buffer.load(std::memory_order_acquire);
 }
 
 /**
@@ -278,42 +340,86 @@ float SynthPADcreator::get_harmonies_detune()
 }
 
 /**
-* @brief	set wavetable buffer length (1<<(15+len). 
-*			(deletes prev table and allocates a new one)
-* param		wt	a pointer to a wave table object of type Wavetable
-* @param	int len _PAD_QUALITY_32K - _PAD_QUALITY_1024K (0-5).
-* @return	length (samples) if OK; -1 if params out of range.
-*/
+ * @brief	set wavetable buffer length (1<<(15+len). 
+ *			Reallocates both double buffers with new size
+ * param		wt	a pointer to a wave table object (ignored - uses internal buffers)
+ * @param	int len _PAD_QUALITY_32K - _PAD_QUALITY_1024K (0-5).
+ * @return	length (samples) if OK; -1 if params out of range.
+ */
 int SynthPADcreator::set_wavetable_length(Wavetable *wt, int len)
 {
-	if (wt == NULL)
+	// Validate range
+	if ((len < _PAD_QUALITY_32K) || (len > _PAD_QUALITY_1024K))
 	{
 		return -1;
 	}
 	
-	if ((len >= _PAD_QUALITY_32K) && (len <= _PAD_QUALITY_1024K) &&
-		(1 << (15 + len) != wt->size)) // No need to change
+	int new_size = (1 << (15 + len));
+	
+	// If size hasn't changed, nothing to do
+	if ((buffer_a != NULL) && (new_size == buffer_a->size))
 	{
-		delete[] wt->samples;
-		//	delete(wt);
-		//	wt = new Wavetable();
-		wt->size = (1 << (15 + len));
-		wt->samples = new float[wt->size];
-		wt->samples[0] = 0.0f;
-		wt->base_freq = _PAD_DEFAULT_BASE_NOTE_FREQ;
-		
-		if (spectrum != NULL)
-		{
-			delete[] spectrum;
-		}
-
-		spectrum_length = wt->size / 2;
-		spectrum = (float*)malloc(spectrum_length * sizeof(float));
-		
-		return wt->size;
+		return new_size;
+	}
+	
+	// ⚠️ CRITICAL: Reallocate BOTH buffers with new size
+	
+	// Deallocate buffer_a
+	if (buffer_a != NULL)
+	{
+		delete[] buffer_a->samples;
+		delete buffer_a;
+	}
+	
+	// Deallocate buffer_b
+	if (buffer_b != NULL)
+	{
+		delete[] buffer_b->samples;
+		delete buffer_b;
+	}
+	
+	// Allocate new buffer_a
+	buffer_a = new Wavetable();
+	buffer_a->size = new_size;
+	buffer_a->samples = new float[buffer_a->size];
+	buffer_a->base_freq = base_frequency; // Use current base frequency
+	
+	// Allocate new buffer_b
+	buffer_b = new Wavetable();
+	buffer_b->size = new_size;
+	buffer_b->samples = new float[buffer_b->size];
+	buffer_b->base_freq = base_frequency;
+	
+	// Initialize both buffers to zero
+	for (int i = 0; i < new_size; i++)
+	{
+		buffer_a->samples[i] = 0.0f;
+		buffer_b->samples[i] = 0.0f;
+	}
+	
+	// Set buffer_a as active
+	active_buffer.store(buffer_a, std::memory_order_release);
+	wavetable = buffer_a;
+	
+	// Reallocate spectrum buffer
+	if (spectrum != NULL)
+	{
+		free(spectrum);
+		spectrum = NULL;
 	}
 
-	return -1;
+	spectrum_length = new_size / 2;
+	spectrum = (float*)malloc(spectrum_length * sizeof(float));
+	
+	if (spectrum == NULL)
+	{
+		return -1;
+	}
+	
+	// Initialize spectrum
+	memset(spectrum, 0, spectrum_length * sizeof(float));
+	
+	return new_size;
 }
 
 /**
@@ -595,62 +701,86 @@ void SynthPADcreator::generate_spectrum_bandwidth_mode(
 */
 int SynthPADcreator::generate_wavetable(Wavetable *wt)
 {
-	int i;
-
-	if (wt == NULL)
-	{
-		return -1;
-	}
-
-	if ((wt->size <= 0) || (wt->samples == NULL))
+	// Get the currently INACTIVE buffer (the one NOT being read)
+	Wavetable *current = active_buffer.load(std::memory_order_acquire);
+	Wavetable *inactive = (current == buffer_a) ? buffer_b : buffer_a;
+    
+	if ((inactive->size <= 0) || (inactive->samples == NULL))
 	{
 		return -2;
 	}
 
 	const float bwadjust = get_profile(&profile[0], profile_size);
-	
-	// prepare the IFFT
-	FFTwrapper *fft = new FFTwrapper(wavetable->size);
-	fft_t      *fftfreqs = new fft_t[spectrum_length];
+    
+	FFTwrapper *fft = new FFTwrapper(inactive->size);
+	fft_t *fftfreqs = new fft_t[spectrum_length];
 
 	generate_spectrum_bandwidth_mode(
-		spectrum,
+	    spectrum,
 		spectrum_length,
 		base_frequency,
 		profile,
 		profile_size,
 		bwadjust);
-	
-	//randomize the phases
-	for (i = 1; i < spectrum_length; ++i) 
+    
+	// Randomize the phases
+	for (int i = 1; i < spectrum_length; ++i) 
 	{
 		fftfreqs[i] = FFTpolar(spectrum[i], (float)RND * 2 * PI);
 	}
-	//that's all; here is the only ifft for the whole sample;
-	//no windows are used ;-)
-	fft->freqs2smps(fftfreqs, wt->samples);
-	//normalize(rms)
+    
+	// Generate into the INACTIVE buffer (voices are reading from 'current')
+	fft->freqs2smps(fftfreqs, inactive->samples);
+    
+	// Normalize (rms)
 	float rms = 0.0f;
-	for (int i = 0; i < wt->size; ++i)
+	for (int i = 0; i < inactive->size; ++i)
 	{
-		rms += wt->samples[i] * wt->samples[i];
+		rms += inactive->samples[i] * inactive->samples[i];
 	}
 	rms = sqrt(rms);
 	if (rms < 0.000001f)
 	{
 		rms = 1.0f;
 	}
-	rms *= sqrt(262144.0f / wt->size); //262144=2^18
-	for (int i = 0; i < wt->size; ++i)
+	rms *= sqrt(262144.0f / inactive->size);
+	for (int i = 0; i < inactive->size; ++i)
 	{
-		wt->samples[i] *= 1.0f / rms * 200.0f;
+		inactive->samples[i] *= 1.0f / rms * 200.0f;
 	}
+    
+	// Update shared fields (safe because they're not arrays)
+	inactive->base_freq = base_frequency;
+    
+	// ⚠️ ATOMIC POINTER SWAP - This is truly glitch-free!
+	// All voices will seamlessly switch to the new buffer on their next read
+	active_buffer.store(inactive, std::memory_order_release);
+    
+	// Update wavetable pointer for backward compatibility
+	active_buffer.store(inactive, std::memory_order_release);
+	wavetable = inactive;
+	
+	// Notify all voices to update their wavetable pointer
+	//update_all_voices_wavetable_pointer(inactive);
 
-	//Cleanup
+	// Cleanup
 	delete(fft);
 	delete[] fftfreqs;
-	
+    
 	return 0;
+}
+
+void SynthPADcreator::update_all_voices_wavetable_pointer(Wavetable *new_wt)
+{
+	// Update all voices that are using this PAD synth
+	for (int v = 0; v < _SYNTH_MAX_NUM_OF_VOICES; v++)
+	{
+		SynthVoice *voice = AdjSynth::get_instance()->synth_voice[v];
+		if (voice && voice->pad_wavetable == wavetable)  // Check if using old pointer
+		{
+			voice->set_pad_wave_table(new_wt);
+		}
+	}
 }
 
 /**

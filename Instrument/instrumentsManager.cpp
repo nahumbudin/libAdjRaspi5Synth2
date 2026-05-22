@@ -20,6 +20,7 @@
 #include "instrumentAnalogSynth.h"
 #include "instrumentHammondOrgan.h"
 #include "instrumentStringSynth.h"
+#include "instrumentPADsynthesizer.h"
 #include "instrumentMidiMixer.h"
 #include "../modSynth.h"
 
@@ -42,7 +43,7 @@ InstrumentsManager::InstrumentsManager(){
 	map_instruments_names[_INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY] = "Anlog Synth";				
 	map_instruments_names[_INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY] = "Karplus Strong String Synth";
 	map_instruments_names[_INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY] = "Morphed Sinus Synth";		
-	map_instruments_names[_INSTRUMENT_NAME_PADSYNTH_SYNTH_STR_KEY] = "PAD Synth";
+	map_instruments_names[_INSTRUMENT_NAME_PAD_SYNTH_STR_KEY] = "PAD Synth";
 	map_instruments_names[_INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY] = "MIDI Player";
 	map_instruments_names[_INSTRUMENT_NAME_MIDI_MIXER_STR_KEY] = "MIDI Mixer";	
 	map_instruments_names[_INSTRUMENT_NAME_MIDI_MAPPER_STR_KEY] = "MIDI_CHANNELS Mapper";
@@ -308,6 +309,17 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		}
 	}
+	else if (last_connected == en_instruments_ids_t::adj_pad_synth)
+	{
+		if (ModSynth::get_instance()->get_pad_synth() != NULL)
+		{
+			channels = ModSynth::get_instance()->get_pad_synth()->
+				alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+			
+			ModSynth::get_instance()->get_pad_synth()->
+				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+		}
+	}
 	
 	// Add the new channel to the other selected instruments
 	
@@ -448,6 +460,13 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 		channels = ModSynth::get_instance()->get_string_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
 
 		ModSynth::get_instance()->get_string_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+		midi_channels_allocated_synth[ch] = synth;
+	}
+	else if (synth == en_instruments_ids_t::adj_pad_synth)
+	{
+		channels = ModSynth::get_instance()->get_pad_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
+
+		ModSynth::get_instance()->get_pad_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		midi_channels_allocated_synth[ch] = synth;
 	}
 	
