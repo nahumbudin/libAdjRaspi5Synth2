@@ -136,6 +136,11 @@ bool XML_files::element_exist(const std::string &xmltext, std::string tag)
 {
 	int pos = 0, start;
 
+	if (tag == "ignore")
+	{
+		return true;
+	}
+	
 	while (true)
 	{
 		start = xmltext.find("<" + tag, pos);

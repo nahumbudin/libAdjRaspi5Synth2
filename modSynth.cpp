@@ -41,6 +41,7 @@
 #include "./Instrument/instrumentStringSynth.h"
 #include "./Instrument/instrumentAnalogSynth.h"
 #include "./Instrument/instrumentPADsynthesizer.h"
+#include "./Instrument/instrumentAnalogSynthPreset.h"
 
 #include "./Instrument/instrumentMidiPlayer.h"
 #include "./Instrument/instrumentMidiMapper.h"
@@ -200,6 +201,18 @@ ModSynth::ModSynth()
 	instruments_manager->add_instrument(_INSTRUMENT_NAME_PAD_SYNTH_STR_KEY, 
 		pad_synth);
 	pad_synth->use_external_settings(adj_synth->synth_program[_PAD_SYNTH_PROGRAM_22]->active_preset_params);
+	
+	// Analog Synth Preset Instruments
+	instrument_analog_synth_preset_manager = 
+		InstrumentAnalogSynthPresetManager::get_instance(adj_synth);
+	
+	for (int i = 0; i < _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS; i++)
+	{
+		
+		instruments_manager->add_instrument(_INSTRUMENT_NAME_ANALOG_SYNTH_PRESET_STR_KEY + string("-") + to_string(i + 1),
+			instrument_analog_synth_preset_manager->get_preset_instrument(i));
+		instrument_analog_synth_preset_manager->get_preset_instrument(i)->use_external_settings(adj_synth->synth_program[_ANALOG_SYNTH_PRESET_1_PROGRAM_23 + i]->active_preset_params);
+	}
 	
 	// An Analog Synth Instrument (implements all the non-sampled based synthesis methods, 
 	// including additive, subtractive, Karplus-Strong, PADsynth, etc.)
@@ -699,6 +712,11 @@ InstrumentAnalogReverbration *ModSynth::get_analog_reverberation()
 InstrumentKeyboardMapper *ModSynth::get_keyboard_mapper()
 {
 	return keyboard_mapper;
+}
+
+InstrumentAnalogSynthPresetManager *ModSynth::get_analog_synth_preset_manager()
+{
+	return instrument_analog_synth_preset_manager;
 }
 
 /**

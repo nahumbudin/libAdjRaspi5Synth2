@@ -2259,6 +2259,23 @@ void mod_synth_midi_mixer_set_channel_pan_mod_level(int chan, int lvl)
 		case en_instruments_ids_t::adj_hammond_organ:
 		case en_instruments_ids_t::adj_karplusstrong_string_synth:
 		case en_instruments_ids_t::adj_pad_synth:
+		case en_instruments_ids_t::analog_synth_preset_1:
+		case en_instruments_ids_t::analog_synth_preset_2:
+		case en_instruments_ids_t::analog_synth_preset_3:
+		case en_instruments_ids_t::analog_synth_preset_4:
+		case en_instruments_ids_t::analog_synth_preset_5:
+		case en_instruments_ids_t::analog_synth_preset_6:
+		case en_instruments_ids_t::analog_synth_preset_7:
+		case en_instruments_ids_t::analog_synth_preset_8:
+		case en_instruments_ids_t::analog_synth_preset_9:
+		case en_instruments_ids_t::analog_synth_preset_10:
+		case en_instruments_ids_t::analog_synth_preset_11:
+		case en_instruments_ids_t::analog_synth_preset_12:
+		case en_instruments_ids_t::analog_synth_preset_13:
+		case en_instruments_ids_t::analog_synth_preset_14:
+		case en_instruments_ids_t::analog_synth_preset_15:
+		case en_instruments_ids_t::analog_synth_preset_16:
+
 			mod_synthesizer->midi_mapper->set_midi_channel_pan_mod_lfo_level(chan, lvl);
 			break;
 		
@@ -2293,6 +2310,22 @@ void mod_synth_midi_mixer_set_channel_pan_mod_lfo(int chan, int lfo)
 	case en_instruments_ids_t::adj_hammond_organ:
 	case en_instruments_ids_t::adj_karplusstrong_string_synth:
 	case en_instruments_ids_t::adj_pad_synth:
+	case en_instruments_ids_t::analog_synth_preset_1:
+	case en_instruments_ids_t::analog_synth_preset_2:
+	case en_instruments_ids_t::analog_synth_preset_3:
+	case en_instruments_ids_t::analog_synth_preset_4:
+	case en_instruments_ids_t::analog_synth_preset_5:
+	case en_instruments_ids_t::analog_synth_preset_6:
+	case en_instruments_ids_t::analog_synth_preset_7:
+	case en_instruments_ids_t::analog_synth_preset_8:
+	case en_instruments_ids_t::analog_synth_preset_9:
+	case en_instruments_ids_t::analog_synth_preset_10:
+	case en_instruments_ids_t::analog_synth_preset_11:
+	case en_instruments_ids_t::analog_synth_preset_12:
+	case en_instruments_ids_t::analog_synth_preset_13:
+	case en_instruments_ids_t::analog_synth_preset_14:
+	case en_instruments_ids_t::analog_synth_preset_15:
+	case en_instruments_ids_t::analog_synth_preset_16:
 		mod_synthesizer->midi_mapper->set_midi_channel_pan_mod_lfo(chan, lfo);
 		
 		break;
@@ -2328,6 +2361,22 @@ void mod_synth_midi_mixer_set_channel_send_level(int chan, int snd)
 	case en_instruments_ids_t::adj_hammond_organ:
 	case en_instruments_ids_t::adj_karplusstrong_string_synth:
 	case en_instruments_ids_t::adj_pad_synth:
+	case en_instruments_ids_t::analog_synth_preset_1:
+	case en_instruments_ids_t::analog_synth_preset_2:
+	case en_instruments_ids_t::analog_synth_preset_3:
+	case en_instruments_ids_t::analog_synth_preset_4:
+	case en_instruments_ids_t::analog_synth_preset_5:
+	case en_instruments_ids_t::analog_synth_preset_6:
+	case en_instruments_ids_t::analog_synth_preset_7:
+	case en_instruments_ids_t::analog_synth_preset_8:
+	case en_instruments_ids_t::analog_synth_preset_9:
+	case en_instruments_ids_t::analog_synth_preset_10:
+	case en_instruments_ids_t::analog_synth_preset_11:
+	case en_instruments_ids_t::analog_synth_preset_12:
+	case en_instruments_ids_t::analog_synth_preset_13:
+	case en_instruments_ids_t::analog_synth_preset_14:
+	case en_instruments_ids_t::analog_synth_preset_15:
+	case en_instruments_ids_t::analog_synth_preset_16:
 		mod_synthesizer->midi_mapper->set_midi_channel_send(chan, snd);
 		break;
 		

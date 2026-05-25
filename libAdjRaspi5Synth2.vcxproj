@@ -176,6 +176,7 @@
     <ClCompile Include="Instrument\instrumentAnalogEqualizer.cpp" />
     <ClCompile Include="Instrument\instrumentAnalogReverbration.cpp" />
     <ClCompile Include="Instrument\instrumentAnalogSynth.cpp" />
+    <ClCompile Include="Instrument\instrumentAnalogSynthPreset.cpp" />
     <ClCompile Include="Instrument\instrumentConnectionsControl.cpp" />
     <ClCompile Include="Instrument\instrumentControlBoxHandler.cpp" />
     <ClCompile Include="Instrument\instrumentFluidSynth.cpp" />
@@ -287,6 +288,7 @@
     <ClInclude Include="DSP\dspWavetable.h" />
     <ClInclude Include="FluidSynth\fluidSynthInterface.h" />
     <ClInclude Include="I2C\i2cInterface.h" />
+    <ClInclude Include="Instrument\instrumentAnalogSynthPreset.h" />
     <ClInclude Include="Instrument\instrument.h" />
     <ClInclude Include="Instrument\instrumentAnalogEqualizer.h" />
     <ClInclude Include="Instrument\instrumentAnalogReverbration.h" />

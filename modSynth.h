@@ -71,6 +71,7 @@ class InstrumentMidiMixer;
 class InstrumentAnalogReverbration;
 class InstrumentStringSynth;
 class InstrumentPADsynthesizer;
+class InstrumentAnalogSynthPresetManager;
 
 class AdjSynth;
 
@@ -118,6 +119,7 @@ public:
 	InstrumentMidiMixer *get_midi_mixer();
 	InstrumentAnalogReverbration *get_analog_reverberation();
 	InstrumentKeyboardMapper *get_keyboard_mapper();
+	InstrumentAnalogSynthPresetManager *get_analog_synth_preset_manager();
 	
 	int set_adj_synth_default_settings(_settings_params_t *params);
 	int set_default_general_settings_parameters(_settings_params_t *params);
@@ -180,6 +182,8 @@ public:
 	InstrumentMidiMapper *midi_mapper;
 	
 	InstrumentKeyboardMapper *keyboard_mapper;
+	
+	InstrumentAnalogSynthPresetManager *instrument_analog_synth_preset_manager;
 
 	PatchsHandler *patches_handler;
 	

@@ -22,6 +22,7 @@
 #include "instrumentStringSynth.h"
 #include "instrumentPADsynthesizer.h"
 #include "instrumentMidiMixer.h"
+#include "instrumentAnalogSynthPreset.h"
 #include "../modSynth.h"
 
 class ModSynth;
@@ -53,6 +54,13 @@ InstrumentsManager::InstrumentsManager(){
 	map_instruments_names[_INSTRUMENT_NAME_CONTROL_BOX_HANDLER_STR_KEY] = "Control Box";	
 	map_instruments_names[_INSTRUMENT_NAME_EXT_MIDI_INT_CONTROL_STR_KEY] = "Ext. MIDI Int.";	
 	map_instruments_names[_INSTRUMENT_NAME_KEYBOARD_CONTROL_STR_KEY] = "Keyboard Control";
+	map_instruments_names[_INSTRUMENT_NAME_KEYBOARD_MAPPER_STR_KEY] = "Keyboard Mapper";
+	
+	for (int i = 0; i < _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS; i++)
+	{
+		map_instruments_names[_INSTRUMENT_NAME_ANALOG_SYNTH_PRESET_STR_KEY + string("-") + to_string(i + 1)] = 
+			"Analog Synth Preset" + string(" ") + to_string(i + 1);
+	}
 
 	map_instruments_type[en_instruments_ids_t::fluid_synth] = en_instruments_types_t::synth;
 	map_instruments_type[en_instruments_ids_t::adj_analog_synth] = en_instruments_types_t::synth;
@@ -68,8 +76,24 @@ InstrumentsManager::InstrumentsManager(){
 	map_instruments_type[en_instruments_ids_t::adj_reverb_effect] = en_instruments_types_t::effect;
 	map_instruments_type[en_instruments_ids_t::adj_ext_midi_interface] = en_instruments_types_t::interface;
 	map_instruments_type[en_instruments_ids_t::adj_keyboard_control] = en_instruments_types_t::keyboard;
+	map_instruments_type[en_instruments_ids_t::adj_keyboard_mapper] = en_instruments_types_t::control;
 	
-	
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_1] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_2] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_3] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_4] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_5] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_6] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_7] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_8] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_9] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_10] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_11] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_12] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_13] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_14] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_15] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::analog_synth_preset_16] = en_instruments_types_t::synth;
 }
 
 InstrumentsManager::~InstrumentsManager()
@@ -269,70 +293,70 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 		if (ModSynth::get_instance()->get_fluid_synth() != NULL)
 		{
 			// Clear the current allocated midi channel bit
-			channels = ModSynth::get_instance()->get_fluid_synth()->
-				alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
-			
-			ModSynth::get_instance()->get_fluid_synth()->
-				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			channels = ModSynth::get_instance()->get_fluid_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+
+			ModSynth::get_instance()->get_fluid_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		}
 	}
 	else if (last_connected == en_instruments_ids_t::adj_analog_synth)
 	{
 		if (ModSynth::get_instance()->get_analog_synth() != NULL)
 		{
-			channels = ModSynth::get_instance()->get_analog_synth()->
-				alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
-			
-			ModSynth::get_instance()->get_analog_synth()->
-				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			channels = ModSynth::get_instance()->get_analog_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+
+			ModSynth::get_instance()->get_analog_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		}
 	}
 	else if (last_connected == en_instruments_ids_t::adj_hammond_organ)
 	{
 		if (ModSynth::get_instance()->get_hammond_organ() != NULL)
 		{
-			channels = ModSynth::get_instance()->get_hammond_organ()->
-				alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
-			
-			ModSynth::get_instance()->get_hammond_organ()->
-				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			channels = ModSynth::get_instance()->get_hammond_organ()->alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+
+			ModSynth::get_instance()->get_hammond_organ()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		}
 	}
 	else if (last_connected == en_instruments_ids_t::adj_karplusstrong_string_synth)
 	{
 		if (ModSynth::get_instance()->get_string_synth() != NULL)
 		{
-			channels = ModSynth::get_instance()->get_string_synth()->
-				alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
-			
-			ModSynth::get_instance()->get_string_synth()->
-				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			channels = ModSynth::get_instance()->get_string_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+
+			ModSynth::get_instance()->get_string_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		}
 	}
 	else if (last_connected == en_instruments_ids_t::adj_pad_synth)
 	{
 		if (ModSynth::get_instance()->get_pad_synth() != NULL)
 		{
-			channels = ModSynth::get_instance()->get_pad_synth()->
-				alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
-			
-			ModSynth::get_instance()->get_pad_synth()->
-				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			channels = ModSynth::get_instance()->get_pad_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+
+			ModSynth::get_instance()->get_pad_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		}
 	}
-	
-	// Add the new channel to the other selected instruments
-	
-	/* Connect the new channel */
+	else
+	{
+		for (int i = 0; i < _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS; i++)
+		{
+			if (ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i) != NULL)
+			{
+				channels = ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i)->alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+
+				ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i)->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			}
+		}
+	}
+
+		// Add the new channel to the other selected instruments
+
+		/* Connect the new channel */
 	if (synth == en_instruments_ids_t::fluid_synth)
 	{
 		if (ModSynth::get_instance()->get_fluid_synth() != NULL)
 		{
-			channels = ModSynth::get_instance()->get_fluid_synth()->
-				alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
-			
-			ModSynth::get_instance()->get_fluid_synth()->
-				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			channels = ModSynth::get_instance()->get_fluid_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
+
+			ModSynth::get_instance()->get_fluid_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 			// Set the new allocated instrument id in the channels allocation map
 			midi_channels_allocated_synth[ch] = synth;
 		}
@@ -341,60 +365,9 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 	{
 		if (ModSynth::get_instance()->get_analog_synth() != NULL)
 		{
-			channels = ModSynth::get_instance()->get_analog_synth()->
-				alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
-			
-			ModSynth::get_instance()->get_analog_synth()->
-				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
-			midi_channels_allocated_synth[ch] = synth;
-			
-			// Can we set the MIDI Mixer channel settings here (Others will be set when allocating a voiceprogram]?
-			
-			sprintf(key_string, "adjsynth.mixer_channel_%i.level", ch + 1);
-			res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
-				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
-				key_string,
-				&int_param);
-			
-			if (res == _SETTINGS_KEY_FOUND)
-			{		
-				AdjSynth::get_instance()->polyphonic_mixer_event(
-					_POLYPHONIC_MIXER_EVENT, 
-					_MIXER_CHAN_1_LEVEL + ch,
-					int_param.value,
-					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
-					AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
-			}
-			
-			sprintf(key_string, "adjsynth.mixer_channel_%i.send", ch + 1);
-			res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
-				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
-				key_string,
-				&int_param);
-			
-			if (res == _SETTINGS_KEY_FOUND)
-			{		
-				AdjSynth::get_instance()->polyphonic_mixer_event(
-			_POLYPHONIC_MIXER_EVENT, 
-					_MIXER_CHAN_1_SEND + ch,
-					int_param.value,
-					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
-					AdjSynth::get_instance()->get_active_sketch());
-			}
-			
-			
-		
-		}
-	}
-	else if (synth == en_instruments_ids_t::adj_hammond_organ)
-	{
-		if (ModSynth::get_instance()->get_hammond_organ() != NULL)
-		{
-			channels = ModSynth::get_instance()->get_hammond_organ()->
-				alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
-			
-			ModSynth::get_instance()->get_hammond_organ()->
-				alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			channels = ModSynth::get_instance()->get_analog_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
+
+			ModSynth::get_instance()->get_analog_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 			midi_channels_allocated_synth[ch] = synth;
 
 			// Can we set the MIDI Mixer channel settings here (Others will be set when allocating a voiceprogram]?
@@ -412,7 +385,51 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 					_MIXER_CHAN_1_LEVEL + ch,
 					int_param.value,
 					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
-					_HAMMOND_ORGAN_PROGRAM_20); //AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
+					AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
+			}
+
+			sprintf(key_string, "adjsynth.mixer_channel_%i.send", ch + 1);
+			res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				key_string,
+				&int_param);
+
+			if (res == _SETTINGS_KEY_FOUND)
+			{
+				AdjSynth::get_instance()->polyphonic_mixer_event(
+					_POLYPHONIC_MIXER_EVENT,
+					_MIXER_CHAN_1_SEND + ch,
+					int_param.value,
+					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+					AdjSynth::get_instance()->get_active_sketch());
+			}
+		}
+	}
+	else if (synth == en_instruments_ids_t::adj_hammond_organ)
+	{
+		if (ModSynth::get_instance()->get_hammond_organ() != NULL)
+		{
+			channels = ModSynth::get_instance()->get_hammond_organ()->alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
+
+			ModSynth::get_instance()->get_hammond_organ()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+			midi_channels_allocated_synth[ch] = synth;
+
+			// Can we set the MIDI Mixer channel settings here (Others will be set when allocating a voiceprogram]?
+
+			sprintf(key_string, "adjsynth.mixer_channel_%i.level", ch + 1);
+			res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
+				ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+				key_string,
+				&int_param);
+
+			if (res == _SETTINGS_KEY_FOUND)
+			{
+				AdjSynth::get_instance()->polyphonic_mixer_event(
+					_POLYPHONIC_MIXER_EVENT,
+					_MIXER_CHAN_1_LEVEL + ch,
+					int_param.value,
+					ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+					_HAMMOND_ORGAN_PROGRAM_20); // AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
 			}
 
 			sprintf(key_string, "adjsynth.mixer_channel_%i.send", ch + 1);
@@ -432,7 +449,7 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 			}
 
 			_settings_int_param_t value;
-			
+
 			res = ModSynth::get_instance()->get_hammond_organ()->instrument_settings_manager->get_int_param(
 				ModSynth::get_instance()->get_hammond_organ()->active_settings_params,
 				"adjsynth.hammond.organ_leslie_speed",
@@ -469,7 +486,80 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 		ModSynth::get_instance()->get_pad_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		midi_channels_allocated_synth[ch] = synth;
 	}
-	
+	else
+	{
+		for (int i = 0; i < _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS; i++)
+		{
+			if (synth == en_instruments_ids_t::analog_synth_preset_1 + i)
+			{
+				if (ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i) != NULL)
+				{
+					channels = ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i)->alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
+
+					ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i)->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+					midi_channels_allocated_synth[ch] = synth;
+
+					// Can we set the MIDI Mixer channel settings here (Others will be set when allocating a voiceprogram]?
+
+					sprintf(key_string, "adjsynth.mixer_channel_%i.level", ch + 1);
+					res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
+						ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+						key_string,
+						&int_param);
+
+					if (res == _SETTINGS_KEY_FOUND)
+					{
+						AdjSynth::get_instance()->polyphonic_mixer_event(
+							_POLYPHONIC_MIXER_EVENT,
+							_MIXER_CHAN_1_LEVEL + ch,
+							int_param.value,
+							ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+							_ANALOG_SYNTH_PRESET_1_PROGRAM_23 + i); // AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
+					}
+
+					sprintf(key_string, "adjsynth.mixer_channel_%i.send", ch + 1);
+					res = ModSynth::get_instance()->get_midi_mixer()->instrument_settings_manager->get_int_param(
+						ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+						key_string,
+						&int_param);
+
+					if (res == _SETTINGS_KEY_FOUND)
+					{
+						AdjSynth::get_instance()->polyphonic_mixer_event(
+							_POLYPHONIC_MIXER_EVENT,
+							_MIXER_CHAN_1_SEND + ch,
+							int_param.value,
+							ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
+							_ANALOG_SYNTH_PRESET_1_PROGRAM_23 + i);
+					}
+
+					_settings_int_param_t value;
+
+					res = ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i)->instrument_settings_manager->get_int_param(
+						ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i)->active_settings_params,
+						"adjsynth.hammond.organ_leslie_speed",
+						&value);
+
+					if (res == _SETTINGS_KEY_FOUND)
+					{
+						mod_synth_midi_mixer_set_channel_pan_mod_lfo(ch, _LFO_6);
+						mod_synth_modulator_event_int(_LFO_6_EVENT, _MOD_LFO_RATE, value.value);
+					}
+
+					res = ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i)->instrument_settings_manager->get_int_param(
+						ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(i)->active_settings_params,
+						"adjsynth.hammond.organ_leslie_level",
+						&value);
+
+					if (res == _SETTINGS_KEY_FOUND)
+					{
+						mod_synth_midi_mixer_set_channel_pan_mod_level(ch, value.value);
+					}
+				}
+			}
+		}
+	}
+
 	return 0;
 }
 en_instruments_ids_t InstrumentsManager::get_allocated_midi_channel_synth(int ch)

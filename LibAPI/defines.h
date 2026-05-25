@@ -12,6 +12,7 @@
 #pragma once
 
 #define _MAX_NUM_OF_INSTRUMENTS									256
+#define _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS					16
 
 #define _INSTRUMENT_TYPE_PLAYING								0
 #define _INSTRUMENT_TYPE_EFFECT									1
@@ -20,10 +21,27 @@
 #define _INSTRUMENT_NAME_FLUID_SYNTH_STR_KEY					"Adj-Fluid-Synth"
 #define _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY					"Adj-Hammond-Organ"
 #define _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY					"Adj-Analog-Synth"
+#define _INSTRUMENT_NAME_ANALOG_SYNTH_PRESET_STR_KEY			"Adj-Analog-Preset-Synth"
 #define _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY	"Karplus-Strong-Strings-Synth"
 #define _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY			"Morphed-Sinus-Synth"
 #define _INSTRUMENT_NAME_PAD_SYNTH_STR_KEY						"Adj-PAD-Synth"
 
+#define _INSTRUMENT_NAME_SYNTH_PRESET_1_STR_KEY					"Adj-Analog-Preset-Synth-1"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_2_STR_KEY					"Adj-Analog-Preset-Synth-2"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_3_STR_KEY					"Adj-Analog-Preset-Synth-3"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_4_STR_KEY					"Adj-Analog-Preset-Synth-4"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_5_STR_KEY					"Adj-Analog-Preset-Synth-5"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_6_STR_KEY					"Adj-Analog-Preset-Synth-6"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_7_STR_KEY					"Adj-Analog-Preset-Synth-7"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_8_STR_KEY					"Adj-Analog-Preset-Synth-8"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_9_STR_KEY					"Adj-Analog-Preset-Synth-9"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_10_STR_KEY				"Adj-Analog-Preset-Synth-10"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_11_STR_KEY				"Adj-Analog-Preset-Synth-11"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_12_STR_KEY				"Adj-Analog-Preset-Synth-12"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_13_STR_KEY				"Adj-Analog-Preset-Synth-13"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_14_STR_KEY				"Adj-Analog-Preset-Synth-14"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_15_STR_KEY				"Adj-Analog-Preset-Synth-15"
+#define _INSTRUMENT_NAME_SYNTH_PRESET_16_STR_KEY				"Adj-Analog-Preset-Synth-16"
 
 #define _INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY			"Adj-Midi-Player"
 #define _INSTRUMENT_NAME_MIDI_MIXER_STR_KEY				"Midi-Mixer"

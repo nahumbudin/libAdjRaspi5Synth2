@@ -220,6 +220,12 @@
     <Filter Include="Source files\Insrtument\KPS String Synthesizer">
       <UniqueIdentifier>{ecb5ac3c-81ab-4f72-8a23-ddfa2a3bbbce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\Instrument\Analog Preset Synth">
+      <UniqueIdentifier>{0e329337-c4bc-440b-8055-5aa806df411b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Insrtument\Analog Preset Synth">
+      <UniqueIdentifier>{3038247d-8705-487b-bea6-46508c3b592d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjSynth\synthKeyboard.cpp">
@@ -768,6 +774,9 @@
     <ClCompile Include="Instrument\instrumentStringSynthesizer.cpp">
       <Filter>Source files\Insrtument\KPS String Synthesizer</Filter>
     </ClCompile>
+    <ClCompile Include="Instrument\instrumentAnalogSynthPreset.cpp">
+      <Filter>Source files\Insrtument\Analog Preset Synth</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdjSynth\synthKeyboard.h">
@@ -1114,6 +1123,9 @@
     </ClInclude>
     <ClInclude Include="Instrument\instrumentStringSynth.h">
       <Filter>Header files\Instrument\KPS String Synthesizer</Filter>
+    </ClInclude>
+    <ClInclude Include="Instrument\instrumentAnalogSynthPreset.h">
+      <Filter>Header files\Instrument\Analog Preset Synth</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

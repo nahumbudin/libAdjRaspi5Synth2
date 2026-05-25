@@ -49,8 +49,23 @@ typedef enum
 	adj_midi_mapper,
 	adj_ext_midi_interface,
 	adj_keyboard_control,
-	adj_keyboard_mapper
-
+	adj_keyboard_mapper,
+	analog_synth_preset_1,
+	analog_synth_preset_2,
+	analog_synth_preset_3,
+	analog_synth_preset_4,
+	analog_synth_preset_5,
+	analog_synth_preset_6,
+	analog_synth_preset_7,
+	analog_synth_preset_8,
+	analog_synth_preset_9,
+	analog_synth_preset_10,
+	analog_synth_preset_11,
+	analog_synth_preset_12,
+	analog_synth_preset_13,
+	analog_synth_preset_14,
+	analog_synth_preset_15,
+	analog_synth_preset_16
 } en_instruments_ids_t;
 
 /* Holds instruments types */

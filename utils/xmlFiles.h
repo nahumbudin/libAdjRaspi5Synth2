@@ -63,7 +63,7 @@ class XML_files
 	/**
 	*	Scans an XML file text loking for a tag and reurns true if found
 	*/
-	bool element_exist(const string &xmltext, string tag);
+	bool element_exist(const string &xmltext, string tag = "ignore");
 
 	// Extract and build elements vectors per type
 	/**

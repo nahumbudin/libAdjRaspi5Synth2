@@ -35,4 +35,4 @@ int mod_synth_save_pad_synthesizer_preset_file(std::string path);
 int mod_synth_load_keyboard_mapper_preset_file(std::string path);
 int mod_synth_save_keyboard_mapper_preset_file(std::string path);
 
-
+int mod_synth_load_patch_preset_synthesizer_preset_file(std::string path, int preset_index);

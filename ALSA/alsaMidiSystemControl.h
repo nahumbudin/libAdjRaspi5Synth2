@@ -31,8 +31,8 @@ using namespace std;
 
 
 const int max_alsa_data_string_length = 2048;
-static const int max_num_of_alsa_clients = 32;
-static const int max_num_of_alsa_ports = 32;
+static const int max_num_of_alsa_clients = 128;
+static const int max_num_of_alsa_ports = 128;
 
 typedef struct s_alsa_clients_connection
 {

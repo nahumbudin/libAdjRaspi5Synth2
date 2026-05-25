@@ -30,6 +30,7 @@
 #include "../Instrument/instrumentStringSynth.h"
 #include "../Instrument/instrumentPADsynthesizer.h"
 #include "../Instrument/InstrumentKeyboardMapper.h"
+#include "../Instrument/instrumentAnalogSynthPreset.h"
 #include "../utils/utils.h"
 #include "../LibAPI/connections.h"
 #include "../LibAPI/defines.h"
@@ -617,6 +618,24 @@ int mod_synth_save_keyboard_mapper_preset_file(std::string path)
 {
 	return ModSynth::get_instance()->get_keyboard_mapper()->save_instrument_active_settings(path, "keyboard-mapper-preset");
 }
+
+int mod_synth_load_patch_preset_synthesizer_preset_file(std::string path, int preset_index)
+{
+	if (preset_index < 0 || preset_index >= _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS)
+	{
+		return -1;
+	}
+	
+	ModSynth::get_instance()->get_pad_synth()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(preset_index)->active_settings_params,
+		path,
+		"ignore", // Ignore the type (this may be various for different presets types, so ignore it).
+		_ANALOG_SYNTH_PRESET_1_PROGRAM_23 + preset_index);
+	
+	return 0;
+}
+
+
 
 void PatchsHandler::register_callback_get_active_instruments_names_list(func_ptr_vector_std_string_void_t ptr)
 {
