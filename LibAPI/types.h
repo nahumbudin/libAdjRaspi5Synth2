@@ -41,6 +41,7 @@ typedef enum
 	adj_karplusstrong_string_synth,
 	adj_morphed_sin_synth,
 	adj_pad_synth,
+	adj_mso_synth,
 	adj_midi_player,
 	adj_reverb_effect,
 	adj_distortion_effect,

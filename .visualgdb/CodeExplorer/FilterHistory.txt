@@ -17,3 +17,5 @@ activ
 hammond
 osc
 octa
+mso_synth
+mod_synth_get_mso

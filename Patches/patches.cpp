@@ -29,6 +29,7 @@
 #include "../Instrument/instrumentHammondOrgan.h"
 #include "../Instrument/instrumentStringSynth.h"
 #include "../Instrument/instrumentPADsynthesizer.h"
+#include "../Instrument/instrumentMSOsynthesizer.h"
 #include "../Instrument/InstrumentKeyboardMapper.h"
 #include "../Instrument/instrumentAnalogSynthPreset.h"
 #include "../utils/utils.h"
@@ -593,6 +594,24 @@ int mod_synth_save_pad_synthesizer_preset_file(std::string path)
 	return ModSynth::get_instance()->get_pad_synth()->save_instrument_active_settings(path, "pad-synthesizer-preset");
 }
 
+int mod_synth_load_mso_synthesizer_preset_file(std::string path)
+{
+	ModSynth::get_instance()->get_mso_synth()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+		path,
+		"mso-synthesizer-preset",
+		_MSO_SYNTH_PROGRAM_23);
+	
+	return 0;
+}
+
+int mod_synth_save_mso_synthesizer_preset_file(std::string path)
+{
+	return ModSynth::get_instance()->get_mso_synth()->save_instrument_active_settings(path, "mso-synthesizer-preset");
+}
+
+
+
 /**
 *   @brief Load Preset parametrs as a XML file.
 *   @param  file path	patch file full path string
@@ -630,7 +649,7 @@ int mod_synth_load_patch_preset_synthesizer_preset_file(std::string path, int pr
 					ModSynth::get_instance()->get_analog_synth_preset_manager()->get_preset_instrument(preset_index)->active_settings_params,
 		path,
 		"ignore", // Ignore the type (this may be various for different presets types, so ignore it).
-		_ANALOG_SYNTH_PRESET_1_PROGRAM_23 + preset_index);
+		_ANALOG_SYNTH_PRESET_1_PROGRAM_30 + preset_index);
 	
 	return 0;
 }
@@ -755,9 +774,9 @@ int PatchsHandler::create_active_instruments_settings_files(vector<string> inst_
 		{
 			mod_synth_save_string_synth_patch_file(settings_file_path);
 		}
-		else if (instrument_name == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY)
+		else if (instrument_name == _INSTRUMENT_NAME_MSO_SYNTH_STR_KEY)
 		{
-			// TODO:
+			mod_synth_save_mso_synth_patch_file(settings_file_path);
 		}
 		else if (instrument_name == _INSTRUMENT_NAME_PAD_SYNTH_STR_KEY)
 		{
@@ -947,9 +966,13 @@ int PatchsHandler::implement_patch(vector<string> active_instruments, vector<str
 					"string-synth-preset",
 					_STRING_SYNTH_PROGRAM_21);
 			}
-			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY)
+			else if (active_instruments.at(m) == _INSTRUMENT_NAME_MSO_SYNTH_STR_KEY)
 			{
-				
+				ModSynth::get_instance()->get_mso_synth()->instrument_settings_manager->read_settings_file(
+					ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+					settings_file_path,
+					"mso-synthesizer-preset",
+					_MSO_SYNTH_PROGRAM_23);
 			}
 			else if (active_instruments.at(m) == _INSTRUMENT_NAME_PAD_SYNTH_STR_KEY)
 			{

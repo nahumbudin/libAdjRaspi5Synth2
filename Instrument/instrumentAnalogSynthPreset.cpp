@@ -30,7 +30,7 @@
 InstrumentAnalogSynthPresetManager* InstrumentAnalogSynthPresetManager::instrument_analog_synth_preset_manager_instance = nullptr;
 
 InstrumentAnalogSynthPreset::InstrumentAnalogSynthPreset(AdjSynth *adj_synth, int midi_program)
-	: Instrument(_INSTRUMENT_NAME_ANALOG_SYNTH_PRESET_STR_KEY + std::string("-") + std::to_string(midi_program - _ANALOG_SYNTH_PRESET_1_PROGRAM_23 + 1), 
+	: Instrument(_INSTRUMENT_NAME_ANALOG_SYNTH_PRESET_STR_KEY + std::string("-") + std::to_string(midi_program - _ANALOG_SYNTH_PRESET_1_PROGRAM_30 + 1), 
 					true, true, false,
 					NULL, NULL, adj_synth, NULL, _INSTRUMENT_TYPE_PLAYING), 
 		midi_program(midi_program)
@@ -178,7 +178,7 @@ InstrumentAnalogSynthPresetManager::InstrumentAnalogSynthPresetManager(AdjSynth 
 	// Create the preset module instruments and add them to the instrument manager
 	for (int i = 0; i < _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS; i++)
 	{
-		preset_instruments[i] = new InstrumentAnalogSynthPreset(adj_synth, _ANALOG_SYNTH_PRESET_1_PROGRAM_23 + i);
+		preset_instruments[i] = new InstrumentAnalogSynthPreset(adj_synth, _ANALOG_SYNTH_PRESET_1_PROGRAM_30 + i);
 	}
 }
 

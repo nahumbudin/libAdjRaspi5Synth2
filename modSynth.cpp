@@ -7,7 +7,7 @@
  *					2. Adding support in both old and new MIDI program objects.
  *					3. Definning a global settings handling mutex
  *					4. Adding I2C interface support
- *					5. Adding MIDI Mapper and MIDI Mixer , Hammon Organ anf String Synthesizer instruments
+ *					5. Adding MIDI Mapper and MIDI Mixer , Hammon Organ and String, MSO and PAD Synthesizer instruments
  *
  *	@brief		This is the main modular synthesizer libraray object.
  *
@@ -41,6 +41,7 @@
 #include "./Instrument/instrumentStringSynth.h"
 #include "./Instrument/instrumentAnalogSynth.h"
 #include "./Instrument/instrumentPADsynthesizer.h"
+#include "./Instrument/instrumentMSOsynthesizer.h"
 #include "./Instrument/instrumentAnalogSynthPreset.h"
 
 #include "./Instrument/instrumentMidiPlayer.h"
@@ -202,6 +203,13 @@ ModSynth::ModSynth()
 		pad_synth);
 	pad_synth->use_external_settings(adj_synth->synth_program[_PAD_SYNTH_PROGRAM_22]->active_preset_params);
 	
+	// An MSO Synthesizer Instrument
+	mso_synth = new InstrumentMSOsynthesizer(adj_synth,
+		adj_synth->synth_program[_MSO_SYNTH_PROGRAM_23]->active_preset_params);
+	instruments_manager->add_instrument(_INSTRUMENT_NAME_MSO_SYNTH_STR_KEY, 
+		mso_synth);
+	mso_synth->use_external_settings(adj_synth->synth_program[_MSO_SYNTH_PROGRAM_23]->active_preset_params);
+	
 	// Analog Synth Preset Instruments
 	instrument_analog_synth_preset_manager = 
 		InstrumentAnalogSynthPresetManager::get_instance(adj_synth);
@@ -211,7 +219,7 @@ ModSynth::ModSynth()
 		
 		instruments_manager->add_instrument(_INSTRUMENT_NAME_ANALOG_SYNTH_PRESET_STR_KEY + string("-") + to_string(i + 1),
 			instrument_analog_synth_preset_manager->get_preset_instrument(i));
-		instrument_analog_synth_preset_manager->get_preset_instrument(i)->use_external_settings(adj_synth->synth_program[_ANALOG_SYNTH_PRESET_1_PROGRAM_23 + i]->active_preset_params);
+		instrument_analog_synth_preset_manager->get_preset_instrument(i)->use_external_settings(adj_synth->synth_program[_ANALOG_SYNTH_PRESET_1_PROGRAM_30 + i]->active_preset_params);
 	}
 	
 	// An Analog Synth Instrument (implements all the non-sampled based synthesis methods, 
@@ -682,6 +690,16 @@ InstrumentStringSynth *ModSynth::get_string_synth()
 InstrumentPADsynthesizer *ModSynth::get_pad_synth()
 {
 	return pad_synth;
+}
+
+/**
+*   @brief  retruns a pointer to the MSO Synthesizer instrument object
+*   @param  none
+*   @return a pointer to the InstrumentMSOsynthesizer instrument object
+*/
+InstrumentMSOsynthesizer *ModSynth::get_mso_synth()
+{
+	return mso_synth;
 }
 
 /**

@@ -7,7 +7,7 @@
  *					2. Adding support in both old and new MIDI program objects.
  *					3. Definning a global settings handling mutex
  *					4. Adding I2C interface support
- *					5. Adding MIDI Mapper and MIDI Mixer , Hammon Organ anf String Synthesizer instruments
+ *					5. Adding MIDI Mapper and MIDI Mixer ,Hammon Organ and String, MSO and PAD Synthesizer instruments
  *
  *	@brief		This is the main modular synthesizer libraray object.
  *
@@ -71,6 +71,7 @@ class InstrumentMidiMixer;
 class InstrumentAnalogReverbration;
 class InstrumentStringSynth;
 class InstrumentPADsynthesizer;
+class InstrumentMSOsynthesizer;
 class InstrumentAnalogSynthPresetManager;
 
 class AdjSynth;
@@ -114,6 +115,7 @@ public:
 	InstrumentHammondOrgan *get_hammond_organ();
 	InstrumentStringSynth *get_string_synth();
 	InstrumentPADsynthesizer *get_pad_synth();
+	InstrumentMSOsynthesizer *get_mso_synth();
 	InstrumentMidiPlayer *get_midi_player();
 	InstrumentMidiMapper *get_midi_mapper();
 	InstrumentMidiMixer *get_midi_mixer();
@@ -223,6 +225,7 @@ public:
 	InstrumentStringSynth *string_synth;
 	InstrumentAnalogSynth *analog_synth;
 	InstrumentPADsynthesizer *pad_synth;
+	InstrumentMSOsynthesizer *mso_synth;
 	
 	/* The modular synthesizer master volume level (0-100) */
 	int master_volume;

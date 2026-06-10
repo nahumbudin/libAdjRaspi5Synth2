@@ -868,6 +868,10 @@ int mod_synth_get_pad_synth_active_env_mod_release();
 
 int mod_synth_get_pad_synth_int_param(int paramid);
 
+int mod_synth_get_mso_synth_int_param(int paramid);
+
+float *mod_synth_get_mso_synth_morphed_lookup_table();
+
 /**
 *   @brief  Returns a pointer to the PAD synth base harmony shape vector.
 *   @param  None.
@@ -894,6 +898,18 @@ float *mod_synth_get_pad_synth_spectrum();
 int mod_synth_get_pad_synth_spectrum_size();
 
 int mod_synth_pad_synth_event_int(int padid, int eventid, int val);
+
+int mod_synth_mso_synth_event_int(int msoid, int eventid, int val);
+
+/**
+*   @brief  Returns a pointer to the the MSO lookup table.
+*   @param  none
+*   @return float*	ta pointer to the the MSO lookup table.
+*/
+float *mod_synth_get_mso_synth_morphed_lookup_table();
+
+
+
 
 
 /**

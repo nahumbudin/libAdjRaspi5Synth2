@@ -62,6 +62,7 @@
 #include "./Instrument/instrumentHammondOrgan.h"
 #include "./Instrument/instrumentStringSynth.h"
 #include "./Instrument/instrumentPADsynthesizer.h"
+#include "./Instrument/instrumentMSOsynthesizer.h"
 #include "./Instrument/InstrumentKeyboardMapper.h"
 
 #include "./utils/xmlFiles.h"
@@ -400,7 +401,7 @@ int mod_synth_connect_jack_connection(
 	if ((out_client_name == _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY) ||
 		(out_client_name == _INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY) ||
 		(out_client_name == _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY) ||
-		(out_client_name == _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY) ||
+		(out_client_name == _INSTRUMENT_NAME_MSO_SYNTH_STR_KEY) ||
 		(out_client_name == _INSTRUMENT_NAME_PAD_SYNTH_STR_KEY))
 	{
 		is_analog_synth = true;
@@ -1101,6 +1102,13 @@ int mod_synth_get_pad_synth_int_param(int paramid)
 		_PAD_SYNTH_EVENT, paramid);
 }
 
+int mod_synth_get_mso_synth_int_param(int paramid)
+{
+	return ModSynth::get_instance()->get_mso_synth()->get_int_parameter(
+		_MSO_SYNTH_EVENT,
+		paramid);
+}
+
 float *mod_synth_get_pad_synth_base_harmony_profile()
 {
 	std::lock_guard<std::mutex> lock(pad_spectrum_mutex);
@@ -1168,6 +1176,498 @@ int mod_synth_pad_synth_event_int(int padid, int eventid, int val)
 	}
 	
 	return -1;
+}
+
+float *mod_synth_get_mso_morphed_synth_lookup_table()
+{
+	return AdjSynth::get_instance()->synth_program[_MSO_SYNTH_PROGRAM_23]->mso_wtab->morphed_waveform_tab->get_wtab_ptr(); 
+	//programsMsoLUT[0]->morphedWaveformLut->getLUTptr(); }
+}
+
+// No need to call the instrument event handler since the mso synth is not a real instrument 
+// but rather a sound design tool, so we can directly call the AdjSynth event handler for it,
+// and point out the the MSO instrument MIDI program and associated settings.
+// Modulators related events are not part of the generic MSO synth events, so they are handled
+// separately here, and not passed to the generic MSO synth event handler.
+int mod_synth_mso_synth_event_int(int msoid, int eventid, int val)
+{
+	if (msoid != _MSO_SYNTH_EVENT)
+	{
+		return -1;
+	}
+	
+	if (eventid == _MSO_AMP_MOD_ENV_ATTACK) 
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_1_EVENT,
+			_MOD_ADSR_ATTACK,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23, "adjsynth.env_1.attack");
+	}
+	else if (eventid == _MSO_AMP_MOD_ENV_DECAY)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_1_EVENT,
+			_MOD_ADSR_DECAY,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_1.decay");
+	}
+	else if (eventid == _MSO_AMP_MOD_ENV_SUSTAIN)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_1_EVENT,
+			_MOD_ADSR_SUSTAIN,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_1.sustain");
+	}
+	else if (eventid == _MSO_AMP_MOD_ENV_RELEASE)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_1_EVENT,
+			_MOD_ADSR_RELEASE,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_1.release");
+	}
+	else if (eventid == _MSO_AMP_MOD_LFO_RATE)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_1_EVENT,
+			_MOD_LFO_RATE,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_1.rate");
+	}
+	else if (eventid == _MSO_AMP_MOD_LFO_SYMMETRY)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_1_EVENT,
+			_MOD_LFO_SYMMETRY,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_1.symmetry");
+	}
+	else if (eventid == _MSO_AMP_MOD_LFO_WAVEFORM)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_1_EVENT,
+			_MOD_LFO_WAVEFORM,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_1.waveform");
+	}
+	else if (eventid == _MSO_SYM_MOD_ENV_ATTACK) 
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_2_EVENT,
+			_MOD_ADSR_ATTACK,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_2.attack");
+	}
+	else if (eventid == _MSO_SYM_MOD_ENV_DECAY)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_2_EVENT,
+			_MOD_ADSR_DECAY,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_2.decay");
+	}
+	else if (eventid == _MSO_SYM_MOD_ENV_SUSTAIN)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_2_EVENT,
+			_MOD_ADSR_SUSTAIN,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_2.sustain");
+	}
+	else if (eventid == _MSO_SYM_MOD_ENV_RELEASE)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_2_EVENT,
+			_MOD_ADSR_RELEASE,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_2.release");
+	}
+	else if (eventid == _MSO_SYM_MOD_LFO_RATE)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_2_EVENT,
+			_MOD_LFO_RATE,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_2.rate");
+	}
+	else if (eventid == _MSO_SYM_MOD_LFO_SYMMETRY)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_2_EVENT,
+			_MOD_LFO_SYMMETRY,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_2.symmetry");
+	}
+	else if (eventid == _MSO_SYM_MOD_LFO_WAVEFORM)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_2_EVENT,
+			_MOD_LFO_WAVEFORM,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_2.waveform");	
+	}
+	else if (eventid == _MSO_FREQ_MOD_ENV_ATTACK) 
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_3_EVENT,
+			_MOD_ADSR_ATTACK,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_3.attack");
+	}
+	else if (eventid == _MSO_FREQ_MOD_ENV_DECAY)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_3_EVENT,
+			_MOD_ADSR_DECAY,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_3.decay");
+	}
+	else if (eventid == _MSO_FREQ_MOD_ENV_SUSTAIN)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_3_EVENT,
+			_MOD_ADSR_SUSTAIN,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_3.sustain");
+	}
+	else if (eventid == _MSO_FREQ_MOD_ENV_RELEASE)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_3_EVENT,
+			_MOD_ADSR_RELEASE,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_3.release");
+	}
+	else if (eventid == _MSO_FREQ_MOD_LFO_RATE)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_3_EVENT,
+			_MOD_LFO_RATE,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_3.rate");
+	}
+	else if (eventid == _MSO_FREQ_MOD_LFO_SYMMETRY)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_3_EVENT,
+			_MOD_LFO_SYMMETRY,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_3.symmetry");
+	}
+	else if (eventid == _MSO_FREQ_MOD_LFO_WAVEFORM)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_3_EVENT,
+			_MOD_LFO_WAVEFORM,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_3.waveform");
+	}
+	else if (eventid == _FILTER_FREQ)
+	{
+		AdjSynth::get_instance()->filter_event
+				(_FILTER_1_EVENT,
+				_FILTER_FREQ,
+				val,
+				ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+				_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23, 
+			"adjsynth.filter1.frequency");
+	}
+	else if (eventid == _FILTER_Q)
+	{
+		AdjSynth::get_instance()->filter_event
+				(_FILTER_1_EVENT,
+			_FILTER_Q,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23, 
+			"adjsynth.filter1.q");
+	}
+	else if (eventid == _FILTER_OCT)
+	{
+		AdjSynth::get_instance()->filter_event
+				(_FILTER_1_EVENT,
+			_FILTER_OCT,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23, 
+			"adjsynth.filter1.oct");
+	}
+	else if (eventid == _FILTER_KBD_TRACK)
+	{
+		AdjSynth::get_instance()->filter_event
+				(_FILTER_1_EVENT,
+			_FILTER_KBD_TRACK,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23, 
+			"adjsynth.filter1.keyboard_track");
+	}
+	else if (eventid == _FILTER_BAND)
+	{
+		AdjSynth::get_instance()->filter_event
+				(_FILTER_1_EVENT,
+			_FILTER_BAND,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23, 
+			"adjsynth.filter1.band");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_LFO_LEVEL)
+	{
+		AdjSynth::get_instance()->filter_event
+				(_FILTER_1_EVENT,
+			_FILTER_FREQ_MOD_LFO_LEVEL,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23, 
+			"adjsynth.filter1.freq_modulation_lfo_level");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_LFO_WAVEFORM)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_4_EVENT,
+			_MOD_LFO_WAVEFORM,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_4.waveform");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_LFO_RATE)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_4_EVENT,
+			_MOD_LFO_RATE,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_4.rate");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_LFO_SYMMETRY)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_LFO_4_EVENT,
+			_MOD_LFO_SYMMETRY,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.lfo_4.symmetry");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_ENV_LEVEL)
+	{
+		AdjSynth::get_instance()->filter_event
+				(_FILTER_1_EVENT,
+			_FILTER_FREQ_MOD_ENV_LEVEL,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23, 
+			"adjsynth.filter1.freq_modulation_env_level");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_ENV_ATTACK)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_4_EVENT,
+			_MOD_ADSR_ATTACK,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_4.attack");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_ENV_DECAY)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_4_EVENT,
+			_MOD_ADSR_DECAY,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_4.decay");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_ENV_SUSTAIN)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_4_EVENT,
+			_MOD_ADSR_SUSTAIN,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_4.sustain");
+	}
+	else if (eventid == _MSO_FILTER_FREQ_MOD_ENV_RELEASE)
+	{
+		AdjSynth::get_instance()->modulator_event_int(
+			_ENV_4_EVENT,
+			_MOD_ADSR_RELEASE,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+		
+		AdjSynth::get_instance()->update_program_voices_parameter(
+			_MSO_SYNTH_PROGRAM_23,
+			"adjsynth.env_4.release");
+	}
+	else
+	{
+		// All the rest are generic MSO synth evens.
+		return AdjSynth::get_instance()->mso_event_int(
+		msoid,
+			eventid,
+			val,
+			ModSynth::get_instance()->get_mso_synth()->active_settings_params,
+			_MSO_SYNTH_PROGRAM_23);
+	}
+	
+	return -1;
+	
+}
+
+float *mod_synth_get_mso_synth_morphed_lookup_table()
+{
+	return AdjSynth::get_instance()->synth_program[_MSO_SYNTH_PROGRAM_23]->mso_wtab->morphed_waveform_tab->get_wtab_ptr(); 
 }
 
 
@@ -1970,6 +2470,11 @@ int mod_synth_save_pad_synth_patch_file(string path)
 	return mod_synthesizer->get_pad_synth()->save_instrument_active_settings(path, "pad-synthesizer-preset");
 }
 
+int mod_synth_save_mso_synth_patch_file(string path)
+{
+	return mod_synthesizer->get_mso_synth()->save_instrument_active_settings(path, "mso-synthesizer-preset");
+}
+
 
 std::string mod_synth_get_program_patch_name(int prog)
 {
@@ -2259,6 +2764,7 @@ void mod_synth_midi_mixer_set_channel_pan_mod_level(int chan, int lvl)
 		case en_instruments_ids_t::adj_hammond_organ:
 		case en_instruments_ids_t::adj_karplusstrong_string_synth:
 		case en_instruments_ids_t::adj_pad_synth:
+		case en_instruments_ids_t::adj_mso_synth:
 		case en_instruments_ids_t::analog_synth_preset_1:
 		case en_instruments_ids_t::analog_synth_preset_2:
 		case en_instruments_ids_t::analog_synth_preset_3:
@@ -2310,6 +2816,7 @@ void mod_synth_midi_mixer_set_channel_pan_mod_lfo(int chan, int lfo)
 	case en_instruments_ids_t::adj_hammond_organ:
 	case en_instruments_ids_t::adj_karplusstrong_string_synth:
 	case en_instruments_ids_t::adj_pad_synth:
+	case en_instruments_ids_t::adj_mso_synth:
 	case en_instruments_ids_t::analog_synth_preset_1:
 	case en_instruments_ids_t::analog_synth_preset_2:
 	case en_instruments_ids_t::analog_synth_preset_3:
@@ -2361,6 +2868,7 @@ void mod_synth_midi_mixer_set_channel_send_level(int chan, int snd)
 	case en_instruments_ids_t::adj_hammond_organ:
 	case en_instruments_ids_t::adj_karplusstrong_string_synth:
 	case en_instruments_ids_t::adj_pad_synth:
+	case en_instruments_ids_t::adj_mso_synth:
 	case en_instruments_ids_t::analog_synth_preset_1:
 	case en_instruments_ids_t::analog_synth_preset_2:
 	case en_instruments_ids_t::analog_synth_preset_3:

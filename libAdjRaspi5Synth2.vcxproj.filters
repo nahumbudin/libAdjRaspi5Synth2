@@ -226,6 +226,12 @@
     <Filter Include="Source files\Insrtument\Analog Preset Synth">
       <UniqueIdentifier>{3038247d-8705-487b-bea6-46508c3b592d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\Instrument\MSO Synthesizer">
+      <UniqueIdentifier>{fe9485f0-75ef-4c0f-ad01-349a6b3bc3f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\Insrtument\MSO Synthesizer">
+      <UniqueIdentifier>{b0ee222d-7bbf-46e9-9d1d-75a29ff0ebb3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjSynth\synthKeyboard.cpp">
@@ -768,14 +774,17 @@
     <ClCompile Include="Instrument\InstrumentKeyboardMapper.cpp">
       <Filter>Source files\Insrtument\Keyboard Mapper</Filter>
     </ClCompile>
-    <ClCompile Include="Instrument\instrumentPADsynthesizer.cpp">
-      <Filter>Source files\Insrtument\PAD Synthesizer</Filter>
-    </ClCompile>
     <ClCompile Include="Instrument\instrumentStringSynthesizer.cpp">
       <Filter>Source files\Insrtument\KPS String Synthesizer</Filter>
     </ClCompile>
     <ClCompile Include="Instrument\instrumentAnalogSynthPreset.cpp">
       <Filter>Source files\Insrtument\Analog Preset Synth</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrument\instrumentMSOsynthesizer.cpp">
+      <Filter>Source files\Insrtument\MSO Synthesizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrument\instrumentPADsynthesizer.cpp">
+      <Filter>Source files\Insrtument\PAD Synthesizer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1126,6 +1135,9 @@
     </ClInclude>
     <ClInclude Include="Instrument\instrumentAnalogSynthPreset.h">
       <Filter>Header files\Instrument\Analog Preset Synth</Filter>
+    </ClInclude>
+    <ClInclude Include="Instrument\instrumentMSOsynthesizer.h">
+      <Filter>Header files\Instrument\MSO Synthesizer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

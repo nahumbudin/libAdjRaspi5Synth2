@@ -1328,7 +1328,8 @@ int AlsaMidiSysControl::get_midi_client_connection_id(std::string name)
 		return -1;
 	}
 	
-	for (cln = 0; cln < num_of_connections; cln++)
+	//for (cln = 0; cln < num_of_connections; cln++)
+	for (cln = 0; cln < max_num_of_alsa_clients; cln++)
 	{
 		if (name == clients_connections_data.clients_name[cln])
 		{

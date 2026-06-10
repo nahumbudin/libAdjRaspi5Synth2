@@ -61,9 +61,8 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 	int voice, i, logLev, j = 0, value = val;
 	int result = -1;
 
-	switch (msoid)
+	if (msoid == _MSO_1_EVENT || msoid == _MSO_SYNTH_EVENT)
 	{
-	case _MSO_1_EVENT:
 		if (eventid == _MSO_SEGMENT_A_POSITION)
 		{
 			adj_synth_settings_manager->set_int_param_value

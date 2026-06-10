@@ -21,6 +21,7 @@
 #include "instrumentHammondOrgan.h"
 #include "instrumentStringSynth.h"
 #include "instrumentPADsynthesizer.h"
+#include "instrumentMSOsynthesizer.h"
 #include "instrumentMidiMixer.h"
 #include "instrumentAnalogSynthPreset.h"
 #include "../modSynth.h"
@@ -43,7 +44,7 @@ InstrumentsManager::InstrumentsManager(){
 	map_instruments_names[_INSTRUMENT_NAME_HAMMON_ORGAN_STR_KEY] = "Hammond Organ";				
 	map_instruments_names[_INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY] = "Anlog Synth";				
 	map_instruments_names[_INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY] = "Karplus Strong String Synth";
-	map_instruments_names[_INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY] = "Morphed Sinus Synth";		
+	map_instruments_names[_INSTRUMENT_NAME_MSO_SYNTH_STR_KEY] = "MSO Synth";		
 	map_instruments_names[_INSTRUMENT_NAME_PAD_SYNTH_STR_KEY] = "PAD Synth";
 	map_instruments_names[_INSTRUMENT_NAME_MIDI_PLAYER_STR_KEY] = "MIDI Player";
 	map_instruments_names[_INSTRUMENT_NAME_MIDI_MIXER_STR_KEY] = "MIDI Mixer";	
@@ -66,7 +67,7 @@ InstrumentsManager::InstrumentsManager(){
 	map_instruments_type[en_instruments_ids_t::adj_analog_synth] = en_instruments_types_t::synth;
 	map_instruments_type[en_instruments_ids_t::adj_hammond_organ] = en_instruments_types_t::synth;
 	map_instruments_type[en_instruments_ids_t::adj_karplusstrong_string_synth] = en_instruments_types_t::synth;
-	map_instruments_type[en_instruments_ids_t::adj_morphed_sin_synth] = en_instruments_types_t::synth;
+	map_instruments_type[en_instruments_ids_t::adj_mso_synth] = en_instruments_types_t::synth;
 	map_instruments_type[en_instruments_ids_t::adj_pad_synth] = en_instruments_types_t::synth;
 	map_instruments_type[en_instruments_ids_t::adj_midi_player] = en_instruments_types_t::player;
 	map_instruments_type[en_instruments_ids_t::adj_midi_mapper] = en_instruments_types_t::control;
@@ -334,6 +335,15 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 			ModSynth::get_instance()->get_pad_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		}
 	}
+	else if (last_connected == en_instruments_ids_t::adj_mso_synth)
+	{
+		if (ModSynth::get_instance()->get_mso_synth() != NULL)
+		{
+			channels = ModSynth::get_instance()->get_mso_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() & channels_off_mask;
+
+			ModSynth::get_instance()->get_mso_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+		}
+	}
 	else
 	{
 		for (int i = 0; i < _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS; i++)
@@ -486,6 +496,13 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 		ModSynth::get_instance()->get_pad_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
 		midi_channels_allocated_synth[ch] = synth;
 	}
+	else if (synth == en_instruments_ids_t::adj_mso_synth)
+	{
+		channels = ModSynth::get_instance()->get_mso_synth()->alsa_midi_sequencer_events_handler->get_active_midi_channels() | channels_on_mask;
+
+		ModSynth::get_instance()->get_mso_synth()->alsa_midi_sequencer_events_handler->set_active_midi_channels(channels);
+		midi_channels_allocated_synth[ch] = synth;
+	}
 	else
 	{
 		for (int i = 0; i < _MAX_NUM_OF_ANALOG_PRESET_INSTRUMENTS; i++)
@@ -514,7 +531,7 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 							_MIXER_CHAN_1_LEVEL + ch,
 							int_param.value,
 							ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
-							_ANALOG_SYNTH_PRESET_1_PROGRAM_23 + i); // AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
+							_ANALOG_SYNTH_PRESET_1_PROGRAM_30 + i); // AdjSynth::get_instance()->get_active_sketch()); // <<< TODO:
 					}
 
 					sprintf(key_string, "adjsynth.mixer_channel_%i.send", ch + 1);
@@ -530,7 +547,7 @@ int InstrumentsManager::allocate_midi_channel_synth(int ch, en_instruments_ids_t
 							_MIXER_CHAN_1_SEND + ch,
 							int_param.value,
 							ModSynth::get_instance()->get_midi_mixer()->active_settings_params,
-							_ANALOG_SYNTH_PRESET_1_PROGRAM_23 + i);
+							_ANALOG_SYNTH_PRESET_1_PROGRAM_30 + i);
 					}
 
 					_settings_int_param_t value;

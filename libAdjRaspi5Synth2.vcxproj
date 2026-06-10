@@ -186,6 +186,7 @@
     <ClCompile Include="Instrument\instrumentMidiMixer.cpp" />
     <ClCompile Include="Instrument\instrumentMidiPlayer.cpp" />
     <ClCompile Include="Instrument\instrumentMidiPlayerPlaybackThread.cpp" />
+    <ClCompile Include="Instrument\instrumentMSOsynthesizer.cpp" />
     <ClCompile Include="Instrument\instrumentPADsynthesizer.cpp" />
     <ClCompile Include="Instrument\instrumentsManager.cpp" />
     <ClCompile Include="Instrument\instrumentStringSynthesizer.cpp" />
@@ -301,6 +302,7 @@
     <ClInclude Include="Instrument\instrumentMidiMapper.h" />
     <ClInclude Include="Instrument\instrumentMidiPlayer.h" />
     <ClInclude Include="Instrument\instrumentMidiPlayerPlaybackThread.h" />
+    <ClInclude Include="Instrument\instrumentMSOsynthesizer.h" />
     <ClInclude Include="Instrument\instrumentPADsynthesizer.h" />
     <ClInclude Include="Instrument\instrumentsManager.h" />
     <ClInclude Include="Instrument\instrumentMidiMixer.h" />

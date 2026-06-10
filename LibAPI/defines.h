@@ -23,8 +23,9 @@
 #define _INSTRUMENT_NAME_ANALOG_SYNTH_STR_KEY					"Adj-Analog-Synth"
 #define _INSTRUMENT_NAME_ANALOG_SYNTH_PRESET_STR_KEY			"Adj-Analog-Preset-Synth"
 #define _INSTRUMENT_NAME_KARPLUS_STRONG_STRING_SYNTH_STR_KEY	"Karplus-Strong-Strings-Synth"
-#define _INSTRUMENT_NAME_MORPHED_SINUS_SYNTH_STR_KEY			"Morphed-Sinus-Synth"
+#define _INSTRUMENT_NAME_MSO_SYNTH_STR_KEY						"Morphed-Sinus-Synth"
 #define _INSTRUMENT_NAME_PAD_SYNTH_STR_KEY						"Adj-PAD-Synth"
+#define _INSTRUMENT_NAME_MSO_SYNTH_STR_KEY						"Adj-MSO-Synth"
 
 #define _INSTRUMENT_NAME_SYNTH_PRESET_1_STR_KEY					"Adj-Analog-Preset-Synth-1"
 #define _INSTRUMENT_NAME_SYNTH_PRESET_2_STR_KEY					"Adj-Analog-Preset-Synth-2"

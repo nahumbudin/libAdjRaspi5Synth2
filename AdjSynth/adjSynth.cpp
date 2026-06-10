@@ -1366,7 +1366,8 @@ int AdjSynth::update_program_voices_parameter(int program_num, const char* param
 	if (((program_num >= _PROGRAM_16) && (program_num <= _PROGRAM_18)) || // Analog synth sketches
 		(program_num == _HAMMOND_ORGAN_PROGRAM_20) ||
 		(program_num == _STRING_SYNTH_PROGRAM_21) ||
-		(program_num == _PAD_SYNTH_PROGRAM_22)) 
+		(program_num == _PAD_SYNTH_PROGRAM_22) ||
+		(program_num == _MSO_SYNTH_PROGRAM_23)) 
 	{	
 		_settings_params_t* program_params = synth_program[program_num]->get_active_program_preset_params();
 			

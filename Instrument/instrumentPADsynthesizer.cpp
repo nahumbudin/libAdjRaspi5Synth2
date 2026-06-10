@@ -1,7 +1,7 @@
 /**
 * @file		instrumentPADsynthesizer.cpp
 *	@author		Nahum Budin
-*	@date		26-06-2024
+*	@date		14-May-2026
 *	@version	1.0	Initial release
 *					
 *	@brief		Implements a PAD synthesizer instrument.

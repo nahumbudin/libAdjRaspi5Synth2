@@ -82,6 +82,22 @@ int mod_synth_save_pad_synth_patch_file(string path);
 int mod_synth_open_adj_synth_patch_file(std::string path, int channel);
 
 /**
+*   @brief  Save the active MSO Synth parameters as XML file
+*   @param  path settings XML file full path
+*   @return 0 if done
+*/
+int mod_synth_save_mso_synth_patch_file(string path);
+
+/**
+*   @brief  Open settings parameters XML file and set it as the AdjSynth active patch parameters
+*   @param  path settings XML file full path
+*	@param	channel	midi channel (1-16, 0 for active patch).
+*   @return 0 if done
+*/
+int mod_synth_open_mso_synth_patch_file(std::string path, int channel);
+
+
+/**
 *   @brief  Gets a program patch name
 *   @param  prog	program num (1-16)
 *   @return program patch name

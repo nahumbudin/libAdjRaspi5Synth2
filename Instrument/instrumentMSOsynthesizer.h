@@ -1,8 +1,7 @@
 /**
-* @file		instrumentPADsynthesizer.h
+* @file		instrumentMSOsynthesizer.h
 *	@author		Nahum Budin
-*	@date		14-May-2026
-*	
+*	@date		30-May-2026
 *	@version	1.0	Initial release
 *					
 *	@brief		Implements a PAD synthesizer instrument.
@@ -15,12 +14,12 @@
 
 #include "instrument.h"
 
-class InstrumentPADsynthesizer : public Instrument
+class InstrumentMSOsynthesizer : public Instrument
 {
 public:
-	InstrumentPADsynthesizer(AdjSynth *adj_synth, _settings_params_t *external_settings);
+	InstrumentMSOsynthesizer(AdjSynth *adj_synth, _settings_params_t *external_settings);
 
-	~InstrumentPADsynthesizer();
+	~InstrumentMSOsynthesizer();
 
 	void note_on_handler(uint8_t channel, uint8_t note, uint8_t velocity);
 	void note_off_handler(uint8_t channel, uint8_t note, uint8_t velocity);
@@ -51,7 +50,7 @@ public:
 	int get_int_parameter(int instID, int param_id);
 	
 	int init_analog_synth_default_settings(_settings_params_t *params);
-	int init_specific_pad_synthesizer_default_settings(_settings_params_t *params);
+	int init_specific_mso_synthesizer_default_settings(_settings_params_t *params);
 	
 };
 
