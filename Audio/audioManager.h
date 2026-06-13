@@ -119,6 +119,7 @@ private:
 	
 	AudioManager(int mseed);
 	
+	
 	static AudioManager *audio_manager_instance;
 	
 	AlsaHandler *alsa_handler;

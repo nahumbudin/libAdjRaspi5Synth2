@@ -15,7 +15,7 @@
 #include "instrumentControlBoxHandler.h"
 
 InstrumentControlBoxEventsHandler::InstrumentControlBoxEventsHandler()
-	: Instrument(_INSTRUMENT_NAME_CONTROL_BOX_HANDLER_STR_KEY, true, true, false,
+	: Instrument(_INSTRUMENT_NAME_CONTROL_BOX_HANDLER_STR_KEY, true, false, true, // midi in, no audio out, midi out
 		NULL, NULL, AdjSynth::get_instance(), NULL, _INSTRUMENT_TYPE_CONTROL)
 {
 	
@@ -36,6 +36,60 @@ InstrumentControlBoxEventsHandler::InstrumentControlBoxEventsHandler()
 InstrumentControlBoxEventsHandler::~InstrumentControlBoxEventsHandler()
 {
 	
+}
+
+void InstrumentControlBoxEventsHandler::note_on_handler(uint8_t channel, uint8_t note, uint8_t velocity)
+{
+	uint8_t bytes[3];
+	int status;
+
+	bytes[0] = _MIDI_EVENT_NOTE_ON + (channel & 0x0f);
+	bytes[1] = note;
+	// bytes[2] = (int)(velocity * midi_channel_volume_scale[channel]);
+	bytes[2] = velocity;
+
+	std::lock_guard<std::mutex> lock(midiout_mutex);
+	if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
+	{
+		printf("Problem writing midi mapper note on data to MIDI output: %s", snd_strerror(status));
+	}
+}
+
+void InstrumentControlBoxEventsHandler::note_off_handler(uint8_t channel, uint8_t note, uint8_t velocity)
+{
+	uint8_t bytes[3];
+	int status;
+
+	bytes[0] = _MIDI_EVENT_NOTE_OFF + (channel & 0x0f);
+	bytes[1] = note;
+	bytes[2] = velocity;
+
+	std::lock_guard<std::mutex> lock(midiout_mutex);
+	if ((status = snd_rawmidi_write(midiout, bytes, 3)) < 0)
+	{
+		printf("Problem writing midi mapper note off data to MIDI output: %s", snd_strerror(status));
+	}
+}
+
+void InstrumentControlBoxEventsHandler::change_program_handler(uint8_t channel, uint8_t program)
+{
+	
+}
+
+void InstrumentControlBoxEventsHandler::channel_pressure_handler(uint8_t channel, uint8_t val)
+{
+	
+}
+
+void InstrumentControlBoxEventsHandler::controller_event_handler(uint8_t channel, uint8_t num, uint8_t val)
+{
+	
+}
+
+void InstrumentControlBoxEventsHandler::pitch_bend_handler(uint8_t channel, int pitch)
+{
+	
+
 }
 
 void InstrumentControlBoxEventsHandler::sysex_handler(uint8_t *message, int len)

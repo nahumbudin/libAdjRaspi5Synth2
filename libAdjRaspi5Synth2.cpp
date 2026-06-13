@@ -112,6 +112,24 @@ int mod_synth_stop_audio()
 	return mod_synthesizer->stop_audio();
 }
 
+/**
+ *	@brief  Start MP3 recording of the poly mixer output.
+ *	@param	mode	Recording mode: _RECORDING_MODE_LEFT, _RECORDING_MODE_RIGHT, _RECORDING_MODE_STEREO, _RECORDING_MODE_MONO_MIX
+ *			path	Output file path (e.g., "/tmp/recording.mp3")
+ *			bitrate	MP3 bitrate in kbps (default 192)
+ *			sample_rate Sample rate in Hz (default 44100)
+ */
+
+void mod_synth_start_mp3_recording(int mode, const std::string &path, int bitrate, int sample_rate)
+{
+	mod_synthesizer->jack_recorder->start_recording(mode, path, bitrate, sample_rate);
+}
+
+void mod_synth_stop_mp3_recording()
+{
+	mod_synthesizer->jack_recorder->stop_recording();
+}
+
 int mod_synth_init_bt_services()
 {
 	/* Inilize */

@@ -18,6 +18,7 @@
 #pragma once
 
 #include "audioBlock.h"
+#include "audioRecording.h"
 #include "../DSP/dspOsc.h" // for LFOs
 #include "../LibAPI/synthesizer.h"
 #include "../LibAPI/midi.h"
@@ -59,7 +60,12 @@ class AudioPolyMixer : public AudioBlockFloat
 	void set_pan_lfo_modulation_value(float mod_factor, float mod_val, float pan_value, float *value);
 	void calc_next_pan_modulation_value(int voice);
 	
+	void start_mp3_recording(int mode, const std::string &path, int bitrate = 192, int sample_rate = 44100);
+	void stop_mp3_recording();
+	
 	virtual void update(void);
+	
+	AudioRecording *audio_recorder;
 	
 	//void set_amp_1_pan_lfo_modulation_value(float mod_factor, float mod_val, float *value);
 	//void set_amp_2_pan_lfo_modulation_value(float mod_factor, float mod_val, float *value);
@@ -130,6 +136,7 @@ class AudioPolyMixer : public AudioBlockFloat
 		int mapping_mode = _DEFAULT_MIDI_MAPPING_MODE,
 		int num_of_voices = _SYNTH_MAX_NUM_OF_VOICES,
 		AudioBlockFloat **audio_first_update_ptr = NULL);
+	
 
 	/* Holds the number of mixer inputs (voices)*/	
 	static int num_of_inputs;

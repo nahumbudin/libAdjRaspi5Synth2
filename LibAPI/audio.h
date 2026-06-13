@@ -9,6 +9,8 @@
 *	Based on libAdjHeartModSynth_1.h Ver 1.3 9-Jan-2021
 */
 
+#include <string>
+
 #pragma once
 
 #define _LEFT								0
@@ -67,6 +69,12 @@
 #define _MESSAGE_JACK_SERV_INPUT_NOT_RUNNING		1802
 #define _MESSAGE_JACK_SERV_INPUT_RUNNING			1803
 
+// Recording mode constants
+#define _RECORDING_MODE_STEREO		0
+#define _RECORDING_MODE_MONO_MIX	1 // Mix L+R to mono
+#define _RECORDING_MODE_LEFT		2
+#define _RECORDING_MODE_RIGHT		3
+
 
 /**
 *   @brief  Starts the audio service.
@@ -82,5 +90,18 @@ int mod_synth_start_audio();
 *   @return 0 if done
 */
 int mod_synth_stop_audio();
+
+/**
+ *	@brief  Start MP3 recording of the poly mixer output.
+ *	@param	mode	Recording mode: _RECORDING_MODE_LEFT, _RECORDING_MODE_RIGHT, _RECORDING_MODE_STEREO, _RECORDING_MODE_MONO_MIX
+ *			path	Output file path (e.g., "/tmp/recording.mp3")
+ *			bitrate	MP3 bitrate in kbps (default 192)
+ *			sample_rate Sample rate in Hz (default 44100)
+ */
+void mod_synth_start_mp3_recording(int mode, const std::string &path, int bitrate, int sample_rate);
+
+void mod_synth_stop_mp3_recording();
+
+
 
 

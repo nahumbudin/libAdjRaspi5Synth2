@@ -8,7 +8,7 @@
  *					3. Definning a global settings handling mutex
  *					4. Adding I2C interface support
  *					5. Adding MIDI Mapper and MIDI Mixer ,Hammon Organ and String, MSO and PAD Synthesizer instruments
- *
+ *					6. Adding JACK recording support
  *	@brief		This is the main modular synthesizer libraray object.
  *
  *	History:\n
@@ -32,6 +32,9 @@
 #include "./ALSA/controlBoxClientAlsaOutput.h"
 #include "./ALSA/controlBoxExtMidiInClientAlsaOutput.h"
 #include "./ALSA/alsaMidiSystemControl.h"
+
+#include "./Audio/audioJackRecording.h"
+
 
 #include "./Jack/jackConnections.h"
 
@@ -174,6 +177,8 @@ public:
 	AlsaMidiSysControl *alsa_midi_system_control;
 
 	JackConnections *jack_connections;
+	
+	AudioJackRecording *jack_recorder;
 
 	InstrumentControlBoxEventsHandler *control_box_events_handler;
 

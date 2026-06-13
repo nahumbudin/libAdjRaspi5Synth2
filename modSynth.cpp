@@ -429,6 +429,12 @@ ModSynth::ModSynth()
 	// Initilizes the presets data.
 	ModSynthPatches::init();
 	
+	// Create JACK recorder
+	jack_recorder = new AudioJackRecording(_DEFAULT_BLOCK_SIZE);
+
+	// Initialize JACK client - in start_audio()
+	//jack_recorder->init_jack_recording_client();
+	
 	
 	// Start the CPU utilization measuring thread.
 	start_cheack_cpu_utilization_thread();
@@ -864,6 +870,13 @@ int ModSynth::start_audio()
 	int res = 0;
 	// TODO:: res = start FluidSynth audio handling
 	res |= adj_synth->start_audio(audio_driver, sample_rate, audio_block_size);
+	
+	if (res == 0)
+	{
+		usleep(1000000);
+		// Initialize JACK client 
+		jack_recorder->init_jack_recording_client();
+	}
 	
 	return res;
 }

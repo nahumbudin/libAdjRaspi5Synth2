@@ -44,7 +44,7 @@
     <Link>
       <AdditionalLinkerInputs>;%(Link.AdditionalLinkerInputs)</AdditionalLinkerInputs>
       <LibrarySearchDirectories>;%(Link.LibrarySearchDirectories)</LibrarySearchDirectories>
-      <AdditionalLibraryNames>fftw3;%(Link.AdditionalLibraryNames)</AdditionalLibraryNames>
+      <AdditionalLibraryNames>fftw3;mp3lame;%(Link.AdditionalLibraryNames)</AdditionalLibraryNames>
       <LinkerScript />
     </Link>
   </ItemDefinitionGroup>
@@ -128,10 +128,12 @@
     <ClCompile Include="ALSA\controlBoxExtMidiInClientAlsaOutput.cpp" />
     <ClCompile Include="Audio\audioBandEqualizer.cpp" />
     <ClCompile Include="Audio\audioBlock.cpp" />
+    <ClCompile Include="Audio\audioJackRecording.cpp" />
     <ClCompile Include="Audio\audioManager.cpp" />
     <ClCompile Include="Audio\audioMasterLimiter.cpp" />
     <ClCompile Include="Audio\audioOutput.cpp" />
     <ClCompile Include="Audio\audioPolyMixer.cpp" />
+    <ClCompile Include="Audio\audioRecording.cpp" />
     <ClCompile Include="Audio\audioReverb.cpp" />
     <ClCompile Include="Audio\audioVoice.cpp" />
     <ClCompile Include="Bluetooth\rspiBluetoothServicesQueuesVer.cpp" />
@@ -256,10 +258,12 @@
     <ClInclude Include="Audio\audioBandEqualizer.h" />
     <ClInclude Include="Audio\audioBlock.h" />
     <ClInclude Include="Audio\audioCommons.h" />
+    <ClInclude Include="Audio\audioJackRecording.h" />
     <ClInclude Include="Audio\audioManager.h" />
     <ClInclude Include="Audio\audioMasterLimiter.h" />
     <ClInclude Include="Audio\audioOutput.h" />
     <ClInclude Include="Audio\audioPolyMixer.h" />
+    <ClInclude Include="Audio\audioRecording.h" />
     <ClInclude Include="Audio\audioReverb.h" />
     <ClInclude Include="Audio\audioVoice.h" />
     <ClInclude Include="Bluetooth\rspiBluetoothServicesQueuesVer.h" />

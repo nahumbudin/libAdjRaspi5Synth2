@@ -16,6 +16,7 @@
  */
 
 #include "audioPolyMixer.h"
+#include "audioRecording.h"
 
 /* Mutex to controll audio memory blocks allocation (adjSynyh.h) */
 extern pthread_mutex_t voice_mem_blocks_allocation_control_mutex;
@@ -62,6 +63,9 @@ AudioPolyMixer::AudioPolyMixer(
 		voice_pan_lfo[i] = _LFO_NONE;
 		voice_pan_lfo_level[i] = 0.0f;
 	}
+	
+	audio_recorder = new AudioRecording(_DEFAULT_BLOCK_SIZE); // 512
+	
 }
 	
 AudioPolyMixer *AudioPolyMixer::get_instance(
@@ -311,6 +315,24 @@ void AudioPolyMixer::calc_next_pan_modulation_value(int voice)
 }
 
 /**
+ *	@brief  Start MP3 recording of the poly mixer output.
+ *	@param	mode	Recording mode: _RECORDING_MODE_LEFT, _RECORDING_MODE_RIGHT, _RECORDING_MODE_STEREO, _RECORDING_MODE_MONO_MIX
+ *			path	Output file path (e.g., "/tmp/recording.mp3")
+ *			bitrate	MP3 bitrate in kbps (default 192)
+ *			sample_rate Sample rate in Hz (default 44100)
+ */
+
+void AudioPolyMixer::start_mp3_recording(int mode, const std::string &path, int bitrate, int sample_rate)
+{
+	audio_recorder->start_recording(mode, path, bitrate, sample_rate);
+}
+
+void AudioPolyMixer::stop_mp3_recording()
+{
+	audio_recorder->stop_recording();
+}
+
+/**
  *   @brief  Execute an update cycle - get input samples, process and send to
  *				next audio block stage..
  *   @param  none
@@ -451,23 +473,11 @@ void AudioPolyMixer::update()
 			} // if (voice active
 		} // for (voice
 
-		// Recording TODO:
-		/*
-		if (RiffWave::getInstance()->isRecording())
-		{
-			for (i = 0; i < _PERIOD_SIZE; i++)
-			{
-				RiffWave::getInstance()->addLeftSample((int16_t)(blockOutL->data[i] * 32767.f));
-				RiffWave::getInstance()->addRightSample((int16_t)(blockOutR->data[i] * 32767.f));
-			}
-
-			RiffWave::getInstance()->incBlockCount();
-			callbackUpdateRecordingTimeDisplay(RiffWave::getInstance()->getBlockCount() * (uint32_t)_PERIOD_TIME_USEC / (uint32_t)1000);
-		}
-
-			//	if (RiffWave::getInstance()->getRecordingLength() >= 441000)
-			//		RiffWave::getInstance()->stopRecording();
-		*/
+		// Recording is reimpleneted using a JACK client in ModSynth.
+		//if (audio_recorder != nullptr && audio_recorder->is_recording())
+		//{
+		//	audio_recorder->record_samples(block_out_L->data, block_out_R->data, audio_block_size);
+		//}
 
 		// Send output blocks to next stage.
 		transmit_audio_block(block_out_L, _LEFT);

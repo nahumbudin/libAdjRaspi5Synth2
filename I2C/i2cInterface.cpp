@@ -115,6 +115,9 @@ int I2Cinterface::write_reg8(int file_desc, uint8_t reg_num, uint8_t reg_val, ui
 											   data_2_reg_address, data_2_len_reg_address) == 0)
 			{
 				// Successfully recovered
+				
+				fprintf(stderr, "? Write Reg 8 Interface reopened\n");
+				
 				return 0;
 			}
 		}
@@ -139,6 +142,8 @@ int I2Cinterface::read_reg8(uint8_t *reg_val, int file_desc, uint8_t reg_num, ui
 											   data_2_reg_address, data_2_len_reg_address) == 0)
 			{
 				// Successfully recovered
+				fprintf(stderr, "? Read Reg 8Interface reopened\n");
+				
 				return 0;
 			} 
 		}
@@ -158,6 +163,9 @@ int I2Cinterface::read_reg8(uint8_t *reg_val, int file_desc, uint8_t reg_num, ui
 											   data_2_reg_address, data_2_len_reg_address) == 0)
 			{
 				// Successfully recovered
+				
+				fprintf(stderr, "? Read Reg 8 Interface reopened\n");
+				
 				return 0;
 			}
 		}
@@ -185,6 +193,8 @@ int I2Cinterface::read_block(int file_desc, uint8_t reg_num, uint8_t *rd_buff, u
 												   data_2_reg_address, data_2_len_reg_address) == 0)
 				{
 					// Successfully recovered
+					fprintf(stderr, "? Read Block Interface reopened\n");
+					
 					return 0;
 				}
 			}
@@ -205,6 +215,8 @@ int I2Cinterface::read_block(int file_desc, uint8_t reg_num, uint8_t *rd_buff, u
 												   data_2_reg_address, data_2_len_reg_address) == 0)
 				{
 					// Successfully recovered
+					fprintf(stderr, "? Read Block Interface reopened\n");
+					
 					return 0;
 				}
 			}
@@ -278,7 +290,7 @@ void *I2Cinterface::i2c_polling_thread(void *arg)
 	uint8_t write_buffer[512];
 	int res;
 	// Will count down the number of iterations to toggle the LED
-	int green_led_is_on, yellow_led_is_on = 0;
+	int green_led_is_on = 0, yellow_led_is_on = 0;
 	// Used for the non-blocking read from the write commands queue.
 	bool timeout = false, blocking = true, non_blocking = false;
 
@@ -286,205 +298,267 @@ void *I2Cinterface::i2c_polling_thread(void *arg)
 
 	fprintf(stderr, "I2C polling thread started\n");
 	
+	// Object pool to avoid heap allocation in hot path
+	static const int POOL_SIZE = 16;
+	i2cRxData_t rx_data_pool[POOL_SIZE];
+	int pool_index = 0;
+	
+	// Error tracking for retry logic
+	int consecutive_errors = 0;
+	const int MAX_CONSECUTIVE_ERRORS = 3;
+	
+	// Rate limiting for LED updates
+	int led_update_counter = 0;
+	const int LED_UPDATE_INTERVAL = 10; // Update LED every 10th message
+	
 	while (i2c_interface->i2c_polling_thread_is_running)
 	{
+		bool had_error = false;
+	
+		// ==================== DATA BLOCK 1 ====================
 		if ((i2c_interface->data_1_len_reg_address != 0) &&
 			(i2c_interface->data_1_reg_address != 0))
 		{
-			// Get the size of  block 1 data message
-			res = i2c_interface->read_reg8(&mssg_size,i2c_interface->i2c_file_descriptor, i2c_interface->data_1_len_reg_address, 
-													read_buffer, write_buffer);
+			// Get the size of block 1 data message
+			res = i2c_interface->read_reg8(&mssg_size, 
+				i2c_interface->i2c_file_descriptor, 
+				i2c_interface->data_1_len_reg_address, 
+				read_buffer, 
+				write_buffer);
 			if (res < 0)
 			{
-				continue;
+				had_error = true;
 			}
-
-			//std::cout << " Mssg size: " << static_cast<int>(mssg_size) << std::endl;
-
-			if (mssg_size > 0)
+			else if (mssg_size > 0)
 			{
 				// Read the block data message
-				res = i2c_interface->read_block(i2c_interface->i2c_file_descriptor, i2c_interface->data_1_reg_address,
-												read_buffer, write_buffer, mssg_size);
+				res = i2c_interface->read_block(i2c_interface->i2c_file_descriptor, 
+					i2c_interface->data_1_reg_address,
+					read_buffer, 
+					write_buffer, 
+					mssg_size);
 
 				if (res >= 0)
 				{
-					// Debug printing
-					/*
-					for (int i = 0; i < mssg_size; i++)
-					{
-						std::cout << " 0x"
-								  << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
-								  << (static_cast<int>(read_buffer[i]) & 0xFF);
-					}
-
-					std::cout << std::endl;
-					*/
-
-					// Process the read data 1
-					i2cRxData_t *rx_data = new i2cRxData_t();
+					// Use object pool instead of new
+					i2cRxData_t *rx_data = &rx_data_pool[pool_index];
+					pool_index = (pool_index + 1) % POOL_SIZE;
+				
 					rx_data->interface_num = i2c_interface->interface_num;
 					rx_data->mssg_len = mssg_size;
 					std::copy(read_buffer, read_buffer + mssg_size, rx_data->message);
 					alsa_control_box_i2c_interface_rx_queue.enqueue(rx_data);
 
-					if (i2c_interface->interface_num == _I2C_INTERFACE_NUMBER_CONTROL_BOARD)
+					// Rate-limited LED updates
+					led_update_counter++;
+					if (led_update_counter % LED_UPDATE_INTERVAL == 0)
 					{
-						// Toggle LED state to indicate activity
-						yellow_led_is_on = 5;
-
-						res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor, _REG_YELLOW_LED_ON, 0xff, write_buffer);
+						if (i2c_interface->interface_num == _I2C_INTERFACE_NUMBER_CONTROL_BOARD)
+						{
+							yellow_led_is_on = 5;
+							res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor, 
+								_REG_YELLOW_LED_ON, 
+								0xff, 
+								write_buffer);
+						}
+						else
+						{
+							i2cWriteRegisterCommandData_t *command = new i2cWriteRegisterCommandData_t;
+							command->interface_num = i2c_interface->interface_num;
+							command->reg_address = _REG_YELLOW_LED_ON;
+							command->reg_value = 0x5;
+							I2Cinterface::write_reg_8_commands_queue.enqueue(command);
+						}
 					}
-					else
-					{
-						// For other interfaces - can add other handling here
-						i2cWriteRegisterCommandData_t *command = new (i2cWriteRegisterCommandData_t);
-						command->interface_num = i2c_interface->interface_num;
-						command->reg_address = _REG_YELLOW_LED_ON;
-						command->reg_value = 0x5; // This value N will set the LED on for a duration of Nx50mmsec
-
-						I2Cinterface::write_reg_8_commands_queue.enqueue(command);
-					}
+				
+					// Reset error counter on success
+					consecutive_errors = 0;
+				}
+				else
+				{
+					had_error = true;
 				}
 			}
 		}
 
+		// ==================== DATA BLOCK 2 ====================
 		if ((i2c_interface->data_2_len_reg_address != 0) &&
 			(i2c_interface->data_2_reg_address != 0))
 		{
-			// Get the size of  block 2 data message
-			res = i2c_interface->read_reg8(&mssg_size, i2c_interface->i2c_file_descriptor, i2c_interface->data_2_len_reg_address,
-												 read_buffer, write_buffer);
+			// Get the size of block 2 data message
+			res = i2c_interface->read_reg8(&mssg_size, 
+				i2c_interface->i2c_file_descriptor, 
+				i2c_interface->data_2_len_reg_address,
+				read_buffer, 
+				write_buffer);
 			if (res < 0)
 			{
-				continue;
+				had_error = true;
 			}
-			
-			//std::cout << " Mssg size: " << static_cast<int>(mssg_size) << std::endl;
-
-			if (mssg_size > 0)
+			else if (mssg_size > 0)
 			{
 				// Read the block data message
-				res = i2c_interface->read_block(i2c_interface->i2c_file_descriptor, i2c_interface->data_2_reg_address,
-												read_buffer, write_buffer, mssg_size);
+				res = i2c_interface->read_block(i2c_interface->i2c_file_descriptor, 
+					i2c_interface->data_2_reg_address,
+					read_buffer, 
+					write_buffer, 
+					mssg_size);
 
 				if (res >= 0)
 				{
-					// Debug printing
-					/*
-					for (int i = 0; i < mssg_size; i++)
+					// Use object pool instead of new
+					i2cRxData_t *rx_data = &rx_data_pool[pool_index];
+					pool_index = (pool_index + 1) % POOL_SIZE;
+				
+					rx_data->interface_num = i2c_interface->interface_num;
+					rx_data->mssg_len = mssg_size;
+					std::copy(read_buffer, read_buffer + mssg_size, rx_data->message);
+					alsa_control_box_i2c_interface_rx_queue.enqueue(rx_data);
+
+					//fprintf(stderr, "I2C polling thread received new block len %i\n", mssg_size);
+
+					// Rate-limited LED updates
+					led_update_counter++;
+					if (led_update_counter % LED_UPDATE_INTERVAL == 0)
 					{
-						std::cout << " 0x"
-								  << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
-								  << (static_cast<int>(read_buffer[i]) & 0xFF);
+						if (i2c_interface->interface_num == _I2C_INTERFACE_NUMBER_CONTROL_BOARD)
+						{
+							yellow_led_is_on = 5;
+							res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor, 
+								_REG_YELLOW_LED_ON, 
+								0xff, 
+								write_buffer);
+						}
+						else
+						{
+							i2cWriteRegisterCommandData_t *command = new i2cWriteRegisterCommandData_t;
+							command->interface_num = i2c_interface->interface_num;
+							command->reg_address = _REG_YELLOW_LED_ON;
+							command->reg_value = 0x5;
+							I2Cinterface::write_reg_8_commands_queue.enqueue(command);
+						}
 					}
-					*/
-
-					std::cout << std::endl;
-
-					if (i2c_interface->interface_num == _I2C_INTERFACE_NUMBER_CONTROL_BOARD)
-					{
-						// Toggle LED state to indicate activity
-						yellow_led_is_on = 5;
-
-						res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor, _REG_YELLOW_LED_ON, 0xff, write_buffer);
-					}
-					else
-					{
-						// For other interfaces
-						i2cWriteRegisterCommandData_t *command = new (i2cWriteRegisterCommandData_t);
-						command->interface_num = i2c_interface->interface_num;
-						command->reg_address = _REG_YELLOW_LED_ON;
-						command->reg_value = 0x5;	// This value N will set the LED on for a duration of Nx50mmsec
-
-						I2Cinterface::write_reg_8_commands_queue.enqueue(command);
-					}
-
+				
+					// Reset error counter on success
+					consecutive_errors = 0;
+				}
+				else
+				{
+					had_error = true;
 				}
 			}
 		}
 
+		// Error handling with retry logic
+		if (had_error)
+		{
+			consecutive_errors++;
+		
+			if (consecutive_errors >= MAX_CONSECUTIVE_ERRORS)
+			{
+				// Only reopen interface after multiple consecutive failures
+				std::cerr << "I2C: Too many consecutive errors (" << consecutive_errors 
+						  << "), attempting to reopen interface..." << std::endl;
+			
+				if (i2c_interface->open_interface(i2c_interface->i2c_bus_number) == 0)
+				{
+					if (i2c_interface->set_slave_address(i2c_interface->slave_address) == 0)
+					{
+						std::cerr << "I2C: Interface successfully reopened" << std::endl;
+						consecutive_errors = 0;
+					}
+				}
+				else
+				{
+					std::cerr << "I2C: Failed to reopen interface" << std::endl;
+					// Don't reset counter - will try again next time
+				}
+			}
+		}
+
+		// ==================== WRITE COMMANDS QUEUE (CONTROL BOARD ONLY) ====================
 		if (i2c_interface->interface_num == _I2C_INTERFACE_NUMBER_CONTROL_BOARD)
 		{
-			// Wait for new data - non blocking
-			i2cWriteRegisterCommandData_t *command = I2Cinterface::write_reg_8_commands_queue.dequeue(0, &timeout, &non_blocking);
-			// Get all queued commands
+			// Process write commands from queue - non-blocking
+			i2cWriteRegisterCommandData_t *command = 
+				I2Cinterface::write_reg_8_commands_queue.dequeue(0, &timeout, &non_blocking);
+		
+			// Process all queued commands
 			while (command != NULL)
 			{
-				// Process the command
+				// Only process commands for other interfaces (not this one)
 				if (command->interface_num != i2c_interface->interface_num)
 				{
 					if (command->reg_address == _REG_YELLOW_LED_ON)
 					{
 						yellow_led_is_on = command->reg_value;
-						// Write the register value
 						res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor,
-														command->reg_address,
-														command->reg_value,
-														write_buffer);
+							command->reg_address,
+							command->reg_value,
+							write_buffer);
 					}
 					else if (command->reg_address == _REG_GREEN_LED_ON)
 					{
 						green_led_is_on = command->reg_value;
-						// Write the register value
 						res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor,
-														command->reg_address,
-														command->reg_value,
-														write_buffer);
+							command->reg_address,
+							command->reg_value,
+							write_buffer);
 					}
 					else if (command->reg_address == _REG_YELLOW_LED_OFF)
 					{
-						// Write the register value
 						res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor,
-														command->reg_address,
-														command->reg_value,
-														write_buffer);
-
-						yellow_led_is_on = 5;
+							command->reg_address,
+							command->reg_value,
+							write_buffer);
+						yellow_led_is_on = 0;
 					}
 					else if (command->reg_address == _REG_GREEN_LED_OFF)
 					{
-						// Write the register value
 						res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor,
-														command->reg_address,
-														command->reg_value,
-														write_buffer);
-
-						green_led_is_on = 5;
+							command->reg_address,
+							command->reg_value,
+							write_buffer);
+						green_led_is_on = 0;
 					}
-
-					delete command;
-					command = I2Cinterface::write_reg_8_commands_queue.dequeue(0, &timeout, &non_blocking);
 				}
+			
+				delete command;
+				command = I2Cinterface::write_reg_8_commands_queue.dequeue(0, &timeout, &non_blocking);
 			}
 
+			// LED countdown timers
 			if (yellow_led_is_on > 0)
 			{
 				yellow_led_is_on--;
-
 				if (yellow_led_is_on <= 0)
 				{
 					yellow_led_is_on = 0;
-					// Turn off LED
-
-					res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor, _REG_YELLOW_LED_OFF, 0xff, write_buffer);
+					res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor, 
+						_REG_YELLOW_LED_OFF, 
+						0xff, 
+						write_buffer);
 				}
 			}
-			
+		
 			if (green_led_is_on > 0)
 			{
 				green_led_is_on--;
 				if (green_led_is_on <= 0)
 				{
 					green_led_is_on = 0;
-					// Turn off LED
-					res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor, _REG_GREEN_LED_OFF, 0xff, write_buffer);
+					res = i2c_interface->write_reg8(i2c_interface->i2c_file_descriptor, 
+						_REG_GREEN_LED_OFF, 
+						0xff, 
+						write_buffer);
 				}
 			}
 		}
 
-		usleep(50000);
+		// 
+		usleep(1000); 
 	}
 	
+	fprintf(stderr, "I2C polling thread stopped\n");
 	return NULL;
 }

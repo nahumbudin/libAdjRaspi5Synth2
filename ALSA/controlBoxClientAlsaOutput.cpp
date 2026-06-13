@@ -171,9 +171,13 @@ void *ControlBoxClientAlsaOutput::alsaOutThread(void *threadid)
 			// Collect all available data
 			for (count = 0; count < control_box_itc_rx_alsa_channel_data->mssg_len; count++)
 			{
-				bytes[count] = control_box_itc_rx_alsa_channel_data->message[count - last_count];
+				//bytes[count] = control_box_itc_rx_alsa_channel_data->message[count - last_count];
+				bytes[last_count + count] = control_box_itc_rx_alsa_channel_data->message[count];
 			}
-			delete control_box_itc_rx_alsa_channel_data;
+
+			last_count += control_box_itc_rx_alsa_channel_data->mssg_len;
+
+			// delete control_box_itc_rx_alsa_channel_data; // Pool allocation at I2C polling thread, no need to delete
 			control_box_itc_rx_alsa_channel_data = I2Cinterface::alsa_control_box_i2c_interface_rx_queue.dequeue(0, &timeout, &non_blocking);
 			//			printf("I2C in data alsa thread while data\n");
 		}
