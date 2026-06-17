@@ -320,6 +320,8 @@ Error - must be no more than 64
 #define _PAD_1_EVENT								60
 
 #define _SEQUENCER_1_EVENT							65
+	
+#define _MIDI_PLAYER_EVENT							66
 
 #define _RECORDER_1_EVENT							70
 

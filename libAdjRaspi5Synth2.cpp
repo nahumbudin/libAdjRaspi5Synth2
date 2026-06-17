@@ -1,4 +1,4 @@
-/**
+﻿/**
 * @file		libAdjRaspi5Synth_1_1.cpp
 *	@author		Nahum Budin
 *	@date		22-Sep-2025
@@ -2684,6 +2684,71 @@ void mod_synth_register_midi_player_song_remaining_playing_time_update_callback(
 	mod_synthesizer->midi_player->register_midi_player_song_remaining_time_update_callback(ptr);
 }
 
+/******************************************************************
+ *********************** Http Bridge API **************************
+ ******************************************************************/
+
+namespace {
+	HttpBridge* bridge_instance = nullptr;
+	lib_api_callback_t user_callback = nullptr; // Where the function pointer is stored
+	std::mutex api_mutex;
+}
+
+void mod_synthesizer_http_server_register_callback(lib_api_callback_t callback) {
+	std::lock_guard<std::mutex> lock(api_mutex);
+	user_callback = callback; // Safely stores 'handle_incoming_parameters'
+    
+	// If the server happens to already be running, link it immediately
+	if (bridge_instance != nullptr) {
+		bridge_instance->register_parameter_update_callback([](int mod, int sub, int param, const std::string& type, const std::vector<uint8_t>& data) {
+			if (user_callback) {
+				user_callback(mod, sub, param, type.c_str(), data.data(), static_cast<int>(data.size()));
+			}
+		});
+	}
+}
+
+bool mod_synthesizer_http_server_start(const char* host, int port) {
+	std::string targetHost = (host == nullptr) ? "0.0.0.0" : host;
+
+	{
+		std::lock_guard<std::mutex> lock(api_mutex);
+		if (bridge_instance != nullptr) {
+			if (bridge_instance->is_running()) return true;
+			delete bridge_instance;
+		}
+
+		// Create the brand-new bridge instance inside the library context
+		bridge_instance = new HttpBridge();
+        
+		// =====================================================================
+		// 🔥 CRITICAL FIX: Bind the inner loop to the stored user_callback!
+		// Even if user_callback was registered hours ago in the constructor, 
+		// this lambda will look up its current value whenever a web packet hits.
+		// =====================================================================
+		bridge_instance->register_parameter_update_callback([](int mod, int sub, int param, const std::string& type, const std::vector<uint8_t>& data) {
+			if (user_callback != nullptr) {
+				user_callback(mod, sub, param, type.c_str(), data.data(), static_cast<int>(data.size()));
+			}
+		});
+	} // Unlock api_mutex here to prevent deadlocks before listening
+
+	return bridge_instance->start(targetHost, port);
+}
+
+void mod_synthesizer_http_server_stop() {
+	std::lock_guard<std::mutex> lock(api_mutex);
+	if (bridge_instance != nullptr) {
+		bridge_instance->stop();
+		delete bridge_instance;
+		bridge_instance = nullptr;
+	}
+}
+
+bool mod_synthesizer_http_server_is_running() {
+	std::lock_guard<std::mutex> lock(api_mutex);
+	return (bridge_instance != nullptr && bridge_instance->is_running());
+}
 
 /******************************************************************
  *********************** Control Box API **************************

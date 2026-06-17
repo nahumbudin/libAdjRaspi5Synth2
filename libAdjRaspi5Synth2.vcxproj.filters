@@ -232,6 +232,12 @@
     <Filter Include="Source files\Insrtument\MSO Synthesizer">
       <UniqueIdentifier>{b0ee222d-7bbf-46e9-9d1d-75a29ff0ebb3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\HTTP">
+      <UniqueIdentifier>{37c400db-c77c-4aa9-bd43-4bb80e444c72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\HTTP">
+      <UniqueIdentifier>{8aee3067-a27c-431c-92d8-50e69e17cbfd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjSynth\synthKeyboard.cpp">
@@ -792,6 +798,18 @@
     <ClCompile Include="Audio\audioJackRecording.cpp">
       <Filter>Source files\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="HTTP\HttpBriedge.cpp">
+      <Filter>Source files\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTP\HttpBridge_IntParamsDispatcher.cpp">
+      <Filter>Source files\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTP\HttpBridge_ByteArrayParamsDispatcher.cpp">
+      <Filter>Source files\HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTP\HttpBridge_FloatBoolStringDispatchers.cpp">
+      <Filter>Source files\HTTP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdjSynth\synthKeyboard.h">
@@ -1150,6 +1168,12 @@
     </ClInclude>
     <ClInclude Include="Audio\audioJackRecording.h">
       <Filter>Header files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\HttpBridge.h">
+      <Filter>Header files\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="LibAPI\http.h">
+      <Filter>Header files\LibApi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

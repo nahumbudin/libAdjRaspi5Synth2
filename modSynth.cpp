@@ -303,6 +303,14 @@ ModSynth::ModSynth()
 		0, 0);
 	// Start the I2C polling thread to read the control board state and events.
 	i2c_interface_control_board->start_i2c_polling_thread();
+	
+	// HTTP Server/Bridge for remote control and monitoring (optional, can be used for a web-based GUI or API)
+	//http_bridge = new HttpBridge();
+	
+	// Temp
+	// Start the worker engine
+	//http_bridge->start("0.0.0.0", 8080);
+	
 
 	// The Control Box events handler Instrument.
 	control_box_events_handler = new InstrumentControlBoxEventsHandler();

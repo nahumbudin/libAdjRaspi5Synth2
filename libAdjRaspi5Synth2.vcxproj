@@ -170,6 +170,10 @@
     <ClCompile Include="DSP\dspWavetable.cpp" />
     <ClCompile Include="FluidSynth\fluidSynthInterface.cpp" />
     <ClCompile Include="FluidSynth\fluidSynthPresets.cpp" />
+    <ClCompile Include="HTTP\HttpBridge_ByteArrayParamsDispatcher.cpp" />
+    <ClCompile Include="HTTP\HttpBridge_FloatBoolStringDispatchers.cpp" />
+    <ClCompile Include="HTTP\HttpBridge_IntParamsDispatcher.cpp" />
+    <ClCompile Include="HTTP\HttpBriedge.cpp" />
     <ClCompile Include="I2C\i2cInterface.cpp" />
     <ClCompile Include="Instrument\analogEqualizerPresets.cpp" />
     <ClCompile Include="Instrument\analogReverbrationPresets.cpp" />
@@ -292,6 +296,7 @@
     <ClInclude Include="DSP\dspWaveformTable.h" />
     <ClInclude Include="DSP\dspWavetable.h" />
     <ClInclude Include="FluidSynth\fluidSynthInterface.h" />
+    <ClInclude Include="HTTP\HttpBridge.h" />
     <ClInclude Include="I2C\i2cInterface.h" />
     <ClInclude Include="Instrument\instrumentAnalogSynthPreset.h" />
     <ClInclude Include="Instrument\instrument.h" />
@@ -323,6 +328,7 @@
     <ClInclude Include="LibAPI\fluidSynth.h" />
     <ClInclude Include="LibAPI\gui.h" />
     <ClInclude Include="LibAPI\hammondOrgan.h" />
+    <ClInclude Include="LibAPI\http.h" />
     <ClInclude Include="LibAPI\libAdjRaspi5SynthAPI.h" />
     <ClInclude Include="LibAPI\midi.h" />
     <ClInclude Include="LibAPI\modSynthAPI.h" />

@@ -46,6 +46,8 @@
 
 #include "./I2C/i2cInterface.h"
 
+#include "./HTTP/HttpBridge.h"
+
 //#include "./Instrument/instrumentMidiMixer.h"
 
 //#include "./Instrument/instrumentFluidSynth.h"
@@ -195,6 +197,8 @@ public:
 	PatchsHandler *patches_handler;
 	
 	AdjSynth *adj_synth;
+	
+	HttpBridge *http_bridge;
 	
 	Settings *general_settings_manager;
 	Settings *fluid_synth_settings_manager;
