@@ -54,6 +54,9 @@ Error - must be no more than 64
 #define _OSC_WAVEFORM_TRIANGLE						3
 #define _OSC_WAVEFORM_SAMPHOLD						4
 
+#define _SYMMETRY_MAX_INT							95
+#define _SYMMETRY_MIN_INT							5			
+
 #define _OSC_DETUNE_MAX_OCTAVE						6
 #define _OSC_DETUNE_MIN_OCTAVE						-6
 #define _OSC_DETUNE_MAX_SEMITONES					11
@@ -141,6 +144,46 @@ Error - must be no more than 64
 #define _NUM_OF_LFOS				6
 #define _NUM_OF_LFO_DELAY_OPTIONS	5
 #define _LFO_NONE					0
+	
+#define _LFO_SELECTED				7 // Used for the GUI common LFO controls frame	
+	
+#define _LFO_1						1
+#define _LFO_1_DELAYED_500MS		2	
+#define _LFO_1_DELAYED_1000MS		3
+#define _LFO_1_DELAYED_1500MS		4
+#define _LFO_1_DELAYED_2000MS		5
+	
+#define _LFO_2						6
+#define _LFO_2_DELAYED_500MS		7
+#define _LFO_2_DELAYED_1000MS		8
+#define _LFO_2_DELAYED_1500MS		9
+#define _LFO_2_DELAYED_2000MS		10
+	
+#define _LFO_3						11
+#define _LFO_3_DELAYED_500MS		12
+#define _LFO_3_DELAYED_1000MS		13
+#define _LFO_3_DELAYED_1500MS		14
+#define _LFO_3_DELAYED_2000MS		15
+	
+#define _LFO_4						16
+#define _LFO_4_DELAYED_500MS		17
+#define _LFO_4_DELAYED_1000MS		18
+#define _LFO_4_DELAYED_1500MS		19
+#define _LFO_4_DELAYED_2000MS		20
+	
+#define _LFO_5						21
+#define _LFO_5_DELAYED_500MS		22
+#define _LFO_5_DELAYED_1000MS		23
+#define _LFO_5_DELAYED_1500MS		24
+#define _LFO_5_DELAYED_2000MS		25
+	
+#define _LFO_6						26
+#define _LFO_6_DELAYED_500MS		27
+#define _LFO_6_DELAYED_1000MS		28
+#define _LFO_6_DELAYED_1500MS		29
+#define _LFO_6_DELAYED_2000MS		30
+
+/*	
 #define _LFO_1						1
 #define _LFO_2						2
 #define _LFO_3						3
@@ -176,7 +219,7 @@ Error - must be no more than 64
 #define _LFO_4_DELAYED_2000MS		28
 #define _LFO_5_DELAYED_2000MS		29
 #define _LFO_6_DELAYED_2000MS		30
-
+*/
 
 #define _NUM_OF_ADSRS				6
 #define _ENV_NONE					0
@@ -294,8 +337,8 @@ Error - must be no more than 64
 #define _ENABLE										((bool)true)
 #define _DISABLE									((bool)false)
 		
-#define _FILTER_1_EVENT								13
-#define _FILTER_2_EVENT								14
+#define _FILTER_1_EVENT								26 // 13
+#define _FILTER_2_EVENT								27 //
 
 #define _AMP_CH1_EVENT								15
 #define _AMP_CH2_EVENT								16
@@ -710,6 +753,7 @@ Error - must be no more than 64
 #define _MSO_FILTER_SEND_1							1283
 #define _MSO_FILTER_SEND_2							1284
 #define _MSO_ENABLE									1285
+#define _MSO_PRESET									1286
 
 #define _MSO_FREQ_MOD_LFO							1290
 #define _MSO_FREQ_MOD_LFO_LEVEL						1291

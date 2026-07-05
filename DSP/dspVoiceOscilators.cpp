@@ -168,7 +168,7 @@ void DSP_Voice::set_osc_1_freq_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		osc_1_freq_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		osc_1_freq_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		osc_1_freq_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }
@@ -221,7 +221,7 @@ void DSP_Voice::set_osc_1_pwm_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && lfo <= (_LFO_6_DELAYED_2000MS))
 	{
-		osc_1_pwm_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		osc_1_pwm_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		osc_1_pwm_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }
@@ -274,7 +274,7 @@ void DSP_Voice::set_osc_1_amp_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		osc_1_amp_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		osc_1_amp_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		osc_1_amp_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }
@@ -585,7 +585,8 @@ void DSP_Voice::set_osc_1_freq_lfo_modulation(float mod_factor, float mod_val)
 {
 	float value = mod_val;
 	
-	if (adsr_1->note_on_elapsed_time < osc_1_amp_mod_lfo_delay)
+	// All ADSRs are triggered at the same time, so we can use any of them to get note-on time for delayed LFO activation
+	if (adsr_1->note_on_elapsed_time < osc_1_freq_mod_lfo_delay)
 	{
 		// Delayed activation
 		value = 0.5f;
@@ -654,7 +655,7 @@ void DSP_Voice::set_osc_2_freq_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		osc_2_freq_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		osc_2_freq_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		osc_2_freq_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }
@@ -707,7 +708,7 @@ void DSP_Voice::set_osc_2_pwm_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && lfo <= (_LFO_6_DELAYED_2000MS))
 	{
-		osc_2_pwm_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		osc_2_pwm_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		osc_2_pwm_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }
@@ -760,7 +761,7 @@ void DSP_Voice::set_osc_2_amp_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		osc_2_amp_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		osc_2_amp_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		osc_2_amp_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }

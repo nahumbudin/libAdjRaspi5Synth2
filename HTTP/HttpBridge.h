@@ -12,6 +12,19 @@
 #include "../httplib.h"
 #include "../json.hpp"
 
+#include "../utils/safeQueues.h"
+
+typedef struct httpMidiRxData
+{
+	httpMidiRxData()
+		: interface_num(16)
+		, mssg_len(0) {}
+
+	int interface_num;
+	uint8_t message[256];
+	int mssg_len;
+} httpMidiRxData_t;
+
 class HttpBridge
 {
 public:
@@ -39,6 +52,9 @@ public:
 	void get_parm(int module_id, int sub_module_id, int param_id, bool& val);
 	void get_parm(int module_id, int sub_module_id, int param_id, std::string& val);
 	void get_parm(int module_id, int sub_module_id, int param_id, std::vector<uint8_t>& val);
+	
+	/* A queue used to send into the system the incoming MIDI data as ALSA midi events */
+	static SafeQueue<httpMidiRxData_t *> alsa_midi_http_interface_rx_queue;
 
 private:
 	httplib::Server m_server;
@@ -52,6 +68,11 @@ private:
 	bool isValidBase64(const std::string& s) const;
 	std::vector<uint8_t> decodeBase64(const std::string& input) const;
 	std::string encodeBase64(const std::vector<uint8_t>& input) const;
+	
+	// Object pool to avoid heap allocation in hot path
+	static const int POOL_SIZE = 16;
+	httpMidiRxData_t rx_data_pool[POOL_SIZE];
+	int pool_index = 0;
 	
 	void set_int_parm_dispatcher(int module_id, int sub_module_id, int param_id, int val);
 	void set_float_parm_dispatcher(int module_id, int sub_module_id, int param_id, float val);

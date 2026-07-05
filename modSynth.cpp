@@ -61,6 +61,8 @@
 int ModSynth::cpu_utilization = 0;
 volatile bool cheack_cpu_utilization_thread_is_running;
 
+AudioRecording *ModSynth::audio_recorder;
+
 
 /*************************** ALSA MIDI *******************************************/
 
@@ -155,6 +157,7 @@ ModSynth::ModSynth()
 	 * 32500 MIDI UART.  */
 	midi_ext_interface = MidiExtInterface::get_midi_ext_interface_instance();
 	
+	audio_recorder = new AudioRecording(_DEFAULT_BLOCK_SIZE); // 512 
 	
 	/* A singleton of the AdjSynth. */ // TODO: can it be above
 	adj_synth = AdjSynth::get_instance();

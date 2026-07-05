@@ -57,9 +57,26 @@
 int AdjSynth::noise_event_int(int noiseid, int eventid, int val, _settings_params_t *params, int program)
 {
 	int result = -1;
+	bool bool_val;
 	
 	switch (eventid)
 	{
+		
+	case _NOISE_ENABLE:
+	// When using the HTTP API, the boolean value is sent as integer 0 or 1, so we need to handle it as integer and convert it to boolean.
+		bool_val = (val != 0);
+		
+		adj_synth_settings_manager->set_bool_param_value
+			(params,
+			"adjsynth.noise.enabled",
+			bool_val,
+			_EXEC_CALLBACK,
+			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.noise.enabled");
+		
+		break;
+	
 	case _NOISE_COLOR:
 		adj_synth_settings_manager->set_int_param_value
 			(params,

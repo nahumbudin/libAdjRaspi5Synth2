@@ -71,6 +71,9 @@
 
 static std::mutex pad_spectrum_mutex;
 
+// Static storage for the registered callback
+static analog_synth_selective_update_callback_t registered_analog_selective_update_callback = NULL;
+
 /******************************************************************
  *********************** ModSynth Management API **************************
  ******************************************************************/
@@ -600,6 +603,24 @@ void mod_synth_register_callback_wrapper_close_instrument_pannel_name(func_ptr_v
 void mod_synth_register_callback_wrapper_open_instrument_pannel_name(func_ptr_void_string_t ptr)
 {
 	mod_synthesizer->instruments_manager->register_callback_open_instrument_pannel_name(ptr);
+}
+
+void mod_synth_register_callback_analog_selective_update(
+    analog_synth_selective_update_callback_t callback)
+{
+	registered_analog_selective_update_callback = callback;
+}
+
+/**
+ * @brief Trigger the registered callback (called from library code)
+ * @param updateBitmap Bitmap indicating which components to update
+ */
+void mod_synth_trigger_analog_selective_update(uint32_t updateBitmap)
+{
+	if (registered_analog_selective_update_callback != NULL)
+	{
+		registered_analog_selective_update_callback(updateBitmap);
+	}
 }
 
 

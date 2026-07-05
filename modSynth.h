@@ -128,6 +128,8 @@ public:
 	InstrumentKeyboardMapper *get_keyboard_mapper();
 	InstrumentAnalogSynthPresetManager *get_analog_synth_preset_manager();
 	
+	static AudioRecording *audio_recorder;
+	
 	int set_adj_synth_default_settings(_settings_params_t *params);
 	int set_default_general_settings_parameters(_settings_params_t *params);
 	int set_default_settings_parameters_audio(_settings_params_t *params);

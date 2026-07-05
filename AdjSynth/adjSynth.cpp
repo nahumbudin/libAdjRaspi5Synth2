@@ -165,7 +165,7 @@ AdjSynth::AdjSynth()
 	allocate_midi_stream_messages_memory_pool(_MAX_MIDI_STREAM_MESSAGES_POOL_SIZE);
 	allocate_raw_data_mssgs_memory_pool(_MAX_RAWDATA_MSSGS_POOL_SIZE);
 
-	init_lfo_delays();
+	//init_lfo_delays(); // See below after setting sampling rate
 
 	// Get the number of cpu cores.
 	num_of_cores = std::thread::hardware_concurrency();
@@ -195,6 +195,8 @@ AdjSynth::AdjSynth()
 	// Set the main audio parameters.
 	set_sample_rate(_DEFAULT_SAMPLE_RATE);
 	set_audio_block_size(_DEFAULT_BLOCK_SIZE);
+	
+	init_lfo_delays();
 
 	// Allocate audio blocks data memory pool. Pre allocation save time at runtime.
 	AllocateAudioMemoryBlocksFloatPool(_MAX_AUDIO_BLOCKS_MESSAGES_POOL_SIZE, audio_block_size);
@@ -714,13 +716,21 @@ int AdjSynth::init_lfo_delays()
 	
 	lfo_delays[0] = 0; // None LFO
 	
-	for (state = 0; state < _NUM_OF_LFO_DELAY_OPTIONS; state++)
+	for (lfo_num = 0; lfo_num < _NUM_OF_LFOS; lfo_num++)
 	{
-		for (lfo_num = 0; lfo_num < _NUM_OF_LFOS; lfo_num++)
+		for (state = 0; state < _NUM_OF_LFO_DELAY_OPTIONS; state++)
 		{
-			lfo_delays[state * _NUM_OF_LFOS + lfo_num + 1] = lfo_500_ms_delay_cont * state;
+			lfo_delays[lfo_num * _NUM_OF_LFO_DELAY_OPTIONS + state + 1] = lfo_500_ms_delay_cont * state;
 		}
 	}
+	
+	//for (state = 0; state < _NUM_OF_LFO_DELAY_OPTIONS; state++)
+	//{
+	//	for (lfo_num = 0; lfo_num < _NUM_OF_LFOS; lfo_num++)
+	//	{
+	//		lfo_delays[state * _NUM_OF_LFOS + lfo_num + 1] = lfo_500_ms_delay_cont * state;
+	//	}
+	//}
 	
 	return 0;
 }

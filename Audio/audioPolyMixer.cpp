@@ -64,7 +64,7 @@ AudioPolyMixer::AudioPolyMixer(
 		voice_pan_lfo_level[i] = 0.0f;
 	}
 	
-	audio_recorder = new AudioRecording(_DEFAULT_BLOCK_SIZE); // 512
+	audio_recorder = ModSynth::get_instance()->audio_recorder; //   new AudioRecording(_DEFAULT_BLOCK_SIZE); // 512
 	
 }
 	

@@ -107,3 +107,32 @@
 // Assuming the system using i2c interface number 1 to communicate with the audio board.
 #define _I2C_INTERFACE_NUMBER_MAIN_CONTROL	2
 #define _I2C_INTERFACE_NUMBER_CONTROL_BOARD 3
+
+// Widgets Types
+#define _WIDGET_TYPE_DIAL					0
+#define _WIDGET_TYPE_SLIDER					1
+#define _WIDGET_TYPE_COMBOBOX				2
+#define _WIDGET_TYPE_BUTTON					3
+#define _WIDGET_TYPE_CHECKBOX				4
+
+
+#define _ML_TRAINNING_MODE_FIXED_PARAM		0
+#define _ML_TRAINNING_MODE_ITERATIVE_PARAM	1
+
+// Bitmap flags for selective updates
+#define ANALOG_UPDATE_OSC1       (1 << 0)   // 0x00000001
+#define ANALOG_UPDATE_OSC2       (1 << 1)   // 0x00000002
+#define ANALOG_UPDATE_NOISE      (1 << 2)   // 0x00000004
+#define ANALOG_UPDATE_KPS        (1 << 3)   // 0x00000008
+#define ANALOG_UPDATE_MSO        (1 << 4)   // 0x00000010
+#define ANALOG_UPDATE_PAD        (1 << 5)   // 0x00000020
+#define ANALOG_UPDATE_FILTERS    (1 << 6)   // 0x00000040
+#define ANALOG_UPDATE_DISTORTION (1 << 7)   // 0x00000080
+#define ANALOG_UPDATE_REVERB     (1 << 8)   // 0x00000100
+#define ANALOG_UPDATE_EQUALIZER  (1 << 9)   // 0x00000200
+#define ANALOG_UPDATE_AMPS       (1 << 10)  // 0x00000400
+#define ANALOG_UPDATE_ADSRS      (1 << 11)  // 0x00000800
+#define ANALOG_UPDATE_LFOS       (1 << 12)  // 0x00001000
+#define ANALOG_UPDATE_ALL        (0xFFFFFFFF)
+
+

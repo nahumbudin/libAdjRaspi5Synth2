@@ -351,6 +351,23 @@ int AdjSynth::mso_event_int(int msoid, int eventid, int val, _settings_params_t 
 			
 			result = update_program_voices_parameter(program, "adjsynth.mso_synth.amp_modulation_env_level");
 		}
+		else if (eventid == _MSO_ENABLE)
+		{
+			// When using the HTTP API, the boolean value is sent as integer 0 or 1, so we need to handle it as 
+			//  integer and convert it to boolean.
+			bool bool_val = (val != 0);
+			
+			adj_synth_settings_manager->set_bool_param_value
+					(params,
+				"adjsynth.mso_synth.enabled",
+				bool_val,
+				_EXEC_CALLBACK,
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.mso_synth.enabled");
+			
+		}
+		
 	}
 	
 	return result;

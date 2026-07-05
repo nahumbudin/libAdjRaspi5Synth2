@@ -24,7 +24,7 @@ void DSP_Voice::set_filter_1_freq_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		filter_1_freq_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		filter_1_freq_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		filter_1_freq_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }
@@ -185,7 +185,7 @@ void DSP_Voice::set_filter_1_freq_env_modulation(float mod_factor, float mod_val
 void DSP_Voice::set_filter_2_freq_mod_lfo(int lfo) {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		filter_2_freq_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		filter_2_freq_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		filter_2_freq_lfo_modulation = AdjSynth::lfo_delays[lfo];
 	}
 }

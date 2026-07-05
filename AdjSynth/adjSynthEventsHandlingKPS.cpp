@@ -203,6 +203,22 @@ int AdjSynth::karplus_event_int(int karlplusid, int eventid, int val, _settings_
 			
 			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.send_filter_2");
 		}
+		else if (eventid == _KARPLUS_STRONG_ENABLE)
+		{
+			// When using the HTTP API, the boolean value is sent as integer 0 or 1, so we need to handle it as
+			
+			bool bool_val = (val != 0);
+			
+			adj_synth_settings_manager->set_bool_param_value
+				(params,
+				"adjsynth.karplus_synth.enabled",
+				bool_val,
+				_EXEC_BLOCK_CALLBACK,
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.karplus_synth.enabled");
+		}
+
 		break;
 	}
 	

@@ -14,6 +14,7 @@
 #include <string>
 #include <fstream>
 #include <atomic>
+#include <mutex>
 
 class AudioRecording
 {
@@ -72,6 +73,18 @@ public:
 	std::string get_recording_path() const;
     
 	/**
+	 * @brief Set remote MP3 file path (e.g., for HTTP streaming)
+	 * @param path Remote file path
+	 */
+	void set_remote_mp3_file_path(const std::string &path);
+	
+	/**
+	 * @brief Get remote MP3 file path
+	 * @return Remote file path string
+	 */
+	std::string get_remote_mp3_file_path() const;
+    
+	/**
 	 * @brief Get current recording mode
 	 * @return Recording mode constant
 	 */
@@ -86,7 +99,7 @@ private:
 	// Recording state
 	std::atomic<bool> recording_active;
 	int recording_mode;
-	std::string recording_file_path;
+	std::string recording_file_path = "";
     
 	// LAME encoder
 	lame_global_flags *lame_flags;
@@ -104,4 +117,9 @@ private:
 	// MP3 output buffer
 	unsigned char *mp3_buffer;
 	int mp3_buffer_size;
+	
+	// Used for remote recording (e.g., via HTTP)
+	std::string remote_mp3_file_path = "";
+
+	std::mutex recording_mutex;
 };

@@ -85,7 +85,22 @@ int AdjSynth::pad_event_int(int padid, int eventid, int val, _settings_params_t 
 	int value = val;
 	int result = -1;
 		
-	if (eventid == _PAD_DETUNE_OCTAVE)
+	if (eventid == _PAD_ENABLE)
+	{
+		// If we use Http API, the value is sent as integer 0 or 1, so we need to convert it to boolean
+		
+		bool bool_val = (val != 0);
+		
+		adj_synth_settings_manager->set_bool_param_value
+			(params,
+			"adjsynth.pad_synth.enabled",
+			bool_val,
+			_EXEC_CALLBACK,
+			program);
+		
+		result = update_program_voices_parameter(program, "adjsynth.pad_synth.enabled");
+	}	
+	else if (eventid == _PAD_DETUNE_OCTAVE)
 	{
 		val += _OSC_DETUNE_MIN_OCTAVE;
 		adj_synth_settings_manager->set_int_param_value

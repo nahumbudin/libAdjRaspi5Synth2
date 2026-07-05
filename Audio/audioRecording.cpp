@@ -137,18 +137,20 @@ int AudioRecording::start_recording(int mode, const std::string &path, int bitra
  */
 int AudioRecording::stop_recording()
 {
+	std::lock_guard<std::mutex> lock(recording_mutex);
+
 	if (!recording_active)
 	{
 		std::cerr << "AudioRecording: No recording in progress" << std::endl;
 		return -1;
 	}
-    
-	// Stop recording flag first (atomic operation)
+
+	// Set flag immediately to prevent re-entry
 	recording_active = false;
-    
+
 	// Flush any remaining samples
 	flush_mp3_encoder();
-    
+
 	// Write final MP3 frames and VBR tag
 	if (lame_flags != nullptr)
 	{
@@ -156,24 +158,23 @@ int AudioRecording::stop_recording()
 		int final_bytes = lame_encode_flush(lame_flags, mp3_finalize_buffer, sizeof(mp3_finalize_buffer));
 		if (final_bytes > 0)
 		{
-			mp3_file.write(reinterpret_cast<char*>(mp3_finalize_buffer), final_bytes);
+			mp3_file.write(reinterpret_cast<char *>(mp3_finalize_buffer), final_bytes);
 		}
-        
+
 		lame_close(lame_flags);
 		lame_flags = nullptr;
 	}
-    
+
 	// Close file
 	if (mp3_file.is_open())
 	{
 		mp3_file.close();
 	}
-    
+
 	std::cout << "AudioRecording: Stopped - " << recording_file_path << std::endl;
-    
-	// Clean up buffers
+
 	cleanup_resources();
-    
+
 	return 0;
 }
 
@@ -182,35 +183,60 @@ int AudioRecording::stop_recording()
  */
 int AudioRecording::record_samples(const float *left_channel, const float *right_channel, int num_samples)
 {
+	std::lock_guard<std::mutex> lock(recording_mutex);
+	
 	if (!recording_active)
 	{
 		return -1;
 	}
-    
+
 	if (left_channel == nullptr || right_channel == nullptr || num_samples <= 0)
 	{
 		return -1;
 	}
-    
+
+	// Safety check: validate buffer is allocated
+	if (pcm_buffer_left == nullptr || pcm_buffer_right == nullptr)
+	{
+		std::cerr << "AudioRecording: PCM buffers not allocated" << std::endl;
+		return -1;
+	}
+
 	// Check if we have room in buffer
 	if (pcm_samples_accumulated + num_samples > pcm_buffer_size)
 	{
 		// Encode what we have first
 		encode_and_write_mp3_chunk();
+
+		// Verify the counter was actually reset
+		if (pcm_samples_accumulated != 0)
+		{
+			std::cerr << "AudioRecording: WARNING - pcm_samples_accumulated not reset after encode, forcing reset" << std::endl;
+			pcm_samples_accumulated = 0;
+		}
 	}
-    
+
+	// Additional safety: ensure we won't overflow even after the check above
+	if (pcm_samples_accumulated + num_samples > pcm_buffer_size)
+	{
+		std::cerr << "AudioRecording: ERROR - Would overflow buffer (" 
+				  << pcm_samples_accumulated << " + " << num_samples 
+				  << " > " << pcm_buffer_size << "), dropping samples" << std::endl;
+		return -1;
+	}
+
 	// Copy samples to PCM buffer
 	std::memcpy(&pcm_buffer_left[pcm_samples_accumulated], left_channel, num_samples * sizeof(float));
 	std::memcpy(&pcm_buffer_right[pcm_samples_accumulated], right_channel, num_samples * sizeof(float));
-    
+
 	pcm_samples_accumulated += num_samples;
-    
+
 	// Encode if buffer is full
 	if (pcm_samples_accumulated >= pcm_buffer_size)
 	{
 		encode_and_write_mp3_chunk();
 	}
-    
+
 	return 0;
 }
 
@@ -231,6 +257,24 @@ std::string AudioRecording::get_recording_path() const
 }
 
 /**
+ * @brief Set remote MP3 file path
+ * @param path Remote file path
+ */
+void AudioRecording::set_remote_mp3_file_path(const std::string &path)
+{
+	remote_mp3_file_path = path;
+}
+
+/**
+ * @brief Get remote MP3 file path
+ * @return Remote file path string
+ */
+std::string AudioRecording::get_remote_mp3_file_path() const
+{
+	return remote_mp3_file_path;
+}
+
+/**
  * @brief Get current recording mode
  */
 int AudioRecording::get_recording_mode() const
@@ -243,21 +287,28 @@ int AudioRecording::get_recording_mode() const
  */
 void AudioRecording::encode_and_write_mp3_chunk()
 {
-	if (!recording_active || lame_flags == nullptr || pcm_samples_accumulated == 0)
+	if (!recording_active || lame_flags == nullptr || pcm_samples_accumulated == 0 || !mp3_file.is_open())
 	{
 		return;
 	}
-    
+
+	// Store the sample count before encoding
+	int samples_to_encode = pcm_samples_accumulated;
+
+	// CRITICAL: Reset the counter BEFORE encoding to prevent buffer overflow
+	// if this function is called recursively or if there's any issue during encoding
+	pcm_samples_accumulated = 0;
+
 	int mp3_bytes = 0;
-    
+
 	if (recording_mode == _RECORDING_MODE_STEREO)
 	{
 		// Encode stereo - 2 separate channels
 		mp3_bytes = lame_encode_buffer_ieee_float(
-		    lame_flags,
+			lame_flags,
 			pcm_buffer_left,
 			pcm_buffer_right,
-			pcm_samples_accumulated,
+			samples_to_encode,
 			mp3_buffer,
 			mp3_buffer_size);
 	}
@@ -265,10 +316,10 @@ void AudioRecording::encode_and_write_mp3_chunk()
 	{
 		// Encode left channel only
 		mp3_bytes = lame_encode_buffer_ieee_float(
-		    lame_flags,
+			lame_flags,
 			pcm_buffer_left,
 			nullptr,
-			pcm_samples_accumulated,
+			samples_to_encode,
 			mp3_buffer,
 			mp3_buffer_size);
 	}
@@ -276,10 +327,10 @@ void AudioRecording::encode_and_write_mp3_chunk()
 	{
 		// Encode right channel only
 		mp3_bytes = lame_encode_buffer_ieee_float(
-		    lame_flags,
+			lame_flags,
 			pcm_buffer_right,
 			nullptr,
-			pcm_samples_accumulated,
+			samples_to_encode,
 			mp3_buffer,
 			mp3_buffer_size);
 	}
@@ -287,34 +338,33 @@ void AudioRecording::encode_and_write_mp3_chunk()
 	{
 		// ⚠️ NEW: Mix L+R to mono
 		// Create temporary buffer with mixed samples
-		float *mixed_buffer = new float[pcm_samples_accumulated];
-		for (int i = 0; i < pcm_samples_accumulated; i++)
+		float *mixed_buffer = new float[samples_to_encode];
+		for (int i = 0; i < samples_to_encode; i++)
 		{
 			mixed_buffer[i] = (pcm_buffer_left[i] + pcm_buffer_right[i]) * 0.5f;
 		}
-        
+
 		// Encode mixed mono
 		mp3_bytes = lame_encode_buffer_ieee_float(
-		    lame_flags,
+			lame_flags,
 			mixed_buffer,
 			nullptr,  // Mono
-			pcm_samples_accumulated,
+			samples_to_encode,
 			mp3_buffer,
 			mp3_buffer_size);
-        
+
 		delete[] mixed_buffer;
 	}
-    
+
 	if (mp3_bytes < 0)
 	{
 		std::cerr << "AudioRecording: LAME encoding error: " << mp3_bytes << std::endl;
+		// Counter already reset - samples are lost but we prevent crash
 	}
 	else if (mp3_bytes > 0)
 	{
 		mp3_file.write(reinterpret_cast<char*>(mp3_buffer), mp3_bytes);
 	}
-    
-	pcm_samples_accumulated = 0;
 }
 
 /**

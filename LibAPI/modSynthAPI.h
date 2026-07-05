@@ -2666,3 +2666,18 @@ void mod_synth_register_callback_wrapper_close_instrument_pannel_name(func_ptr_v
 *   @return void
 */
 void mod_synth_register_callback_wrapper_open_instrument_pannel_name(func_ptr_void_string_t ptr);
+
+/**
+ * @brief Register callback for analog synth selective UI updates
+ * @param callback Function pointer to callback, or NULL to unregister
+ */
+void mod_synth_register_callback_analog_selective_update(
+    analog_synth_selective_update_callback_t callback);
+
+/**
+ * @brief Trigger the registered callback (called from library code)
+ * @param updateBitmap Bitmap indicating which components to update
+ */
+void mod_synth_trigger_analog_selective_update(uint32_t updateBitmap);
+
+

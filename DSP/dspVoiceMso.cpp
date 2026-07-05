@@ -92,7 +92,7 @@ void DSP_Voice::set_mso_1_freq_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		mso_1_freq_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		mso_1_freq_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		mso_1_freq_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }
@@ -145,7 +145,7 @@ void DSP_Voice::set_mso_1_pwm_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		mso_1_pwm_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		mso_1_pwm_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		mso_1_pwm_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }
@@ -198,7 +198,7 @@ void DSP_Voice::set_mso_1_amp_mod_lfo(int lfo)
 {
 	if ((lfo >= _LFO_NONE) && (lfo <= _LFO_6_DELAYED_2000MS))
 	{
-		mso_1_amp_mod_lfo = ((lfo - 1) % _NUM_OF_LFOS) + 1;
+		mso_1_amp_mod_lfo = ((lfo - 1) / _NUM_OF_LFO_DELAY_OPTIONS + 1); // % _NUM_OF_LFOS) + 1;
 		mso_1_amp_mod_lfo_delay = AdjSynth::lfo_delays[lfo];
 	}
 }

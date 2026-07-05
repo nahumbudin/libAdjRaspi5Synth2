@@ -105,9 +105,39 @@ int AdjSynth::vco_event_int(int vcoid, int eventid, int val, _settings_params_t 
 	{	
 		return -1;
 	}
+	
+	bool bool_val;
 
 	switch (eventid)
 	{
+	case _OSC_ENABLE:
+		// When using the HTTP API, the boolean value is sent as integer 0 or 1, so we need to handle it as integer and convert it to boolean.
+		bool_val = (value != 0);
+		
+		if (vcoid == _OSC_1_EVENT)
+		{
+			adj_synth_settings_manager->set_bool_param_value
+				(params,
+				"adjsynth.osc1.enabled",
+				bool_val,
+				_EXEC_CALLBACK,
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc1.enabled");
+		}
+		else if (vcoid == _OSC_2_EVENT)
+		{
+			adj_synth_settings_manager->set_bool_param_value
+				(params,
+				"adjsynth.osc2.enabled",
+				val,
+				_EXEC_CALLBACK,
+				program);
+			
+			result = update_program_voices_parameter(program, "adjsynth.osc2.enabled");
+		}
+		break;
+		
 	case _OSC_PARAM_WAVEFORM:
 		if (vcoid == _OSC_1_EVENT)
 		{

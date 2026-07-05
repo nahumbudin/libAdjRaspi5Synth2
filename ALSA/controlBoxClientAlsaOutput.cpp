@@ -16,6 +16,7 @@
 #include "../Misc/priorities.h"
 #include "../Serial/serialPort.h"
 #include "../I2C/i2cInterface.h"
+#include "../HTTP/HttpBridge.h"
 #include "controlBoxClientAlsaOutput.h"
 
 bool ControlBoxClientAlsaOutput::alsa_out_thread_is_running = false;
@@ -28,6 +29,9 @@ serialPortData_t *control_box_uart_rx_alsa_channel_data = NULL;
 
 /* Will hold data received from I2C interface */
 i2cRxData_t *control_box_itc_rx_alsa_channel_data = NULL;
+
+/* Will hold data received from HTTP interface */
+httpMidiRxData_t *control_box_http_rx_alsa_channel_data = NULL;
 
 ControlBoxClientAlsaOutput::ControlBoxClientAlsaOutput()
 {
@@ -120,6 +124,7 @@ void *ControlBoxClientAlsaOutput::alsaOutThread(void *threadid)
 {
 	bool timeout = false, blocking = true, non_blocking = false;
 	int count, last_count, status, timeouts = 0;
+	int http_count, last_http_count;
 	uint8_t bytes[512];
 
 	fprintf(stderr, "Control Box alsa out thread started\n");
@@ -193,6 +198,42 @@ void *ControlBoxClientAlsaOutput::alsaOutThread(void *threadid)
 			if ((status = snd_rawmidi_write(midiout, bytes, count)) < 0)
 			{
 				printf("Problem writing i2c interface data to MIDI output: %s", snd_strerror(status));
+				//					exit(1);
+			}
+		}
+		
+		// Wait for new HTTP data - non blocking - if no new data available return NULL immediately
+		control_box_http_rx_alsa_channel_data = 
+			HttpBridge::alsa_midi_http_interface_rx_queue.dequeue(0, &timeout, &non_blocking);
+		// Get all new data
+		http_count = 0;
+		while (control_box_http_rx_alsa_channel_data != NULL)
+		{
+			// Collect all available data
+			for (http_count = 0; http_count < control_box_http_rx_alsa_channel_data->mssg_len; http_count++)
+			{
+				//bytes[count] = control_box_http_rx_alsa_channel_data->message[count - last_count];
+				bytes[last_count + http_count] = control_box_http_rx_alsa_channel_data->message[http_count];
+			}
+
+			last_count += control_box_http_rx_alsa_channel_data->mssg_len;
+
+			// delete control_box_http_rx_alsa_channel_data; // Pool allocation at HTTP polling thread, no need to delete
+			control_box_http_rx_alsa_channel_data = HttpBridge::alsa_midi_http_interface_rx_queue.dequeue(0, &timeout, &non_blocking);
+			//			printf("HTTP in data alsa thread while data\n");
+		}
+
+		if (http_count > 0)
+		{
+			// New data is available
+			//			printf("\nHTTP in data alsa thread: count: %i  data: ", http_count);
+			//			for (int i = 0; i < http_count; i++)
+			//				printf("%x ", bytes[i]);
+			//			printf("\n");
+
+			if ((status = snd_rawmidi_write(midiout, bytes, http_count)) < 0)
+			{
+				printf("Problem writing HTTP interface data to MIDI output: %s", snd_strerror(status));
 				//					exit(1);
 			}
 		}

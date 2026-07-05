@@ -1,7 +1,11 @@
+
+
 #include "HttpBridge.h"
 #include <iostream>
 #include <algorithm>
 #include <cctype>
+
+SafeQueue<httpMidiRxData_t *> HttpBridge::alsa_midi_http_interface_rx_queue;
 
 HttpBridge::HttpBridge() 
 	: thread_running(false)

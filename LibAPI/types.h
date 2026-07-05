@@ -151,3 +151,6 @@ typedef std::vector<std::string>(*func_ptr_vector_std_string_void_t)(void);
 /* void foo(en_instruments_ids_t) function pointer */
 typedef void(*func_ptr_void_en_instruments_ids_t_t)(en_instruments_ids_t);
 
+// Callback function type definition for selective analog synth dialog GUI - takes a bitmap parameter
+typedef void(*analog_synth_selective_update_callback_t)(uint32_t update_bitmap);
+
