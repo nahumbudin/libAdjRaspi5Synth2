@@ -1199,6 +1199,7 @@ float DSP_Voice::detune_frequency_factor(int detune_oct, int detune_semitones, f
 */
 void DSP_Voice::calc_next_modulation_values(int samp_num, bool use_global_lfos)
 {
+	// Get LFOs Outputs.
 	if (use_global_lfos)
 	{
 		lfo_out[0] = AdjSynth::get_instance()->global_lfo_1_output_value[samp_num];
@@ -1222,6 +1223,7 @@ void DSP_Voice::calc_next_modulation_values(int samp_num, bool use_global_lfos)
 	//	fprintf(stderr, "note on time : %i %i %i\n", adsr1->getNoteToneElapsedTime(),
 	//	adsr2->getNoteToneElapsedTime(),adsr3->getNoteToneElapsedTime());
 
+	// Get ADSRs Outputs.
 	adsr_1->calc_next_envelope_val();
 	adsr_out[0] = adsr_1->get_output_val();
 
@@ -1260,8 +1262,8 @@ void DSP_Voice::calc_next_modulation_values(int samp_num, bool use_global_lfos)
 
 	if (osc_1_pwm_mod_lfo > _LFO_NONE)
 	{
-		//set_osc_1_pwm_lfo_modulation(osc_1_pwm_mod_lfo_level, lfo_out[osc_1_pwm_mod_lfo - 1]);
-		set_osc_1_pwm_lfo_modulation(lfo_out[osc_1_pwm_mod_lfo - 1], osc_1_pwm_mod_lfo_level);
+		//set_osc_1_pwm_lfo_modulation(lfo_out[osc_1_pwm_mod_lfo - 1], osc_1_pwm_mod_lfo_level);
+		set_osc_1_pwm_lfo_modulation(osc_1_pwm_mod_lfo_level, lfo_out[osc_1_pwm_mod_lfo - 1]);
 	}
 	else
 	{
@@ -1593,7 +1595,7 @@ void DSP_Voice::update_voice_modulation(int voice)
 	act_freq_pad_1 = frequency * pad_1_detune;
 	
 	// PWM
-	if (osc_1_pwm_lfo_modulation + osc_1_pwm_env_modulation > 0.0)
+	if (osc_1_pwm_lfo_modulation + osc_1_pwm_env_modulation != 0.0) // > 0.0
 	{
 		pwm_mod_osc_1 = osc_1->get_pwm_dcycle_set_val() / 100.0f + osc_1_pwm_lfo_modulation + osc_1_pwm_env_modulation;
 		if (pwm_mod_osc_1 < -1.0f)
@@ -1608,7 +1610,7 @@ void DSP_Voice::update_voice_modulation(int voice)
 		osc_1->set_pwm_dcycle(50 + (int)(pwm_mod_osc_1 * 45.0f));
 	}
 	
-	if (osc_2_pwm_lfo_modulation + osc_2_pwm_env_modulation > 0.0)
+	if (osc_2_pwm_lfo_modulation + osc_2_pwm_env_modulation != 0.0)
 	{
 		pwm_mod_osc_2 = osc_2->get_pwm_dcycle_set_val() / 100.0f + osc_2_pwm_lfo_modulation + osc_2_pwm_env_modulation;
 		if (pwm_mod_osc_2 < -1.0f)
@@ -1623,7 +1625,7 @@ void DSP_Voice::update_voice_modulation(int voice)
 		osc_2->set_pwm_dcycle(50 + (int)(pwm_mod_osc_2 * 45.0f));
 	}
 
-	if (mso_1_pwm_lfo_modulation + mso_1_pwm_env_modulation > 0.0)
+	if (mso_1_pwm_lfo_modulation + mso_1_pwm_env_modulation != 0.0)
 	{
 		pwm_mod_mso_1 = mso_1->get_pwm_dcycle_set_val() / 100.0f + mso_1_pwm_lfo_modulation + 
 						mso_1_pwm_env_modulation;

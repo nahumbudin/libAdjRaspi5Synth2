@@ -83,7 +83,7 @@ float DSP_TriangleWaveGenerator::set_asymetry(float asy)
 	pt2 = 1 - pt1;
 	dy1 = 1 / pt1;
 	dy2 = 2 / (pt2 - pt1);
-	pos = 0;
+	//pos = 0;  // <<<<<<<<<<<<<<<<<<<<<<<<<
 	cycle_restarted = false;
 	
 	return asym;

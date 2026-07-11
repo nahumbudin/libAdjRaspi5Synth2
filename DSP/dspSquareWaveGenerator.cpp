@@ -78,9 +78,9 @@ float DSP_SquareWaveGenerator::set_pwm(float asym)
 	
 	cycle_restarted = false;
 	//pt1 = asym;	// ?????
-	pos = 0;
+	//pos = 0; // <<<<<<<<<<<<<<<<<<<<<<<<
 	
-	fprintf(stderr, "DSP_SquareWaveGenerator::set_pwm: pt1=%f\n", pt1);
+	//fprintf(stderr, "DSP_SquareWaveGenerator::set_pwm: pt1=%f\n", pt1);
 	
 	return pt1;
 }

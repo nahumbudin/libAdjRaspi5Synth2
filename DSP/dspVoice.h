@@ -182,12 +182,12 @@ public:
 	int get_osc_1_amp_mod_env();
 	float get_osc_1_amp_mod_env_level();
 	
-	void set_osc_1_amp_lfo_modulation(float mod_factor, float mod_val); 
-	void set_osc_1_amp_env_modulation(float mod_factor, float mod_val); 
-	void set_osc_1_pwm_lfo_modulation(float mod_factor, float mod_val); 
-	void set_osc_1_pwm_env_modulation(float mod_factor, float mod_val); 
-	void set_osc_1_freq_lfo_modulation(float mod_factor, float mod_val);
-	void set_osc_1_freq_env_modulation(float mod_factor, float mod_val);
+	void set_osc_1_amp_lfo_modulation(float mod_level, float mod_signal); 
+	void set_osc_1_amp_env_modulation(float mod_level, float mod_signal); 
+	void set_osc_1_pwm_lfo_modulation(float mod_level, float mod_signal); 
+	void set_osc_1_pwm_env_modulation(float mod_level, float mod_signal); 
+	void set_osc_1_freq_lfo_modulation(float mod_level, float mod_signal);
+	void set_osc_1_freq_env_modulation(float mod_level, float mod_signal);
 
 	void set_osc_2_freq_mod_lfo(int lfo);
 	void set_osc_2_freq_mod_lfo_level(int lev);
@@ -219,12 +219,12 @@ public:
 	int get_osc_2_amp_mod_env();
 	float get_osc_2_amp_mod_env_level();
 	
-	void set_osc_2_amp_lfo_modulation(float mod_factor, float mod_val); 
-	void set_osc_2_amp_env_modulation(float mod_factor, float mod_val); 
-	void set_osc_2_pwm_lfo_modulation(float mod_factor, float mod_val); 
-	void set_osc_2_pwm_env_modulation(float mod_factor, float mod_val); 
-	void set_osc_2_freq_lfo_modulation(float mod_factor, float mod_val);
-	void set_osc_2_freq_env_modulation(float mod_factor, float mod_val);
+	void set_osc_2_amp_lfo_modulation(float mod_level, float mod_signal); 
+	void set_osc_2_amp_env_modulation(float mod_level, float mod_signal); 
+	void set_osc_2_pwm_lfo_modulation(float mod_level, float mod_signal); 
+	void set_osc_2_pwm_env_modulation(float mod_level, float mod_signal); 
+	void set_osc_2_freq_lfo_modulation(float mod_level, float mod_signal);
+	void set_osc_2_freq_env_modulation(float mod_level, float mod_signal);
 
 	void set_noise_1_amp_mod_lfo(int lfo);
 	void set_noise_1_amp_mod_lfo_level(int lev);

@@ -454,212 +454,220 @@ float DSP_Voice::get_osc_1_amp_mod_env_level()
 }
 
 /**
-*	@brief	Set OSC_1 active LFO amplitude modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value -1.0 to +1.0
+*	@brief	Set OSC_1 active LFO amplitude modulator modulation value 0.0 to 1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation lfo output value -1.0 to +1.0
 *	@return none
 */
-void DSP_Voice::set_osc_1_amp_lfo_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_1_amp_lfo_modulation(float mod_level, float mod_signal)
 {
-	float value = mod_val; // Modulation value (LFO: -1.0 to 1.0; Env: 0 to 1.0)
+	float mod_sig = mod_signal; // Modulation value (LFO: -1.0 to 1.0; Env: 0 to 1.0)
 	// Use any adsr to get note-on time
 	if (adsr_1->note_on_elapsed_time < osc_1_amp_mod_lfo_delay) 
 	{
 		// Delayed activation
-		value = 0.5f;
+		mod_sig = 1.0f; //0.5 Mid-level (no modulation)
 	}
 	
-	float factor = mod_factor; // 0 to 1.0 : indicates the modulator send set-level
-	if (factor < 0.0f)
+	float level = mod_level; // 0 to 1.0 : indicates the modulator send set-level
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-
-	if (value < -1.0f)
-	{
-		value = -1.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 
-	osc_1_amp_lfo_modulation = 1 - (1.0f + value) * factor / 2.0f;
+	if (mod_sig < -1.0f)
+	{
+		mod_sig = -1.0f;
+	}
+	else if (mod_sig > 1.0f)
+	{
+		mod_sig = 1.0f;
+	}
+
+	// (1 - mod_sig) * level / 2: level = 1.0: mod signal from 1.0 to -1.0 is converted to 0.0 to 1.0
+	// (1 - mod_sig) * level / 2: level = 0.5: mod signal from 1.0 to -1.0 is converted to 0.0 to 0.5
+	//
+	// 1 - (1.0f - mod_sig) * level / 2.0f: level = 1.0: mod signal from 1.0 to -1.0 is converted to 1.0 to 0.0
+	// 1 - (1.0f - mod_sig) * level / 2.0f: level = 0.5: mod signal from 1.0 to -1.0 is converted to 1.0 to 0.5
+	// This will be multiplied by the envelope output value to get the final amplitude modulation value for OSC1.
+	osc_1_amp_lfo_modulation = 1 - (1.0f - mod_sig) * level / 2.0f;
+	
+	//osc_1_amp_lfo_modulation = 1 - (1.0f + mod_sig) * level / 2.0f;
 } 
 
 /**
 *	@brief	Set OSC_1 active ENV amplitude modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value 0.0 to 1.0
+*	@param	mod_levl	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_sig	modulation output signal 0.0 to 1.0
 *	@return none
 */
-void DSP_Voice::set_osc_1_amp_env_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_1_amp_env_modulation(float mod_level, float mod_signal)
 {
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-	
-	float value = mod_val;
-	if (value < 0.0f)
-	{
-		value = 0.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 	
-	osc_1_amp_env_modulation = factor * value;
+	float sig = mod_signal;
+	if (sig < 0.0f)
+	{
+		sig = 0.0f;
+	}
+	else if (sig > 1.0f)
+	{
+		sig = 1.0f;
+	}
+	
+	osc_1_amp_env_modulation = level * sig;
 }
 
 /**
-*	@brief	Set OSC1 active LFO pwm modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value -1.0 to +1.0
+*	@brief	Set OSC1 active LFO pwm modulator modulation value -1.0 to +1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation LFO output value -1.0 to +1.0
 *	@return none
 */
-void DSP_Voice::set_osc_1_pwm_lfo_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_1_pwm_lfo_modulation(float mod_level, float mod_signal)
 {
-	float value = mod_val;
+	float signal = mod_signal;
 	
 	if (adsr_1->note_on_elapsed_time < osc_1_pwm_mod_lfo_delay)
 	{
 		// Delayed activation
-		value = 0.5f;
+		signal = 0.0; // 0.5f; // this is addative modulation - no modulation.
 	}
 	
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-	
-	if (value < -1.0f)
-	{
-		value = -1.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 	
-	osc_1_pwm_lfo_modulation = factor * value;
+	if (signal < -1.0f)
+	{
+		signal = -1.0f;
+	}
+	else if (signal > 1.0f)
+	{
+		signal = 1.0f;
+	}
+	
+	osc_1_pwm_lfo_modulation = level * signal * 0.45; // Added
 
-	printf("OSC1 set pwm mod: %f  level: %f   factor: %f\n", value, factor, osc_1_pwm_lfo_modulation);
+	// printf("OSC1 set pwm mod: %f  level: %f  lfo signal: %f\n", osc_1_pwm_lfo_modulation, level, signal);
 }
 /**
 *	@brief	Set OSC_1 active ENV pwm modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value 0.0 to 1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation ADSR output value 0.0 to 1.0
 *	@return none
 */
-void DSP_Voice::set_osc_1_pwm_env_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_1_pwm_env_modulation(float mod_level, float mod_signal)
 {
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-	
-	float value = mod_val;
-	if (value < 0.0f)
-	{
-		value = 0.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 	
-	osc_1_pwm_env_modulation = factor * value;
+	float sig = mod_signal;
+	if (sig < 0.0f)
+	{
+		sig = 0.0f;
+	}
+	else if (sig > 1.0f)
+	{
+		sig = 1.0f;
+	}
+	
+	osc_1_pwm_env_modulation = level * sig * 0.45;
 }
 
 /**
 *	@brief	Set OSC_1 active LFO frequency modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value -1.0 to +1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation LFO output value -1.0 to +1.0
 *	@return none
 */
-void DSP_Voice::set_osc_1_freq_lfo_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_1_freq_lfo_modulation(float mod_level, float mod_signal)
 {
-	float value = mod_val;
+	float signal = mod_signal;
 	
 	// All ADSRs are triggered at the same time, so we can use any of them to get note-on time for delayed LFO activation
 	if (adsr_1->note_on_elapsed_time < osc_1_freq_mod_lfo_delay)
 	{
 		// Delayed activation
-		value = 0.5f;
+		signal = 0.0f;
 	}
 	
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-	
-	if (value < -1.0f)
-	{
-		value = -1.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 	
-	osc_1_freq_lfo_modulation = factor * value;
+	if (signal < -1.0f)
+	{
+		signal = -1.0f;
+	}
+	else if (signal > 1.0f)
+	{
+		signal = 1.0f;
+	}
+	
+	osc_1_freq_lfo_modulation = level * signal;
 }
 
 /**
 *	@brief	Set OSC_1 active ENV frequency modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value 0.0 to 1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation ADSR output value 0.0 to 1.0
 *	@return none
 */
-void DSP_Voice::set_osc_1_freq_env_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_1_freq_env_modulation(float mod_level, float mod_signal)
 {
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-
-	float value = mod_val;
-	if (value < 0.0f)
-	{
-		value = 0.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 
-	osc_1_freq_env_modulation = factor * value;
+	float signal = mod_signal;
+	if (signal < 0.0f)
+	{
+		signal = 0.0f;
+	}
+	else if (signal > 1.0f)
+	{
+		signal = 1.0f;
+	}
+
+	osc_1_freq_env_modulation = level * signal;
 }
 
 
@@ -959,209 +967,209 @@ float DSP_Voice::get_osc_2_amp_mod_env_level()
 
 /**
 *	@brief	Set OSC_2 active LFO amplitude modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value -1.0 to +1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation lfo output value -1.0 to +1.0
 *	@return none
 */
-void DSP_Voice::set_osc_2_amp_lfo_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_2_amp_lfo_modulation(float mod_level, float mod_signal)
 {
-	float value = mod_val; // Modulation value (LFO: -1.0 to 1.0; Env: 0 to 1.0)
+	float mod_sig = mod_signal; // Modulation value (LFO: -1.0 to 1.0; Env: 0 to 1.0)
 	
 	// Use any adsr to get note-on time
 	if (adsr_1->note_on_elapsed_time < osc_2_amp_mod_lfo_delay) 
 	{
 		// Delayed activation
-		value = 0.5f;
+		mod_sig = 1.0f;
 	}
 	
-	float factor = mod_factor; // 0 to 1.0 : indicates the modulator send set-level
-	if (factor < 0.0f)
+	float level = mod_level; // 0 to 1.0 : indicates the modulator send set-level
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-
-	if (value < -1.0f)
-	{
-		value = -1.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 
-	osc_2_amp_lfo_modulation = 1 - (1.0f + value) * factor / 2.0f;
+	if (mod_sig < -1.0f)
+	{
+		mod_sig = -1.0f;
+	}
+	else if (mod_sig > 1.0f)
+	{
+		mod_sig = 1.0f;
+	}
+
+	osc_2_amp_lfo_modulation = 1 - (1.0f - mod_sig) * level / 2.0f;
 } 
 
 /**
 *	@brief	Set OSC_2 active ENV amplitude modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value 0.0 to 1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation ADSR output value 0.0 to 1.0
 *	@return none
 */
-void DSP_Voice::set_osc_2_amp_env_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_2_amp_env_modulation(float mod_level, float mod_signal)
 {
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-	
-	float value = mod_val;
-	if (value < 0.0f)
-	{
-		value = 0.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 	
-	osc_2_amp_env_modulation = factor * value;
+	float mod_sig = mod_signal;
+	if (mod_sig < 0.0f)
+	{
+		mod_sig = 0.0f;
+	}
+	else if (mod_sig > 1.0f)
+	{
+		mod_sig = 1.0f;
+	}
+	
+	osc_2_amp_env_modulation = level * mod_sig;
 }
 
 /**
 *	@brief	Set OSC_2 active LFO pwm modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value -1.0 to +1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation LFO output value -1.0 to +1.0
 *	@return none
 */
-void DSP_Voice::set_osc_2_pwm_lfo_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_2_pwm_lfo_modulation(float mod_level, float mod_signal)
 {
-	float value = mod_val;
+	float signal = mod_signal;
 	
 	if (adsr_1->note_on_elapsed_time < osc_2_pwm_mod_lfo_delay)
 	{
 		// Delayed activation
-		value = 0.5f;
+		signal = 0.0f;
 	}
 	
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-	
-	if (value < -1.0f)
-	{
-		value = -1.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 	
-	osc_2_pwm_lfo_modulation = factor * value;
+	if (signal < -1.0f)
+	{
+		signal = -1.0f;
+	}
+	else if (signal > 1.0f)
+	{
+		signal = 1.0f;
+	}
+	
+	osc_2_pwm_lfo_modulation = level * signal * 0.45;
 }
 /**
 *	@brief	Set OSC_2 active ENV pwm modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value 0.0 to 1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation ADSR output value 0.0 to 1.0
 *	@return none
 */
-void DSP_Voice::set_osc_2_pwm_env_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_2_pwm_env_modulation(float mod_level, float mod_signal)
 {
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-	
-	float value = mod_val;
-	if (value < 0.0f)
-	{
-		value = 0.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 	
-	osc_2_pwm_env_modulation = factor * value;
+	float signal = mod_signal;
+	if (signal < 0.0f)
+	{
+		signal = 0.0f;
+	}
+	else if (signal > 1.0f)
+	{
+		signal = 1.0f;
+	}
+	
+	osc_2_pwm_env_modulation = level * signal * 0.45;
 }
 
 /**
 *	@brief	Set OSC_2 active LFO frequency modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value -1.0 to +1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal 	modulation ADSR output value -1.0 to +1.0
 *	@return none
 */
-void DSP_Voice::set_osc_2_freq_lfo_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_2_freq_lfo_modulation(float mod_level, float mod_signal)
 {
-	float value = mod_val;
+	float signal = mod_signal;
 	
 	if (adsr_1->note_on_elapsed_time < osc_2_freq_mod_lfo_delay)
 	{
 		// Delayed activation
-		value = 0.5f;
+		signal = 0.0f;
 	}
 	
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-	
-	if (value < -1.0f)
-	{
-		value = -1.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 	
-	osc_2_freq_lfo_modulation = factor * value;
+	if (signal < -1.0f)
+	{
+		signal = -1.0f;
+	}
+	else if (signal > 1.0f)
+	{
+		signal = 1.0f;
+	}
+	
+	osc_2_freq_lfo_modulation = level * signal;
 }
 
 /**
 *	@brief	Set OSC_2 active ENV frequency modulator modulation value
-*	@param	mod_factor	modulation factor (depth) 0.0 to 1.0
-*	@param	mod_val	modulation value 0.0 to 1.0
+*	@param	mod_level	modulation factor (depth) 0.0 to 1.0
+*	@param	mod_signal	modulation ADSR output value 0.0 to 1.0
 *	@return none
 */
-void DSP_Voice::set_osc_2_freq_env_modulation(float mod_factor, float mod_val)
+void DSP_Voice::set_osc_2_freq_env_modulation(float mod_level, float mod_signal)
 {
-	float factor = mod_factor;
-	if (factor < 0.0f)
+	float level = mod_level;
+	if (level < 0.0f)
 	{
-		factor = 0.0f;
+		level = 0.0f;
 	}
-	else if (factor > 1.0f)
+	else if (level > 1.0f)
 	{
-		factor = 1.0f;
-	}
-
-	float value = mod_val;
-	if (value < 0.0f)
-	{
-		value = 0.0f;
-	}
-	else if (value > 1.0f)
-	{
-		value = 1.0f;
+		level = 1.0f;
 	}
 
-	osc_2_freq_env_modulation = factor * value;
+	float signal = mod_signal;
+	if (signal < 0.0f)
+	{
+		signal = 0.0f;
+	}
+	else if (signal > 1.0f)
+	{
+		signal = 1.0f;
+	}
+
+	osc_2_freq_env_modulation = level * signal;
 }
 
 
