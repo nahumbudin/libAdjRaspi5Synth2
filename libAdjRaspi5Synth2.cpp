@@ -658,6 +658,16 @@ int mod_synth_get_master_volume()
 	return AdjSynth::get_instance()->get_master_volume();
 }
 
+void mod_synth_set_lfos_sync_on_note_on_mode(int mode)
+{
+	AdjSynth::get_instance()->set_lfos_sync_on_note_on_mode(mode);
+}
+
+int mod_synth_get_lfos_sync_on_note_on_mode()
+{
+	return AdjSynth::get_instance()->get_lfos_sync_on_note_on_mode();
+}
+
 int mod_synth_amp_event_int(int ampid, int eventid, int val)
 {
 	return AdjSynth::get_instance()->amp_event(

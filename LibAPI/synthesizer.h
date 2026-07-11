@@ -908,3 +908,8 @@ Error - must be no more than 64
 #define _FLUID_SYNTH_CHORUS_ENABLE					10150
 	
 	
+#define _LFO_NOTE_ON_SYNC_MODE_NONE					0
+#define _LFO_NOTE_ON_SYNC_MODE_RETRIGGER			1	// retrigger on each note on
+#define _LFO_NOTE_ON_SYNC_MODE_RETRIGGER_FIRST		2	// retrigger on first note on only
+	
+	

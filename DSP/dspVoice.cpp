@@ -210,6 +210,7 @@ DSP_Voice::DSP_Voice(
 	, pad_wavetable_1(synth_pad_wavetable)
 	, original_pad_wavetable_1(synth_pad_wavetable)
 	, voice_end_event_callback_ptr(voice_end_event_callback_pointer)
+	, lfos_sync_on_note_on_mode(0) // _LFO_SYNC_ON_NOTE_ON_MODE_NONE
 {	
 	for (int i = 0; i < _NUM_OF_LFOS; i++)
 	{
@@ -1078,6 +1079,29 @@ void DSP_Voice::set_voice_frequency(float frq)
 float DSP_Voice::get_voice_frequency() { return frequency; }
 
 /**
+*   @brief  Set LFOs sync on note on mode.
+*   @param  mode	LFOs sync mode (_LFO_NOTE_ON_SYNC_MODE_NONE, _LFO_NOTE_ON_SYNC_MODE_RETRIGGER, _LFO_NOTE_ON_SYNC_MODE_RETRIGGER_FIRST)
+*   @return void
+*/
+void DSP_Voice::set_lfos_sync_on_note_on_mode(int mode) 
+{ 
+	if (mode == _LFO_NOTE_ON_SYNC_MODE_NONE || mode == _LFO_NOTE_ON_SYNC_MODE_RETRIGGER || mode == _LFO_NOTE_ON_SYNC_MODE_RETRIGGER_FIRST)
+	{
+		lfos_sync_on_note_on_mode = mode; 
+	}
+}
+
+/**
+*   @brief  Return voice frequency (Hz).
+*   @param  none
+*   @return voice frequency (Hz)
+*/
+int DSP_Voice::get_lfos_sync_on_note_on_mode() 
+{ 
+	return lfos_sync_on_note_on_mode; 
+}
+
+/**
 *	@brief	Set voice active
 *	@param	none
 *	@return none
@@ -1236,7 +1260,8 @@ void DSP_Voice::calc_next_modulation_values(int samp_num, bool use_global_lfos)
 
 	if (osc_1_pwm_mod_lfo > _LFO_NONE)
 	{
-		set_osc_1_pwm_lfo_modulation(osc_1_pwm_mod_lfo_level, lfo_out[osc_1_pwm_mod_lfo - 1]);
+		//set_osc_1_pwm_lfo_modulation(osc_1_pwm_mod_lfo_level, lfo_out[osc_1_pwm_mod_lfo - 1]);
+		set_osc_1_pwm_lfo_modulation(lfo_out[osc_1_pwm_mod_lfo - 1], osc_1_pwm_mod_lfo_level);
 	}
 	else
 	{
@@ -1825,6 +1850,35 @@ void DSP_Voice::set_osc_2_not_sync_on_osc_1()
 *	@return true if OSC2 sync on OSC1 is on false otherwise
 */
 bool DSP_Voice::get_osc_2_sync_on_osc_1_state() { return osc_2_sync_on_osc_1; }
+
+/**
+*	@brief	Trigger a note-on event on LFO generator
+*	@param	lfo a pointer to an LFO (DSP_Osc) generator object
+*	@param	num_of_active_voices number of active voices
+*	@return void
+*/
+void DSP_Voice::lfo_note_on(DSP_Osc *lfo, int num_of_active_voices)
+{
+	switch (lfos_sync_on_note_on_mode)
+	{
+	case _LFO_NOTE_ON_SYNC_MODE_RETRIGGER:
+		lfo->sync();
+		break;
+		
+	case _LFO_NOTE_ON_SYNC_MODE_RETRIGGER_FIRST:
+		if (num_of_active_voices == 0)
+		{
+			lfo->sync();
+		}
+		break;
+		
+	case _LFO_NOTE_ON_SYNC_MODE_NONE:
+	default:
+		break;
+	}
+	
+}
+
 
 /**
 *	@brief	Trigger a note-on event on ENV generator

@@ -106,18 +106,26 @@ string ModSynth::mod_synth_current_soundfonts_directory = "";
 string ModSynth::mod_synth_current_midi_files_directory = "";
 string ModSynth::mod_synth_general_settings_file_path = "";
 
+string ModSynth::mod_synth_last_initial_alsa_input_client_name = "";
+
 std::mutex ModSynth::settings_handler_mutex;
 
 ModSynth::ModSynth()
 {
 	mod_synth = this;
 	int i, res, last_input_client_num;
+	string last_client_name;
 
 	// An object that uses system "aconnect" commands to scan and control ALSA midi connections.
 	alsa_midi_system_control = AlsaMidiSysControl::get_instance();
 	
 	// An object that uses system "jack_lsp" commands to scan and control JACK connections.
 	jack_connections = JackConnections::get_instance();
+
+	// Get the current ALSA input client max number name (assuming ids are sorted in ascending order)
+	alsa_midi_system_control->refresh_alsa_clients_data();
+	last_input_client_num = alsa_midi_system_control->get_num_of_input_midi_clients() - 1;
+	alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num, &mod_synth_last_initial_alsa_input_client_name);
 
 	// The Bluetooth ALSA output Client.
 	// Handles the BT RFCOMM(SPP) midi input streams and
@@ -127,9 +135,22 @@ ModSynth::ModSynth()
 	// Scan for current ALSA MIDI In client - the last is the BT client above (last created)
 	alsa_midi_system_control->refresh_alsa_clients_data();
 	last_input_client_num = alsa_midi_system_control->get_num_of_input_midi_clients() - 1;
-	alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num,
-																&alsa_midi_system_control->bt_client_in_name);
+	// Get the last input clent name.
+	alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num, &last_client_name);
+	if (last_client_name == mod_synth_last_initial_alsa_input_client_name)
+	{
+		// The created BT client ID is lower than the max client name, so the BT client is one before the max client name.
+		alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num - 1,
+																	&alsa_midi_system_control->bt_client_in_name);
+	}
+	else
+	{
+		// The created BT client ID is the last client name, so the BT client is the max client num.
+		alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num,
+																	&alsa_midi_system_control->bt_client_in_name);
+	}
 
+		
 	// Serial Port based Control Box Support (See I2C based Control Box support below)
 	
 	// The Control Box MIDI ALSA output Client 
@@ -138,9 +159,21 @@ ModSynth::ModSynth()
 	// Scan for current ALSA MIDI In Clients - the last is the Control Box In client (last created)
 	alsa_midi_system_control->refresh_alsa_clients_data();
 	last_input_client_num = alsa_midi_system_control->get_num_of_input_midi_clients() - 1;
-	alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num,
-																&alsa_midi_system_control->control_box_client_in_name);
-
+	// Get the last input clent name.
+	alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num, &last_client_name);
+	if (last_client_name == mod_synth_last_initial_alsa_input_client_name)
+	{
+		// The created Control Box MIDI ALSA client ID is lower than the max client name, so the Control Box client is one before the max client name.
+		alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num - 1,
+																	&alsa_midi_system_control->control_box_client_in_name);
+	}
+	else
+	{
+		// The created Control Box client ID is the last client name, so the Control Box client is the max client num.
+		alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num,
+																	&alsa_midi_system_control->control_box_client_in_name);
+	}
+	
 	// The Control Box external MIDI in port ALSA output Client
 	// This is a Serial Port input based alsa output client (serial->alsa)
 	control_box_ext_midi_in_alsa_out = ControlBoxExtMidiInClientAlsaOutput::get_instance();
@@ -148,8 +181,19 @@ ModSynth::ModSynth()
 	// Scan for current ALSA MIDI In Clients - the last should be the Control Box Ext MIDI In client
 	alsa_midi_system_control->refresh_alsa_clients_data();
 	last_input_client_num = alsa_midi_system_control->get_num_of_input_midi_clients() - 1;
-	alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num,
-																&alsa_midi_system_control->control_box_xt_midi_in_client_name);
+	if (last_client_name == mod_synth_last_initial_alsa_input_client_name)
+	{
+		// The created Control Box external MIDI client ID is lower than the max client name, so the Control Box client is one before the max client name.
+		alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num - 1,
+																	&alsa_midi_system_control->control_box_xt_midi_in_client_name);
+	}
+	else
+	{
+		// The created Control Box client ID is the last client name, so the Control Box client is the max client num.
+		alsa_midi_system_control->get_midi_input_client_name_string(last_input_client_num,
+																	&alsa_midi_system_control->control_box_xt_midi_in_client_name);
+	}
+	
 
 	/* The external MIDI interface
 	 * Handeles the external MIDI interfaces (including the device knobs, sliders, etc.)
@@ -1047,6 +1091,16 @@ int ModSynth::set_audio_driver_type(int driver)
 int ModSynth::get_audio_driver_type() 
 { 
 	return audio_driver; 
+}
+
+/**
+ *	@brief	Returns the last initial ALSA input client name
+ *	@param	none
+ *	@return last initial ALSA input client name
+ */
+string ModSynth::get_mod_synth_last_initial_alsa_input_client_name()
+{
+	return mod_synth_last_initial_alsa_input_client_name;
 }
 
 

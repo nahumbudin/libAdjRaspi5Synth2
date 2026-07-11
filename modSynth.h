@@ -163,6 +163,8 @@ public:
 	int set_audio_driver_type(int driver);
 	int get_audio_driver_type();
 	
+	static string get_mod_synth_last_initial_alsa_input_client_name();
+	
 	int start_audio();
 	int stop_audio();
 	
@@ -261,6 +263,9 @@ public:
 	static string mod_synth_current_midi_files_directory;
 	// ModSynth default settings directory
 	static string mod_synth_general_settings_file_path;
+	
+	// Before starting creating new ALSA input clients, look for the last used client name.
+	static string mod_synth_last_initial_alsa_input_client_name;
 	
 	
 	/* Holds the general (global) settings parameters */

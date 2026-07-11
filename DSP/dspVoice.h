@@ -1,17 +1,18 @@
 /**
 *	@file		dspVoice.h
 *	@author		Nahum Budin
-*	@date		3-Oct-2025
-*	@version	1.3
+*	@date		7-July-2026
+*	@version	1.4
+*					1. Added LFOs sync on note on option.
+*
+*	@History
+*				version	1.3
 *					1. Fixing bug - added the ADSR6 and LFO6.
 *					2. Set ADR values: use the _log functions
 *					3. Adding LFO/ADSR 6 settings
 *					4.  Refactoring lfo_delays[] -> global array in adjSynth.
 *					5. Force source outputs to zero when voice is not active.
 *					6. Adding option to use global LFOs for modulation calculations.
-
-*
-*	@History
 *				version 1.2	16-Oct-2024
 *				version 1.1	25_Jan-2021
 *					1. Code refactoring and notaion.
@@ -70,6 +71,9 @@ public:
 	
 	void set_voice_frequency(float frq);
 	float get_voice_frequency();
+	
+	void set_lfos_sync_on_note_on_mode(int mode);
+	int get_lfos_sync_on_note_on_mode();
 
 	void enable_osc_1();
 	void enable_osc_2();
@@ -369,6 +373,8 @@ public:
 	void set_osc_2_sync_on_osc_1();
 	void set_osc_2_not_sync_on_osc_1();
 	bool get_osc_2_sync_on_osc_1_state();
+	
+	void lfo_note_on(DSP_Osc *lfo, int num_of_active_voices);
 
 	void adsr_note_on(DSP_ADSR *adsr);
 	void adsr_note_off(DSP_ADSR *adsr);
@@ -416,6 +422,8 @@ private:
 	
 	int sample_rate;
 	int audio_block_size;
+	
+	int lfos_sync_on_note_on_mode; // None, retrigger, retrigger on 1st note on only.
 	
 	//uint32_t lfo_delays[_NUM_OF_LFOS * _NUM_OF_LFO_DELAY_OPTIONS + 1]; // 5 LFOs, 5 states; 1 None
 	

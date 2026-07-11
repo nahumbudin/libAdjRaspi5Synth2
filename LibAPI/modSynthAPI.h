@@ -206,6 +206,21 @@ void mod_synth_set_master_volume(int vol);
 */
 int mod_synth_get_master_volume();
 
+/**
+*   @brief  Sets the LFOs sync on note on mode.
+*   @param  int mode	_LFO_NOTE_ON_SYNC_MODE_NONE, _LFO_NOTE_ON_SYNC_MODE_RETRIGGER, _LFO_NOTE_ON_SYNC_MODE_RETRIGGER_FIRST
+*   @return 0 if done
+*/
+void mod_synth_set_lfos_sync_on_note_on_mode(int mode);
+
+/**
+*   @brief  Returns the LFOs sync on note on mode.
+*   @param  none
+*   @return int LFOs sync on note on mode
+*/
+int mod_synth_get_lfos_sync_on_note_on_mode();
+
+
 
 /**
 *   @brief  Initiates an amplifier-mixer related event with integer value (affects all voices).

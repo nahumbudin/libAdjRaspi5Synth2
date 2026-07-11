@@ -70,6 +70,9 @@ Instrument::Instrument(std::string name, bool with_midi_in,
 	midi_out_enable = with_midi_out;
 	audio_out_enable = with_audio_out;
 	
+	int last_input_client_num;
+	string last_client_name;
+	
 	
 	// CRITICAL: Set active_settings_params BEFORE any init code
 	if (external_settings != nullptr) {
@@ -110,12 +113,21 @@ Instrument::Instrument(std::string name, bool with_midi_in,
 		{			
 			if ((alsa_control != NULL) && (alsa_client_in_name != NULL))
 			{
-				// Scan for current ALSA In Instrument client
+				// Scan for current ALSA MIDI In Clients - the last should be the last added instrument (this) In client
 				alsa_control->refresh_alsa_clients_data();
-				// The last client name is of theis instrumet just created client.
-				int last_input_client_num = alsa_control->get_num_of_input_midi_clients() - 1;
-				alsa_control->get_midi_input_client_name_string(last_input_client_num,
-																alsa_client_in_name);
+				last_input_client_num = alsa_control->get_num_of_input_midi_clients() - 1;
+				if (last_client_name == ModSynth::get_mod_synth_last_initial_alsa_input_client_name())
+				{
+					// The created Control Box external MIDI client ID is lower than the max client name, so the Control Box client is one before the max client name.
+					alsa_control->get_midi_input_client_name_string(last_input_client_num - 1,
+						alsa_client_in_name);
+				}
+				else
+				{
+					// The created Control Box client ID is the last client name, so the Control Box client is the max client num.
+					alsa_control->get_midi_input_client_name_string(last_input_client_num,
+						alsa_client_in_name);
+				}
 			}
 		}
 	}

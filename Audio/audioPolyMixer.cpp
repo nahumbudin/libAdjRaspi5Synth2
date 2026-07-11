@@ -294,12 +294,21 @@ void AudioPolyMixer::set_pan_lfo_modulation_value(float mod_factor, float mod_va
  */
 void AudioPolyMixer::calc_next_pan_modulation_value(int voice)
 {
-	lfo_out[0] = AdjSynth::get_instance()->global_lfo_1->get_next_output_val(AdjSynth::get_instance()->global_lfo_1_actual_freq);
-	lfo_out[1] = AdjSynth::get_instance()->global_lfo_2->get_next_output_val(AdjSynth::get_instance()->global_lfo_2_actual_freq);	
-	lfo_out[2] = AdjSynth::get_instance()->global_lfo_3->get_next_output_val(AdjSynth::get_instance()->global_lfo_3_actual_freq);
-	lfo_out[3] = AdjSynth::get_instance()->global_lfo_4->get_next_output_val(AdjSynth::get_instance()->global_lfo_4_actual_freq);
-	lfo_out[4] = AdjSynth::get_instance()->global_lfo_5->get_next_output_val(AdjSynth::get_instance()->global_lfo_5_actual_freq);
-	lfo_out[5] = AdjSynth::get_instance()->global_lfo_6->get_next_output_val(AdjSynth::get_instance()->global_lfo_6_actual_freq);
+	static int sample_num = 0;
+	
+	lfo_out[0] = AdjSynth::get_instance()->global_lfo_1_output_value[sample_num];  // AdjSynth::get_instance()->global_lfo_1->get_next_output_val(AdjSynth::get_instance()->global_lfo_1_actual_freq);
+	lfo_out[1] = AdjSynth::get_instance()->global_lfo_2_output_value[sample_num];   // AdjSynth::get_instance()->global_lfo_2->get_next_output_val(AdjSynth::get_instance()->global_lfo_2_actual_freq);	
+	lfo_out[2] = AdjSynth::get_instance()->global_lfo_3_output_value[sample_num];   // AdjSynth::get_instance()->global_lfo_3->get_next_output_val(AdjSynth::get_instance()->global_lfo_3_actual_freq);
+	lfo_out[3] = AdjSynth::get_instance()->global_lfo_4_output_value[sample_num];   // AdjSynth::get_instance()->global_lfo_4->get_next_output_val(AdjSynth::get_instance()->global_lfo_4_actual_freq);
+	lfo_out[4] = AdjSynth::get_instance()->global_lfo_5_output_value[sample_num];   // AdjSynth::get_instance()->global_lfo_5->get_next_output_val(AdjSynth::get_instance()->global_lfo_5_actual_freq);
+	lfo_out[5] = AdjSynth::get_instance()->global_lfo_6_output_value[sample_num];   // AdjSynth::get_instance()->global_lfo_6->get_next_output_val(AdjSynth::get_instance()->global_lfo_6_actual_freq);
+		
+	sample_num++;
+	
+	if (sample_num >= _CONTROL_SUB_SAMPLING)
+	{
+		sample_num = 0;
+	}
 	
 	if (voice_pan_lfo[voice] > _LFO_NONE)
 	{

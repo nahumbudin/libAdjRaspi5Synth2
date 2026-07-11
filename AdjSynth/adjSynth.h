@@ -114,6 +114,7 @@ public:
 	int update_program_voices_parameter(int program_num, const char* param_key);
 	
 	int get_num_of_voices();
+	int get_num_of_active_voices();
 	int get_num_of_programs();
 	void set_active_sketch(int ask);
 	int get_active_sketch();
@@ -126,6 +127,9 @@ public:
 
 	void set_midi_mapping_mode(int mod);
 	int get_midi_mapping_mode();
+	
+	void set_lfos_sync_on_note_on_mode(int mode);
+	int get_lfos_sync_on_note_on_mode();
 	
 	int set_default_preset_parameters(_settings_params_t *params, int prog);
 	int set_default_preset_parameters_vco(_settings_params_t *params, int prog);
@@ -320,6 +324,8 @@ public:
 	int master_volume;
 	
 	int cpu_utilization;
+	
+	int lfos_sync_on_note_on_mode; // None, retrigger, retrigger on 1st note on only.
 
 
 	// Audio connections

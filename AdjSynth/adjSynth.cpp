@@ -6,6 +6,7 @@
  *					1. Adding program param to not on and note off calls.
  *					2. Using programs as the sketches settings parameters holder.
  *					3. Copy sketch: deep copy setting parameters (and not set voices parameters
+ *					4. Added LFOs sync on note on option.
 *					
 *	@brief		A collection of 4 synthesizers: Additive, Karplus String, PAD and Morphed Sine Oscilator (MSO)
 *					
@@ -761,6 +762,27 @@ int AdjSynth::get_master_volume()
 }
 
 /**
+*   @brief  get the number of active or wait for not activevoices (voices that are in a note on state)
+*   @param	none 
+*   @return number of active voices
+*/
+int AdjSynth::get_num_of_active_voices()
+{
+	int num_of_active_voices = 0;
+	
+	for (int voice = 0; voice < num_of_voices; voice++)
+	{
+		if (synth_voice[voice]->audio_voice->is_voice_active() ||
+			synth_voice[voice]->audio_voice->is_voice_wait_for_not_active())
+		{
+			num_of_active_voices++;
+		}
+	}
+	
+	return num_of_active_voices;
+}
+
+/**
  *	@brief	Set LFO_1 frequency
  *	@param	freq	LFO_1 frequncy 0-100
  *		(converted into a logaritmic scale _MOD_LFO_MIN_FREQ to _MOD_LFO_MAX_FREQ)
@@ -1226,6 +1248,26 @@ void AdjSynth::set_midi_mapping_mode(int mod)
 	audio_polyphony_mixer->set_midi_mapping_mode(midi_mapping_mode);
 }
 
+void AdjSynth::set_lfos_sync_on_note_on_mode(int mode)
+{
+	if ((mode == _LFO_NOTE_ON_SYNC_MODE_NONE) || 
+		(mode == _LFO_NOTE_ON_SYNC_MODE_RETRIGGER) ||
+		(mode == _LFO_NOTE_ON_SYNC_MODE_RETRIGGER_FIRST))
+	{
+		lfos_sync_on_note_on_mode = mode;
+		
+		for (int voice = 0; voice < num_of_voices; voice++)
+		{
+			synth_voice[voice]->dsp_voice->set_lfos_sync_on_note_on_mode(lfos_sync_on_note_on_mode);
+		}
+	}
+}
+
+int AdjSynth::get_lfos_sync_on_note_on_mode()
+{
+	return lfos_sync_on_note_on_mode;
+}
+
 int AdjSynth::get_midi_mapping_mode() 
 { 
 	return midi_mapping_mode; 
@@ -1532,7 +1574,7 @@ void  AdjSynth::midi_play_note_on(uint8_t channel, uint8_t byte2, uint8_t byte3,
 	if (byte3 == 0)
 	// Note off
 	{
-		midi_play_note_off(channel, byte2, byte3);
+		midi_play_note_off(channel, byte2, byte3, voc, prog);
 
 		return;
 	}
@@ -1631,7 +1673,39 @@ void  AdjSynth::midi_play_note_on(uint8_t channel, uint8_t byte2, uint8_t byte3,
 	synth_voice[voice]->dsp_voice->adsr_note_on(synth_voice[voice]->dsp_voice->adsr_4);
 	synth_voice[voice]->dsp_voice->adsr_note_on(synth_voice[voice]->dsp_voice->adsr_5);
 	synth_voice[voice]->dsp_voice->adsr_note_on(synth_voice[voice]->dsp_voice->adsr_6);
-
+	
+	// LFOs Sync on note on
+	int num_of_active_voices = get_num_of_active_voices();
+	
+	switch (lfos_sync_on_note_on_mode)
+	{
+	case _LFO_NOTE_ON_SYNC_MODE_RETRIGGER:
+		global_lfo_1->sync();
+		global_lfo_2->sync();
+		global_lfo_3->sync();
+		global_lfo_4->sync();
+		global_lfo_5->sync();
+		global_lfo_6->sync();
+		
+		break;
+		
+	case _LFO_NOTE_ON_SYNC_MODE_RETRIGGER_FIRST:
+		if (num_of_active_voices == 0)
+		{
+			global_lfo_1->sync();
+			global_lfo_2->sync();
+			global_lfo_3->sync();
+			global_lfo_4->sync();
+			global_lfo_5->sync();
+			global_lfo_6->sync();
+		}
+		break;
+		
+	case _LFO_NOTE_ON_SYNC_MODE_NONE:
+	default:
+		break;
+	}
+	
 	// Ensure all writes above are completed and visible to all CPU cores
 	// before marking the voice as active
 	__sync_synchronize();

@@ -948,21 +948,21 @@ void *AUDMNG_try_connect_jack(void *threadid) {
 		}
 	}
 	
-	while (retry_in < 5)
-	{
-		res = intilize_jack_server_connection_in("AdjHeartSynth_in", "default");
-		if (res != 0)
-		{
-			fprintf(stderr, "Jack connect thread: Jack (in) not started");
-			retry_in++;
-			sleep(1);
-		}
-		else
-		{
-			jack_in_connected = true;
-			break;
-		}
-	}
+	//while (retry_in < 5)
+	//{
+	//	res = intilize_jack_server_connection_in("AdjHeartSynth_in", "default");
+	//	if (res != 0)
+	//	{
+	//		fprintf(stderr, "Jack connect thread: Jack (in) not started");
+	//		retry_in++;
+	//		sleep(1);
+	//	}
+	//	else
+	//	{
+	//		jack_in_connected = true;
+	//		break;
+	//	}
+	//}
 	
 	return NULL;
 }
