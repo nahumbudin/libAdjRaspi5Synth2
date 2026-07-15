@@ -1,15 +1,16 @@
 /**
 *	@file		jackConnections.h
 *	@author		Nahum Budin
-*	@date		6-Jul-2024
-*	@version	1.1
-*					1. Update includes.
+*	@date		14-Jul-2026
+*	@version	1.2
+*					1. Handle Jack Clentt names with "(" and ")" chars.
 *	
 *	@brief		Use system "jack_lsp" commands to scan and control JACK connections.		
 *				
 *	History:\n
 *	
-*		version 1.0	 25-Mar-2021	
+*				version 1.1	 6-Jul-2024		update includes.
+*				version 1.0	 25-Mar-2021	
 */
 
 #include <stdlib.h>
@@ -34,6 +35,26 @@ JackConnections *JackConnections::get_instance()
 	}
 
 	return jack_connections_instance;
+}
+
+/**
+*	@brief	function that takes a string as input and returns a new string where:
+	     Every ( is replaced with \(
+*	     Every ) is replaced with \)
+*	@param	std::string input string to be escaped
+*	@return std::string the escaped string
+*/
+std::string JackConnections::escapeParentheses(const std::string& input) {
+	std::string result;
+    
+	for (char c : input) {
+		if (c == '(' || c == ')') {
+			result += '\\';
+		}
+		result += c;
+	}
+    
+	return result;
 }
 
 /**
@@ -323,10 +344,10 @@ int JackConnections::connect_jack_connection(
 	// Verify it is a valid connection?
 	sprintf(command,
 			"jack_connect %s:%s %s:%s",
-			in_client_name.c_str(),
-			in_client_port_name.c_str(),
-			out_client_name.c_str(),
-			out_client_port_name.c_str());
+		escapeParentheses(in_client_name).c_str(),
+		escapeParentheses(in_client_port_name).c_str(),
+		escapeParentheses(out_client_name).c_str(),
+		escapeParentheses(out_client_port_name).c_str());
 
 	system(command);
 
@@ -358,10 +379,10 @@ int JackConnections::disconnect_jack_connection(
 	// Verify it is a valid connection?
 	sprintf(command,
 			"jack_disconnect %s:%s %s:%s",
-			in_client_name.c_str(),
-			in_client_port_name.c_str(),
-			out_client_name.c_str(),
-			out_client_port_name.c_str());
+		escapeParentheses(in_client_name).c_str(),
+		escapeParentheses(in_client_port_name).c_str(),
+		escapeParentheses(out_client_name).c_str(),
+		escapeParentheses(out_client_port_name).c_str());
 
 	system(command);
 
@@ -380,10 +401,10 @@ int JackConnections::disconnect_all_jack_connections()
 	for (c = 0; c < clients_connections_data.connections.size(); c++)
 	{
 		disconnect_jack_connection(
-			clients_connections_data.connections.at(c).in_client_name,
-			clients_connections_data.connections.at(c).in_client_port_name,
-			clients_connections_data.connections.at(c).out_client_name,
-			clients_connections_data.connections.at(c).out_client_port_name);
+			escapeParentheses(clients_connections_data.connections.at(c).in_client_name),
+			escapeParentheses(clients_connections_data.connections.at(c).in_client_port_name),
+			escapeParentheses(clients_connections_data.connections.at(c).out_client_name),
+			escapeParentheses(clients_connections_data.connections.at(c).out_client_port_name));
 	}
 
 	clients_connections_data.connections.clear();

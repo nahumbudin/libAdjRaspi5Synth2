@@ -236,8 +236,8 @@ public:
 	int get_noise_1_amp_mod_env();
 	float get_noise_1_amp_mod_env_level();
 	
-	void set_noise_1_amp_lfo_modulation(float mod_factor, float mod_val);
-	void set_noise_1_amp_env_modulation(float mod_factor, float mod_val);
+	void set_noise_1_amp_lfo_modulation(float mod_level, float mod_signal);
+	void set_noise_1_amp_env_modulation(float mod_level, float mod_signal);
 
 	void set_mso_1_freq_mod_lfo(int lfo);
 	void set_mso_1_freq_mod_lfo_level(int lev);
@@ -269,12 +269,12 @@ public:
 	int get_mso_1_amp_mod_env();
 	float get_mso_1_amp_mod_env_level();
 
-	void set_mso_1_amp_lfo_modulation(float mod_factor, float mod_val);
-	void set_mso_1_amp_env_modulation(float mod_factor, float mod_val);
-	void set_mso_1_pwm_lfo_modulation(float mod_factor, float mod_val);
-	void set_mso_1_pwm_env_modulation(float mod_factor, float mod_val);
-	void set_mso_1_freq_lfo_modulation(float mod_factor, float mod_val);
-	void set_mso_1_freq_env_modulation(float mod_factor, float mod_val);
+	void set_mso_1_amp_lfo_modulation(float mod_level, float mod_signal);
+	void set_mso_1_amp_env_modulation(float mod_level, float mod_signal);
+	void set_mso_1_pwm_lfo_modulation(float mod_level, float mod_signal);
+	void set_mso_1_pwm_env_modulation(float mod_level, float mod_signal);
+	void set_mso_1_freq_lfo_modulation(float mod_level, float mod_signal);
+	void set_mso_1_freq_env_modulation(float mod_level, float mod_signal);
 
 	void set_pad_1_freq_mod_lfo(int lfo);
 	void set_pad_1_freq_mod_lfo_level(int lev);
@@ -296,10 +296,10 @@ public:
 	int get_pad_1_amp_mod_env();
 	float get_pad_1_amp_mod_env_level();
 
-	void set_pad_1_amp_lfo_modulation(float mod_factor, float mod_val);
-	void set_pad_1_amp_env_modulation(float mod_factor, float mod__vval);
-	void set_pad_1_freq_lfo_modulation(float mod_factor, float mod_vVal);
-	void set_pad_1_freq_env_modulation(float mod_factor, float mod_vVal);
+	void set_pad_1_amp_lfo_modulation(float mod_level, float mod_signal);
+	void set_pad_1_amp_env_modulation(float mod_level, float mod_signal);
+	void set_pad_1_freq_lfo_modulation(float mod_level, float mod_signal);
+	void set_pad_1_freq_env_modulation(float mod_level, float mod_signal);
 
 	void set_filter_1_freq_mod_lfo(int lfo);
 	void set_filter_1_freq_mod_lfo_level(int lev);

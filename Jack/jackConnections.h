@@ -98,6 +98,8 @@ class JackConnections
 {
   public:
 	static JackConnections *get_instance();
+	
+	std::string escapeParentheses(const std::string& input);
 
 	int refresh_jack_clients_data();
 
